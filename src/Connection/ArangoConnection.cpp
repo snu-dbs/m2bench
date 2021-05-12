@@ -12,6 +12,8 @@ ArangoConnection::ArangoConnection(const string& url, string db, const string& u
                                 cpr::Header{{"accept", "application/json"}},
                                 cpr::Body{aAuth.dump()});
 
+    if (r.status_code != 200) assert("Creating ArangoConnection failed!");
+
     json j = json::parse(r.text);
     jwt = j["jwt"].get<string>();
 }

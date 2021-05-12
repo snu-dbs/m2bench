@@ -20,7 +20,7 @@ private:
     string id;      // arango cursor id
     string url, jwt, query;
     bool isFirst = true;
-    bool done = true;
+    bool done = false;
 };
 
 

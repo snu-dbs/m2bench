@@ -21,14 +21,19 @@ endif()
 add_executable(m2bench_ao main.cpp
         include/Cursor.h
         include/Connection/Connection.h
+        include/Connection/OrientConnection.h
         include/Connection/ArangoConnection.h
         include/Session/Session.h
         include/Session/ArangoSession.h
+        include/Session/OrientSession.h
 
         src/Cursor.cpp
         src/Connection/ArangoConnection.cpp
         src/Session/ArangoSession.cpp
-        src/CurlHelper.cpp include/CurlHelper.h)
+        src/Connection/OrientConnection.cpp
+        src/Session/OrientSession.cpp
+        src/CurlHelper.cpp
+        include/CurlHelper.h)
 
 target_link_libraries(m2bench_ao PRIVATE cpr::cpr)
 target_link_libraries(m2bench_ao PRIVATE nlohmann_json::nlohmann_json)
