@@ -3,7 +3,9 @@
 #include <nlohmann/json.hpp>
 #include <iomanip>
 #include "include/Connection/ArangoConnection.h"
-
+#include "src/Example/neo4j_example.h"
+#include "src/Example/mysql_example.h"
+#include "src/Example/mongodb_example.h"
 
 using json = nlohmann::json;         // for convenience
 
@@ -23,6 +25,11 @@ int main() {
 
     std::cout << a << std::endl;
     delete conn;
+
+
+    mysql_example();
+    neo4j_example();
+    mongodb_example();
 
     return 0;
 }
