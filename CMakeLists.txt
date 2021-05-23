@@ -60,6 +60,10 @@ add_executable(m2bench_ao main.cpp
         src/Example/neo4j_example.h
         src/Example/mongodb_example.h
 
+        src/Scenarios/PolyglotDB/Ecommerce_Tasks.h
+        src/Scenarios/PolyglotDB/Healthcare_Tasks.h
+        src/Scenarios/PolyglotDB/Disaster_Tasks.h
+
         )
 
 

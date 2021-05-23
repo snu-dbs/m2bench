@@ -3,3 +3,4 @@
 //
 
 #include "../../include/Connection/mongodb_connector.h"
+int mongodb_connector::init = 1004;
