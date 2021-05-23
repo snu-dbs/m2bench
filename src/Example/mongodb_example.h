@@ -20,7 +20,7 @@ void mongodb_example(){
         std::cout << "[MONGODB] Query Example1\n" << std::endl;
 
 
-        auto mongodb = new mongodb_connector();
+        auto mongodb = new mongodb_connector("mxmdb");
 
         auto db = mongodb-> db;
 
@@ -95,5 +95,7 @@ void mongodb_example(){
             }
 
         }
+
+        delete mongodb;
 
 };

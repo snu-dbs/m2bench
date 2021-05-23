@@ -6,6 +6,7 @@
 #include "src/Example/neo4j_example.h"
 #include "src/Example/mysql_example.h"
 #include "src/Example/mongodb_example.h"
+#include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
 
 using json = nlohmann::json;         // for convenience
 
@@ -31,7 +32,10 @@ int main() {
     neo4j_example();
     mongodb_example();
 
-    return 0;
+    /* M2Bench */
+
+    T5(9);
+   return 0;
 }
 
 //int main(int argc, char** argv) {
