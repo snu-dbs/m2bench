@@ -7,11 +7,11 @@
 #include "src/Example/mysql_example.h"
 #include "src/Example/mongodb_example.h"
 #include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
+#include "src/Scenarios/PolyglotDB/Ecommerce_Tasks.h"
 
 using json = nlohmann::json;         // for convenience
 
-
-int main() {
+void sample_connection(){
     // sample query
     auto *conn = new ArangoConnection("147.46.125.23:8529", "", "root", "dbs402418!");
 //    auto *cursor = conn->exec("LET x = SLEEP(1) RETURN 1");
@@ -31,12 +31,22 @@ int main() {
     mysql_example();
     neo4j_example();
     mongodb_example();
+}
+
+int main() {
+
+
+    /* Sample Connection */
+    // sample_connection();
+
 
     /* M2Bench */
-
-    T5(9);
+    T1();
+    T6(9);
    return 0;
 }
+
+
 
 //int main(int argc, char** argv) {
 //    // arangodb
