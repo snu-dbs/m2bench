@@ -7,17 +7,14 @@
 
 #include <string>
 #include <cpr/cpr.h>
-#include "Connection.h"
 
-using namespace std;
+#include "Connection.h"
 
 class OrientConnection: Connection {
 public:
     OrientConnection(const string& url, const string& db, const string& username, const string& password);
-    Cursor* exec(string query);
+    unique_ptr<Cursor> exec(string query) override;
 
-private:
-    string jwt;
 };
 
 

@@ -3,11 +3,12 @@
 //
 
 #include <iostream>
-#include "../../include/Session/OrientSession.h"
-#include "../../include/CurlHelper.h"
+
+#include "Session/OrientSession.h"
+#include "CurlHelper.h"
 
 OrientSession::OrientSession(string url, string username, string password, string query)
-    : url(url), username(username), password(password), query(query) {}
+        : url(move(url)), username(move(username)), password(move(password)), query(move(query)) {}
 
 vector<json> OrientSession::fetch() {
     json res;

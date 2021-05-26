@@ -2,17 +2,17 @@
 // Created by Kyoseung Koo on 2021/05/05.
 //
 
-#include "../include/Cursor.h"
+#include "Cursor.h"
 
 void Cursor::push_vector(const vector<json>& v) {
     // push all vector values to the queue
     for (auto & it : v) q.push(it);
 }
 
-Cursor::Cursor(Session* session) {
+Cursor::Cursor(unique_ptr<Session> session) {
     auto firstData = session->fetch();
     push_vector(firstData);
-    this->session = session;
+    this->session = move(session);
 }
 
 bool Cursor::hasNext() {

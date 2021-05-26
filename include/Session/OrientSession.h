@@ -7,13 +7,14 @@
 
 #include <string>
 #include <cpr/cpr.h>
+
 #include "Session.h"
 
 class OrientSession : public Session {
 public:
     OrientSession(string url, string username, string password, string query);
-    vector<json> fetch();
-    bool isDone();
+    vector<json> fetch() override;
+    bool isDone() override;
 
 private:
     string id;      // arango cursor id
