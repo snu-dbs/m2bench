@@ -3,9 +3,12 @@
 //
 
 #include <iostream>
-#include "../../include/Session/ArangoSession.h"
+#include <utility>
 
-ArangoSession::ArangoSession(string url, string jwt, string query): url(url), jwt(jwt), query(query) {}
+#include "Session/ArangoSession.h"
+
+ArangoSession::ArangoSession(string url, string jwt, string query):
+        url(move(url)), jwt(move(jwt)), query(move(query)) {}
 
 vector<json> ArangoSession::fetch() {
     json res;

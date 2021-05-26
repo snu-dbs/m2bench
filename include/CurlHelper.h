@@ -16,6 +16,7 @@ using namespace std;
 class CurlHelper {
 public:
     static string spaceReplace(const string &input);
+    static string replace(const string &input);
 };
 
 

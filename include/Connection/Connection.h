@@ -7,27 +7,23 @@
 
 #include <list>
 #include <iostream>
+#include <utility>
+
 #include <nlohmann/json.hpp>
-#include "../Cursor.h"
+
+#include "Cursor.h"
 
 using namespace std;
 using json = nlohmann::json;
 
 class Connection {
 public:
-    Connection(string url, string db, string username, string password): url(url), db(db), username(username), password(password) {};
-    ~Connection() {
-        for (auto *it :cursors) delete it;
-        for (auto *it :sessions) delete it;
-    };
-    virtual Cursor* exec(string query) = 0;
+    Connection(string url, string db, string username, string password):
+            url(std::move(url)), db(std::move(db)), username(std::move(username)), password(std::move(password)) {};
+    virtual unique_ptr<Cursor> exec(string query) = 0;
 
 protected:
     string url, db, username, password;         // server info
-
-    // maintain to delete
-    list<Cursor*> cursors;
-    list<Session*> sessions;
 };
 
 

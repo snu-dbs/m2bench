@@ -8,6 +8,7 @@
 #include <vector>
 #include <queue>
 #include <nlohmann/json.hpp>
+
 #include "Session/Session.h"
 
 using json = nlohmann::json;
@@ -15,11 +16,11 @@ using namespace std;
 
 class Cursor {
 public:
-    Cursor(Session* session);
+    Cursor(unique_ptr<Session> session);
     bool hasNext();
     json next();
 private:
-    Session *session;
+    unique_ptr<Session> session;
     queue<json> q;
 
     void push_vector(const vector<json>& v);
