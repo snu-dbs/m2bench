@@ -21,13 +21,13 @@ int dense() {
     // Download data with Dense format
     // download array
     auto arr = conn->download("siheung");             // download array "siheung".
-    auto data = arr->data;                                      // get actual ScidbData (type is any)
-    auto *x = std::any_cast<float*>((*data)["pm10"]);        // get dense array from data
+    auto data = arr.data;                                       // actual ScidbData (dense array)
+    auto *x = std::any_cast<float*>(data["pm10"]);           // get dense array from data
     auto lat = new int[522*522], lon = new int[522*522];        // you can create your own array
 
     // manipulate data
-    int i_length = arr->schema.dims[0].end - arr->schema.dims[0].start;
-    int j_length = arr->schema.dims[1].end - arr->schema.dims[1].start;
+    int i_length = arr.schema.dims[0].end - arr.schema.dims[0].start;
+    int j_length = arr.schema.dims[1].end - arr.schema.dims[1].start;
     for (int i = 0; i < i_length; i++) {
         for (int j = 0; j < j_length; j++) {
             lat[i*j_length+j] = i, lon[i*j_length+j] = j;
@@ -36,7 +36,7 @@ int dense() {
     x[261 + 261 * j_length] = 100000;        // arbitrary manipulation
 
     // save it to "data'
-    (*data)["pm10"] = x, (*data)["lat"] = lat, (*data)["lon"] = lon;
+    data["pm10"] = x, data["lat"] = lat, data["lon"] = lon;
 
     // upload array. Note that SciDB only accepts 1-D array.
     conn->upload("siheung3", data);         // upload data to "siheung3" array with dense format
@@ -67,8 +67,8 @@ int coo() {
     }
 
     // construct ScidbData
-    shared_ptr<ScidbData> data(new ScidbData);
-    (*data)["f1"] = f1, (*data)["d2"] = d2; (*data)["i3"] = i3, (*data)["s4"] = s4;
+    ScidbData data;
+    data["f1"] = f1, data["d2"] = d2; data["i3"] = i3, data["s4"] = s4;
     // If you consider the performance, use std::move() instead of naked copy
 
     // upload array.
@@ -79,10 +79,10 @@ int coo() {
     // Download array
     auto download = conn->download("testarray", COO);
     // Conversion
-    auto ff1 = any_cast<vector<float>>((*download->data)["f1"]);
-    auto dd2 = any_cast<vector<double>>((*download->data)["d2"]);
-    auto ii3 = any_cast<vector<int>>((*download->data)["i3"]);
-    auto ss4 = any_cast<vector<string>>((*download->data)["s4"]);
+    auto ff1 = any_cast<vector<float>>(download.data["f1"]);
+    auto dd2 = any_cast<vector<double>>(download.data["d2"]);
+    auto ii3 = any_cast<vector<int>>(download.data["i3"]);
+    auto ss4 = any_cast<vector<string>>(download.data["s4"]);
 
     // Iterate data
     cout << "f1\tff1\td2\tdd2\ti3\tii3\ts4\tss4\n";
@@ -150,8 +150,8 @@ int orientTest() {
 
 
 int main() {
-    arangoTest();
-    orientTest();
+//    arangoTest();
+//    orientTest();
     scidbTest();
 
     return 0;

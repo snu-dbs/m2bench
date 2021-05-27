@@ -59,21 +59,18 @@ void ScidbSession::exec(const string& query, bool save) {
     }
 }
 
-unique_ptr<ScidbArr> ScidbSession::download(const string& arrayName, ScidbDataFormat format) {
+ScidbArr ScidbSession::download(const string& arrayName, ScidbDataFormat format) {
     ScidbSchema schema = this->schema(arrayName);
     this->exec("scan(" + arrayName + ")", true);
     string raw = this->pull();
     if (format == DENSE) {
-        unique_ptr<ScidbArr> ret(new ScidbArr(schema, conversionTsvToDenseScidbData(raw, schema)));
-        return ret;
+        return ScidbArr(schema, conversionTsvToDenseScidbData(raw, schema));
     } else if (format == COO) {
-        unique_ptr<ScidbArr> ret(new ScidbArr(schema, conversionTsvToCooScidbData(raw, schema)));
-        return ret;
+        return ScidbArr(schema, conversionTsvToCooScidbData(raw, schema));
     }
-
 }
 
-void ScidbSession::upload(const string& arrayName, shared_ptr<ScidbData> data, ScidbDataFormat format) {
+void ScidbSession::upload(const string& arrayName, ScidbData data, ScidbDataFormat format) {
     string body;
     ScidbSchema schema = this->schema(arrayName);
     if (format == DENSE) {
@@ -146,7 +143,7 @@ ScidbSchema ScidbSession::parsingSchema(const string& basicString) {
     return schema;
 }
 
-string ScidbSession::conversionDenseScidbDataToTsv(const shared_ptr<ScidbData>& pMap, const ScidbSchema& schema) {
+string ScidbSession::conversionDenseScidbDataToTsv(ScidbData pMap, const ScidbSchema& schema) {
     string ret = "";
 
     vector<int> dimLength;
@@ -162,10 +159,10 @@ string ScidbSession::conversionDenseScidbDataToTsv(const shared_ptr<ScidbData>& 
         string line;
         for (size_t j = 0; j < schema.attrs.size(); j++) {
             auto attr = schema.attrs.at(j);
-            if (attr.type.find("float") != string::npos) line += to_string(any_cast<float*>((*pMap)[attr.name])[i]);
-            else if (attr.type.find("double") != string::npos) line += to_string(any_cast<double*>((*pMap)[attr.name])[i]);
-            else if (attr.type.find("int") != string::npos) line += to_string(any_cast<int*>((*pMap)[attr.name])[i]);
-            else if (attr.type.find("string") != string::npos) line += any_cast<string*>((*pMap)[attr.name])[i];
+            if (attr.type.find("float") != string::npos) line += to_string(any_cast<float*>(pMap[attr.name])[i]);
+            else if (attr.type.find("double") != string::npos) line += to_string(any_cast<double*>(pMap[attr.name])[i]);
+            else if (attr.type.find("int") != string::npos) line += to_string(any_cast<int*>(pMap[attr.name])[i]);
+            else if (attr.type.find("string") != string::npos) line += any_cast<string*>(pMap[attr.name])[i];
 
             if (j < schema.attrs.size() - 1) line += "\t";
         }
@@ -175,16 +172,16 @@ string ScidbSession::conversionDenseScidbDataToTsv(const shared_ptr<ScidbData>& 
     return ret;
 }
 
-string ScidbSession::conversionCooScidbDataToTsv(const shared_ptr<ScidbData>& pMap, const ScidbSchema& schema) {
-    if (pMap->empty()) throw runtime_error("ScidbData is empty");
+string ScidbSession::conversionCooScidbDataToTsv(ScidbData pMap, const ScidbSchema& schema) {
+    if (pMap.empty()) throw runtime_error("ScidbData is empty");
 
     // get any data to get length
     size_t totalSize = 0;
     auto firstAttr = schema.attrs.begin();
-    if (firstAttr->type.find("float") != string::npos) totalSize = any_cast<vector<float>>((*pMap)[firstAttr->name]).size();
-    else if (firstAttr->type.find("double") != string::npos) totalSize = any_cast<vector<double>>((*pMap)[firstAttr->name]).size();
-    else if (firstAttr->type.find("int") != string::npos) totalSize = any_cast<vector<int>>((*pMap)[firstAttr->name]).size();
-    else if (firstAttr->type.find("string") != string::npos) totalSize = any_cast<vector<string>>((*pMap)[firstAttr->name]).size();
+    if (firstAttr->type.find("float") != string::npos) totalSize = any_cast<vector<float>>(pMap[firstAttr->name]).size();
+    else if (firstAttr->type.find("double") != string::npos) totalSize = any_cast<vector<double>>(pMap[firstAttr->name]).size();
+    else if (firstAttr->type.find("int") != string::npos) totalSize = any_cast<vector<int>>(pMap[firstAttr->name]).size();
+    else if (firstAttr->type.find("string") != string::npos) totalSize = any_cast<vector<string>>(pMap[firstAttr->name]).size();
 
     // line (row) iteration
     string ret;
@@ -194,10 +191,10 @@ string ScidbSession::conversionCooScidbDataToTsv(const shared_ptr<ScidbData>& pM
         // attribute (column) iteration
         for (size_t j = 0; j < schema.attrs.size(); j++) {
             auto attr = schema.attrs.at(j);
-            if (attr.type.find("float") != string::npos) line += to_string(any_cast<vector<float>>((*pMap)[attr.name])[i]);
-            else if (attr.type.find("double") != string::npos) line += to_string(any_cast<vector<double>>((*pMap)[attr.name])[i]);
-            else if (attr.type.find("int") != string::npos) line += to_string(any_cast<vector<int>>((*pMap)[attr.name])[i]);
-            else if (attr.type.find("double") != string::npos) line += any_cast<vector<string>>((*pMap)[attr.name])[i];
+            if (attr.type.find("float") != string::npos) line += to_string(any_cast<vector<float>>(pMap[attr.name])[i]);
+            else if (attr.type.find("double") != string::npos) line += to_string(any_cast<vector<double>>(pMap[attr.name])[i]);
+            else if (attr.type.find("int") != string::npos) line += to_string(any_cast<vector<int>>(pMap[attr.name])[i]);
+            else if (attr.type.find("double") != string::npos) line += any_cast<vector<string>>(pMap[attr.name])[i];
 
             if (j < schema.attrs.size() - 1) line += "\t";
         }
@@ -207,9 +204,9 @@ string ScidbSession::conversionCooScidbDataToTsv(const shared_ptr<ScidbData>& pM
     return ret;
 }
 
-unique_ptr<ScidbData> ScidbSession::conversionTsvToDenseScidbData(const string& basicString,
-                                                                  const ScidbSchema& schema) {
-    unique_ptr<ScidbData> ret(new ScidbData());
+ScidbData ScidbSession::conversionTsvToDenseScidbData(const string& basicString,
+                                                      const ScidbSchema& schema) {
+    ScidbData ret;
 
     vector<int> dimLength;
     for (auto &dim : schema.dims) {
@@ -220,10 +217,10 @@ unique_ptr<ScidbData> ScidbSession::conversionTsvToDenseScidbData(const string& 
    int totalSize = accumulate(dimLength.begin(), dimLength.end(), 1, multiplies<>()) ;
     for (auto &attr : schema.attrs) {
         // TODO: Simple typing
-        if (attr.type.find("float") != string::npos) (*ret)[attr.name] = new float[totalSize];
-        else if (attr.type.find("double") != string::npos) (*ret)[attr.name] = new double[totalSize];
-        else if (attr.type.find("int") != string::npos) (*ret)[attr.name] = new int[totalSize];
-        else if (attr.type.find("string") != string::npos) (*ret)[attr.name] = new string[totalSize];
+        if (attr.type.find("float") != string::npos) ret[attr.name] = new float[totalSize];
+        else if (attr.type.find("double") != string::npos) ret[attr.name] = new double[totalSize];
+        else if (attr.type.find("int") != string::npos) ret[attr.name] = new int[totalSize];
+        else if (attr.type.find("string") != string::npos) ret[attr.name] = new string[totalSize];
     }
 
     // create dataframe-like table
@@ -241,26 +238,26 @@ unique_ptr<ScidbData> ScidbSession::conversionTsvToDenseScidbData(const string& 
         // attr
         for (int i = dimLength.size(); i < items.size(); i++) {
             auto ta = schema.attrs.at(i - dimLength.size());
-            if (ta.type.find("float") != string::npos) any_cast<float*>((*ret)[ta.name])[index] = stof(items[i]);
-            else if (ta.type.find("double") != string::npos) any_cast<double*>((*ret)[ta.name])[index] = stod(items[i]);
-            else if (ta.type.find("int") != string::npos) any_cast<int*>((*ret)[ta.name])[index] = stoi(items[i]);
-            else if (ta.type.find("string") != string::npos) any_cast<string*>((*ret)[ta.name])[index] = items[i];
+            if (ta.type.find("float") != string::npos) any_cast<float*>(ret[ta.name])[index] = stof(items[i]);
+            else if (ta.type.find("double") != string::npos) any_cast<double*>(ret[ta.name])[index] = stod(items[i]);
+            else if (ta.type.find("int") != string::npos) any_cast<int*>(ret[ta.name])[index] = stoi(items[i]);
+            else if (ta.type.find("string") != string::npos) any_cast<string*>(ret[ta.name])[index] = items[i];
         }
     }
 
     return ret;
 }
 
-unique_ptr<ScidbData> ScidbSession::conversionTsvToCooScidbData(const string& basicString, const ScidbSchema& schema) {
-    unique_ptr<ScidbData> ret(new ScidbData());
+ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, const ScidbSchema& schema) {
+    ScidbData ret;
 
     // empty vector initialization per column
-    for (auto& dim : schema.dims) (*ret)[dim.name] = vector<int>();
+    for (auto& dim : schema.dims) ret[dim.name] = vector<int>();
     for (auto& attr : schema.attrs) {
-        if (attr.type.find("float") != string::npos) (*ret)[attr.name] = vector<float>();
-        else if (attr.type.find("double") != string::npos) (*ret)[attr.name] = vector<double>();
-        else if (attr.type.find("int") != string::npos) (*ret)[attr.name] = vector<int>();
-        else if (attr.type.find("string") != string::npos) (*ret)[attr.name] = vector<string>();
+        if (attr.type.find("float") != string::npos) ret[attr.name] = vector<float>();
+        else if (attr.type.find("double") != string::npos) ret[attr.name] = vector<double>();
+        else if (attr.type.find("int") != string::npos) ret[attr.name] = vector<int>();
+        else if (attr.type.find("string") != string::npos) ret[attr.name] = vector<string>();
     }
 
     // filling the table (vectors) by iterating tsv lines
@@ -272,29 +269,29 @@ unique_ptr<ScidbData> ScidbSession::conversionTsvToCooScidbData(const string& ba
         // attr
         size_t idx = 0;
         for (auto& dim : schema.dims) {
-            auto temp = any_cast<vector<int>>(move((*ret)[dim.name]));
+            auto temp = any_cast<vector<int>>(move(ret[dim.name]));
             temp.push_back(stoi(items[idx++]));
-            (*ret)[dim.name] = move(temp);
+            ret[dim.name] = move(temp);
         }
 
         for (auto& attr : schema.attrs) {
             // TODO: Too slow?
             if (attr.type.find("float") != string::npos) {
-                auto temp = any_cast<vector<float>>(move((*ret)[attr.name]));
+                auto temp = any_cast<vector<float>>(move(ret[attr.name]));
                 temp.push_back(stof(items[idx++]));
-                (*ret)[attr.name] = move(temp);
+                ret[attr.name] = move(temp);
             } else if (attr.type.find("double") != string::npos) {
-                auto temp = any_cast<vector<double>>(move((*ret)[attr.name]));
+                auto temp = any_cast<vector<double>>(move(ret[attr.name]));
                 temp.push_back(stod(items[idx++]));
-                (*ret)[attr.name] = move(temp);
+                ret[attr.name] = move(temp);
             } else if (attr.type.find("int") != string::npos) {
-                auto temp = any_cast<vector<int>>(move((*ret)[attr.name]));
+                auto temp = any_cast<vector<int>>(move(ret[attr.name]));
                 temp.push_back(stoi(items[idx++]));
-                (*ret)[attr.name] = move(temp);
+                ret[attr.name] = move(temp);
             }  else if (attr.type.find("string") != string::npos) {
-                auto temp = any_cast<vector<string>>(move((*ret)[attr.name]));
+                auto temp = any_cast<vector<string>>(move(ret[attr.name]));
                 temp.push_back(items[idx++]);
-                (*ret)[attr.name] = move(temp);
+                ret[attr.name] = move(temp);
             }
         }
     }
