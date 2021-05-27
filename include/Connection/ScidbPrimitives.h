@@ -34,10 +34,10 @@ enum ScidbDataFormat { DENSE, COO };
 typedef struct ScidbArr {
 
     ScidbSchema schema;
-    shared_ptr<ScidbData> data;
+    ScidbData data;
     ScidbDataFormat format;
 
-    ScidbArr(ScidbSchema schema1, shared_ptr<ScidbData> data1): schema(schema1), data(data1) {}
+    ScidbArr(ScidbSchema schema1, ScidbData data1): schema(schema1), data(data1) {}
 } ScidbArr;
 
 #endif //M2BENCH_AO_SCIDBPRIMITIVES_H
