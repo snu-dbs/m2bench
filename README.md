@@ -1,5 +1,9 @@
 # Prerequsite
 
+
+Install cmake >= 3.11.x 
+
+
 Install neo4j client using following github
 ```
 $ sudo apt-get install -y libedit-dev
