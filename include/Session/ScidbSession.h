@@ -20,7 +20,7 @@ public:
 
     void exec(const string& query, bool save=false);
     unique_ptr<ScidbArr> download(const string& arrayName, ScidbDataFormat format=DENSE);
-    void upload(const string& arrayName, shared_ptr<ScidbData> data, ScidbDataFormat=DENSE);
+    void upload(const string& arrayName, shared_ptr<ScidbData> data, ScidbDataFormat format=DENSE);
 
     vector<json> fetch() override;
     bool isDone() override;
@@ -32,7 +32,7 @@ private:
     string pull();
     ScidbSchema schema(const string& arrayName);
 
-    static string conversionDenseScidbDataToTsv(shared_ptr<ScidbData> pMap, const ScidbSchema& schema);
+    static string conversionDenseScidbDataToTsv(const shared_ptr<ScidbData>& pMap, const ScidbSchema& schema);
     static string conversionCooScidbDataToTsv(const shared_ptr<ScidbData>& pMap, const ScidbSchema& schema);
     static unique_ptr<ScidbData> conversionTsvToDenseScidbData(const string& basicString, const ScidbSchema& schema);
     static unique_ptr<ScidbData> conversionTsvToCooScidbData(const string& basicString, const ScidbSchema& schema);

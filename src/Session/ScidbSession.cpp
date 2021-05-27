@@ -139,14 +139,14 @@ ScidbSchema ScidbSession::parsingSchema(const string& basicString) {
         int end = (ds.at(1) == "*") ? INT32_MAX : stoi(ds.at(1));
         int interval = (ds.at(2) == "*") ? 0 : stoi(ds.at(2));
         int overlap = (ds.at(3) == "*") ? 0 : stoi(ds.at(3));
-        ScidbDim dim1(nad.at(1), start, end, interval, overlap);
+        ScidbDim dim1(nad.at(0), start, end, interval, overlap);
         schema.dims.push_back(dim1);
     }
 
     return schema;
 }
 
-string ScidbSession::conversionDenseScidbDataToTsv(shared_ptr<ScidbData> pMap, const ScidbSchema& schema) {
+string ScidbSession::conversionDenseScidbDataToTsv(const shared_ptr<ScidbData>& pMap, const ScidbSchema& schema) {
     string ret = "";
 
     vector<int> dimLength;
@@ -255,9 +255,9 @@ unique_ptr<ScidbData> ScidbSession::conversionTsvToCooScidbData(const string& ba
     unique_ptr<ScidbData> ret(new ScidbData());
 
     // empty vector initialization per column
-    size_t totalSize = 0;
+    for (auto& dim : schema.dims) (*ret)[dim.name] = vector<int>();
     for (auto& attr : schema.attrs) {
-        if (attr.type.find("float") != string::npos) (*ret)[attr.name] = new vector<float>();
+        if (attr.type.find("float") != string::npos) (*ret)[attr.name] = vector<float>();
         else if (attr.type.find("double") != string::npos) (*ret)[attr.name] = vector<double>();
         else if (attr.type.find("int") != string::npos) (*ret)[attr.name] = vector<int>();
         else if (attr.type.find("string") != string::npos) (*ret)[attr.name] = vector<string>();
@@ -271,12 +271,31 @@ unique_ptr<ScidbData> ScidbSession::conversionTsvToCooScidbData(const string& ba
         auto items = split(line, "\t");     // split
         // attr
         size_t idx = 0;
-        for (auto& dim : schema.dims) any_cast<vector<int>>((*ret)[dim.name]).push_back(stoi(items[idx++]));
+        for (auto& dim : schema.dims) {
+            auto temp = any_cast<vector<int>>(move((*ret)[dim.name]));
+            temp.push_back(stoi(items[idx++]));
+            (*ret)[dim.name] = move(temp);
+        }
+
         for (auto& attr : schema.attrs) {
-            if (attr.type.find("float") != string::npos) any_cast<vector<float>>((*ret)[attr.name]).push_back(stof(items[idx++]));
-            else if (attr.type.find("double") != string::npos) any_cast<vector<double>>((*ret)[attr.name]).push_back(stod(items[idx++]));
-            else if (attr.type.find("int") != string::npos) any_cast<vector<int>>((*ret)[attr.name]).push_back(stoi(items[idx++]));
-            else if (attr.type.find("string") != string::npos) any_cast<vector<string>>((*ret)[attr.name]).push_back(items[idx++]);
+            // TODO: Too slow?
+            if (attr.type.find("float") != string::npos) {
+                auto temp = any_cast<vector<float>>(move((*ret)[attr.name]));
+                temp.push_back(stof(items[idx++]));
+                (*ret)[attr.name] = move(temp);
+            } else if (attr.type.find("double") != string::npos) {
+                auto temp = any_cast<vector<double>>(move((*ret)[attr.name]));
+                temp.push_back(stod(items[idx++]));
+                (*ret)[attr.name] = move(temp);
+            } else if (attr.type.find("int") != string::npos) {
+                auto temp = any_cast<vector<int>>(move((*ret)[attr.name]));
+                temp.push_back(stoi(items[idx++]));
+                (*ret)[attr.name] = move(temp);
+            }  else if (attr.type.find("string") != string::npos) {
+                auto temp = any_cast<vector<string>>(move((*ret)[attr.name]));
+                temp.push_back(items[idx++]);
+                (*ret)[attr.name] = move(temp);
+            }
         }
     }
 
