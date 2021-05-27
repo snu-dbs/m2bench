@@ -33,11 +33,21 @@ enum ScidbDataFormat { DENSE, COO };
 
 typedef struct ScidbArr {
 
-    ScidbSchema schema;
+    ScidbSchema schema;     // readonly
     ScidbData data;
     ScidbDataFormat format;
 
     ScidbArr(ScidbSchema schema1, ScidbData data1): schema(schema1), data(data1) {}
+    ~ScidbArr() {
+        if (format == DENSE) {      // what the dense array connector made is deleted by the connector
+            for (auto &attr : schema.attrs) {
+                if (attr.type.find("float") != string::npos) delete[] any_cast<float*>(data[attr.name]);
+                else if (attr.type.find("double") != string::npos) delete[] any_cast<double*>(data[attr.name]);
+                else if (attr.type.find("int") != string::npos) delete[] any_cast<int*>(data[attr.name]);
+                else if (attr.type.find("string") != string::npos) delete[] any_cast<string*>(data[attr.name]);
+            }
+        }
+    }
 } ScidbArr;
 
 #endif //M2BENCH_AO_SCIDBPRIMITIVES_H

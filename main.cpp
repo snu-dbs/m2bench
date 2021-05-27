@@ -44,6 +44,9 @@ int dense() {
     // you should redimension uploaded array
     conn->exec("redimension(siheung3, <pm10:float,pm2_5:float> [lat=0:521:0:1000; lon=0:521:0:1000])");
 
+    // you must free your pointers
+    delete[] lat; delete[] lon;
+
     return 0;
 }
 
