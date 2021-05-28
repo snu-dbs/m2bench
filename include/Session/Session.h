@@ -6,10 +6,11 @@
 #define M2BENCH_AO_SESSION_H
 
 #include <vector>
+
 #include <nlohmann/json.hpp>
 
-using json = nlohmann::json;
 using namespace std;
+using json = nlohmann::json;
 
 class Session {
 public:

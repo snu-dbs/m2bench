@@ -3,21 +3,25 @@
 //
 
 #include <iostream>
-#include "../../include/Session/ArangoSession.h"
+#include <utility>
 
-ArangoSession::ArangoSession(string url, string jwt, string query): url(url), jwt(jwt), query(query) {}
+#include "Session/ArangoSession.h"
+
+ArangoSession::ArangoSession(string url, string jwt, string query):
+        url(move(url)), jwt(move(jwt)), query(move(query)) {}
 
 vector<json> ArangoSession::fetch() {
     json res;
 
     // request
     if (isFirst) {
-        json test = json::parse(R"({"query" : ")" + query + R"("})");
+//        json test = json::parse(R"({"query" : ")" + query + R"(", "batchSize": 10})");
+        json test = json::parse(R"({"query" : ")" + query + R"("})");       // using default
         cpr::Response r2 = cpr::Post(cpr::Url{"http://" + url + "/_api/cursor"},
                                      cpr::Header{{"accept", "application/json"}, {"Authorization", "bearer " + jwt}},
                                      cpr::Body{test.dump()});
 
-        cout << r2.text << endl;
+//        cout << r2.text << endl;
         if (r2.status_code != 201) {        // error
             cerr << r2.text << endl;
             done = true;
@@ -30,7 +34,7 @@ vector<json> ArangoSession::fetch() {
         cpr::Response r2 = cpr::Put(cpr::Url{"http://" + url + "/_api/cursor/" + id},
                                     cpr::Header{{"accept", "application/json"}, {"Authorization", "bearer " + jwt}});
         res = json::parse(r2.text);
-        cout << r2.text << endl;
+//        cout << r2.text << endl;
     }
 
     // has more check
