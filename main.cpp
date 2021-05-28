@@ -1,40 +1,22 @@
 #include <iostream>
-#include <cpr/cpr.h>
-#include "src/Example/neo4j_example.h"
-#include "src/Example/mysql_example.h"
-#include "src/Example/mongodb_example.h"
-#include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
+//#include "src/Example/neo4j_example.h"
+//#include "src/Example/mysql_example.h"
+//#include "src/Example/mongodb_example.h"
+//#include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
 #include "src/Scenarios/PolyglotDB/Ecommerce_Tasks.h"
-#include "src/Scenarios/PolyglotDB/Disaster_Tasks.h"
+//#include "src/Scenarios/PolyglotDB/Disaster_Tasks.h"
+
 #include <chrono>
+#include <nlohmann/json.hpp>
+#include "src/Example/scidb.h"
+#include <string>
 
 using json = nlohmann::json;         // for convenience
+using namespace std;
 using std::chrono::high_resolution_clock;
 using std::chrono::duration_cast;
 using std::chrono::duration;
 using std::chrono::milliseconds;
-
-void sample_connection(){
-    // sample query
-    auto *conn = new ArangoConnection("147.46.125.23:8529", "", "root", "dbs402418!");
-//    auto *cursor = conn->exec("LET x = SLEEP(1) RETURN 1");
-    auto *cursor = conn->exec("FOR doc IN Customer RETURN doc");
-    int a = 0;
-    while (cursor->hasNext()) {
-        a++;
-        json row = cursor->next();
-        std::cout << row << std::endl;
-        // TODO:
-    }
-
-    std::cout << a << std::endl;
-    delete conn;
-
-
-    mysql_example();
-    neo4j_example();
-    mongodb_example();
-}
 
 template <typename T>
 void timer( void (*f)(T), T x){
@@ -63,10 +45,11 @@ int main() {
     // sample_connection();
 
     /* M2Bench */
-    timer(T1);
-    timer(T2);
-    timer(T6, 9);
+//    timer(T1);
+        timer(T2);
+//    timer(T6, 9);
 
+//    dense();
     return 0;
 }
 
