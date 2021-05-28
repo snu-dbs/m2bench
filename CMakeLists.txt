@@ -1,4 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
+set (CMAKE_CXX_STANDARD 17)
+
 project(m2bench_ao)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
@@ -33,20 +35,21 @@ if(NOT json_POPULATED)
     add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-
+# m2bench_ao
+include_directories(include)
+include_directories(src)
 
 add_executable(m2bench_ao main.cpp
         include/Cursor.h
         include/Connection/Connection.h
+        include/Connection/OrientConnection.h
         include/Connection/ArangoConnection.h
+        include/Connection/ScidbConnection.h
+        include/Connection/ScidbPrimitives.h
         include/Session/Session.h
         include/Session/ArangoSession.h
-
-        src/Cursor.cpp
-        src/Connection/ArangoConnection.cpp
-        src/Session/ArangoSession.cpp
-        src/CurlHelper.cpp include/CurlHelper.h
-
+        include/Session/OrientSession.h
+        include/Session/ScidbSession.h
 
         include/Connection/mysql_connector.h
         include/Connection/neo4j_connector.h
@@ -59,13 +62,25 @@ add_executable(m2bench_ao main.cpp
         src/Example/mysql_example.h
         src/Example/neo4j_example.h
         src/Example/mongodb_example.h
+        src/Example/scidb.cpp
+        src/Example/arangodb.cpp
+        src/Example/orientdb.cpp
 
         src/Scenarios/PolyglotDB/Ecommerce_Tasks.h
         src/Scenarios/PolyglotDB/Healthcare_Tasks.h
         src/Scenarios/PolyglotDB/Disaster_Tasks.h
 
-        )
+        src/Cursor.cpp
+        src/Connection/ArangoConnection.cpp
+        src/Session/ArangoSession.cpp
+        src/Connection/OrientConnection.cpp
+        src/Session/OrientSession.cpp
+        src/Session/ScidbSession.cpp
+        src/Connection/ScidbConnection.cpp
 
+        src/CurlHelper.cpp
+        include/CurlHelper.h
+        )
 
 target_link_libraries(m2bench_ao PRIVATE cpr::cpr)
 target_link_libraries(m2bench_ao PRIVATE nlohmann_json::nlohmann_json)

@@ -13,14 +13,14 @@
 class ArangoSession : public Session {
 public:
     ArangoSession(string url, string jwt, string query);
-    vector<json> fetch();
-    bool isDone();
+    vector<json> fetch() override;
+    bool isDone() override;
 
 private:
     string id;      // arango cursor id
     string url, jwt, query;
     bool isFirst = true;
-    bool done = true;
+    bool done = false;
 };
 
 
