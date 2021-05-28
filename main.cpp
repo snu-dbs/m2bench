@@ -8,6 +8,8 @@
 #include "src/Example/mongodb_example.h"
 #include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
 #include "src/Scenarios/PolyglotDB/Ecommerce_Tasks.h"
+#include "src/Scenarios/PolyglotDB/Disaster_Tasks.h"
+
 #include <chrono>
 
 using json = nlohmann::json;         // for convenience
@@ -69,9 +71,10 @@ int main() {
 
 
     /* M2Bench */
-    timer(T1);
-    timer(T2);
-    timer(T6, 9);
+  timer(T1);
+//  timer(T2);
+//  timer(T6, 9);
+//    timer(T16);
    return 0;
 }
 
