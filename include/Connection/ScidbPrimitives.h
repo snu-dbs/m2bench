@@ -6,7 +6,17 @@
 #define M2BENCH_AO_SCIDBPRIMITIVES_H
 
 
-typedef map<string, any> ScidbData;
+typedef class ScidbData {
+private:
+    vector<vector<any>> data{};       // TODO: this will replaced as file-based implementation available
+
+public:
+    // TODO: separate declare and impl
+    vector<vector<any>>::iterator begin() { return data.begin(); }
+    vector<vector<any>>::iterator end() { return data.end(); }
+    void add(vector<any> input) { data.push_back(input); }
+
+} ScidbData;
 
 typedef struct ScidbDim {
     string name{};
@@ -29,24 +39,16 @@ typedef struct ScidbSchema {
     vector<ScidbAttr> attrs{};
 } ScidbSchema;
 
-enum ScidbDataFormat { DENSE, COO };
+enum ScidbDataFormat { COO };
 
 typedef struct ScidbArr {
 
     ScidbSchema schema;     // readonly
     ScidbData data;
-    ScidbDataFormat format;
+    ScidbDataFormat format;     // only COO available
 
     ScidbArr(ScidbSchema schema1, ScidbData data1): schema(schema1), data(data1) {}
     ~ScidbArr() {
-        if (format == DENSE) {      // what the dense array connector made is deleted by the connector
-            for (auto &attr : schema.attrs) {
-                if (attr.type.find("float") != string::npos) delete[] any_cast<float*>(data[attr.name]);
-                else if (attr.type.find("double") != string::npos) delete[] any_cast<double*>(data[attr.name]);
-                else if (attr.type.find("int") != string::npos) delete[] any_cast<int*>(data[attr.name]);
-                else if (attr.type.find("string") != string::npos) delete[] any_cast<string*>(data[attr.name]);
-            }
-        }
     }
 } ScidbArr;
 
