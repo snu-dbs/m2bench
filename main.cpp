@@ -1,11 +1,18 @@
 #include <iostream>
-#include <cpr/cpr.h>
-#include "src/Example/neo4j_example.h"
-#include "src/Example/mysql_example.h"
-#include "src/Example/mongodb_example.h"
-#include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
+//#include "src/Example/neo4j_example.h"
+//#include "src/Example/mysql_example.h"
+//#include "src/Example/mongodb_example.h"
+//#include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
 #include "src/Scenarios/PolyglotDB/Ecommerce_Tasks.h"
+//#include "src/Scenarios/PolyglotDB/Disaster_Tasks.h"
 
+#include <chrono>
+#include <nlohmann/json.hpp>
+#include "src/Example/scidb.h"
+#include <string>
+
+using json = nlohmann::json;         // for convenience
+using namespace std;
 using std::chrono::high_resolution_clock;
 using std::chrono::duration_cast;
 using std::chrono::duration;
@@ -38,10 +45,11 @@ int main() {
     // sample_connection();
 
     /* M2Bench */
-    timer(T1);
-    timer(T2);
-    timer(T6, 9);
+//    timer(T1);
+        timer(T2);
+//    timer(T6, 9);
 
-   return 0;
+//    dense();
+    return 0;
 }
 

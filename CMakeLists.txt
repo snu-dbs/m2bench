@@ -62,9 +62,9 @@ add_executable(m2bench_ao main.cpp
         src/Example/mysql_example.h
         src/Example/neo4j_example.h
         src/Example/mongodb_example.h
-        src/Example/scidb.cpp
-        src/Example/arangodb.cpp
-        src/Example/orientdb.cpp
+        src/Example/scidb.h
+        src/Example/arangodb.h
+        src/Example/orientdb.h
 
         src/Scenarios/PolyglotDB/Ecommerce_Tasks.h
         src/Scenarios/PolyglotDB/Healthcare_Tasks.h
