@@ -19,7 +19,7 @@ public:
 } ScidbData;
 
 typedef struct ScidbDim {
-    string name{};
+    std::string name{};
     int start, end;
     int overlap, interval;
 
@@ -28,10 +28,10 @@ typedef struct ScidbDim {
 } ScidbDim;
 
 typedef struct ScidbAttr {
-    string name{};
-    string type{};
+    std::string name{};
+    std::string type{};
 
-    ScidbAttr(string name, string type): name(name), type(type) {}
+    ScidbAttr(std::string name, std::string type): name(name), type(type) {}
 } ScidbAttr;
 
 typedef struct ScidbSchema {
