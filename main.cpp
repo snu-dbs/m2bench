@@ -49,8 +49,9 @@ int main() {
 //    timer(T2);
 
 //    timer(T6, 9);
+    coo_stream();
+//      timer(T16);
 
-      timer(T16);
 
 //    coo_finedust();
     return 0;

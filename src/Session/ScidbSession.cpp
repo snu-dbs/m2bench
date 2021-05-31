@@ -169,7 +169,6 @@ ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, c
     ScidbData ret;
     // filling the table (vectors) by iterating tsv lines
 
-    int nrow= 0;
     size_t pos = 0;
     string temp = basicString;
     while ((pos = temp.find("\n")) != string::npos) {
@@ -193,7 +192,6 @@ ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, c
             else if (attr.type.find("string") != string::npos) linedata.emplace_back(items[idx++]);
         }
         // append to ret
-        cout << nrow++ << endl;
         ret.add(linedata);
     }
 
