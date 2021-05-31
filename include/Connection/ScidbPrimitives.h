@@ -4,17 +4,19 @@
 
 #ifndef M2BENCH_AO_SCIDBPRIMITIVES_H
 #define M2BENCH_AO_SCIDBPRIMITIVES_H
+#include <variant>
 
+typedef vector<variant<int, float, double, string>> ScidbLineType;
 
 typedef class ScidbData {
 private:
-    vector<vector<any>> data{};       // TODO: this will replaced as file-based implementation available
+    vector<ScidbLineType> data{};       // TODO: this will replaced as file-based implementation available
 
 public:
     // TODO: separate declare and impl
-    vector<vector<any>>::iterator begin() { return data.begin(); }
-    vector<vector<any>>::iterator end() { return data.end(); }
-    void add(vector<any> input) { data.push_back(input); }
+    vector<ScidbLineType>::iterator begin() { return data.begin(); }
+    vector<ScidbLineType>::iterator end() { return data.end(); }
+    void add(ScidbLineType input) { data.push_back(input); }
 
 } ScidbData;
 
@@ -27,11 +29,13 @@ typedef struct ScidbDim {
             name(name), start(start), end(end), overlap(overlap), interval(interval) {}
 } ScidbDim;
 
+enum ScidbDataType { UNSUPPORTED, INT32, STRING, DOUBLE, FLOAT,  };
+
 typedef struct ScidbAttr {
     std::string name{};
-    std::string type{};
+    ScidbDataType type = UNSUPPORTED;
 
-    ScidbAttr(std::string name, std::string type): name(name), type(type) {}
+    ScidbAttr(std::string name, ScidbDataType type): name(name), type(type) {}
 } ScidbAttr;
 
 typedef struct ScidbSchema {

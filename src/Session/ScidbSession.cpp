@@ -115,7 +115,15 @@ ScidbSchema ScidbSession::parsingSchema(const string& basicString) {
     vector<string> attrs = split(string(match[2]), ",");
     for (auto &attr : attrs) {
         auto nat = split(trim(attr, ' '), ":");
-        ScidbAttr attr1(nat.at(0), nat.at(1));
+        ScidbDataType type = UNSUPPORTED;
+
+        // TODO 8, 16, 32, 64 bit primitive types
+        if (nat.at(1).find("float") != string::npos) type = FLOAT;
+        else if (nat.at(1).find("double") != string::npos) type = DOUBLE;
+        else if (nat.at(1).find("int") != string::npos) type = INT32;
+        else if (nat.at(1).find("string") != string::npos) type = STRING;
+
+        ScidbAttr attr1(nat.at(0), type);
         schema.attrs.push_back(attr1);
     }
 
@@ -143,10 +151,10 @@ string ScidbSession::conversionCooScidbDataToTsv(ScidbData pMap, const ScidbSche
         string line;
         for (size_t j = 0; j < schema.attrs.size(); j++) {
             auto attr = schema.attrs.at(j);
-            if (attr.type.find("float") != string::npos) line += to_string(any_cast<float>((*item).at(j)));
-            else if (attr.type.find("double") != string::npos) line += to_string(any_cast<double>((*item).at(j)));
-            else if (attr.type.find("int") != string::npos) line += to_string(any_cast<int>((*item).at(j)));
-            else if (attr.type.find("string") != string::npos) line += any_cast<string>((*item).at(j));
+            if (attr.type == FLOAT) line += to_string(get<float>((*item).at(j)));
+            else if (attr.type == DOUBLE) line += to_string(get<double>((*item).at(j)));
+            else if (attr.type == INT32) line += to_string(get<int>((*item).at(j)));
+            else if (attr.type == STRING) line += get<string>((*item).at(j));
 
             if (j < schema.attrs.size() - 1) line += "\t";
         }
@@ -169,7 +177,7 @@ ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, c
         if (line.empty()) continue;     // exception (specifically last line)
 
         auto items = split(line, "\t");     // split
-        vector<any> linedata;           // one line data
+        ScidbLineType linedata;         // one line data
         size_t idx = 0;                 // idx in linedata
 
         // dim
@@ -177,10 +185,10 @@ ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, c
 
         // attr
         for (auto& attr : schema.attrs) {
-            if (attr.type.find("float") != string::npos) linedata.emplace_back(stof(items[idx++]));
-            else if (attr.type.find("double") != string::npos) linedata.emplace_back(stod(items[idx++]));
-            else if (attr.type.find("int") != string::npos) linedata.emplace_back(stoi(items[idx++]));
-            else if (attr.type.find("string") != string::npos) linedata.emplace_back(items[idx++]);
+            if (attr.type == FLOAT) linedata.emplace_back(stof(items[idx++]));
+            else if (attr.type == DOUBLE) linedata.emplace_back(stod(items[idx++]));
+            else if (attr.type == INT32) linedata.emplace_back(stoi(items[idx++]));
+            else if (attr.type == STRING) linedata.emplace_back(items[idx++]);
         }
 
         // append to ret
