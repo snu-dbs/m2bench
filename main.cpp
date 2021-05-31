@@ -46,10 +46,11 @@ int main() {
 
     /* M2Bench */
 //    timer(T1);
-        timer(T2);
+//        timer(T2);
 //    timer(T6, 9);
 
-//    dense();
+//    coo();
+    coo_finedust();
     return 0;
 }
 
