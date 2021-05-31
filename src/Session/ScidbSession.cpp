@@ -160,8 +160,12 @@ ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, c
     ScidbData ret;
 
     // filling the table (vectors) by iterating tsv lines
-    vector<string> lines = split(basicString, "\n");
-    for (auto& line : lines) {
+    size_t pos = 0;
+    string temp = basicString;
+    while ((pos = temp.find("\n")) != string::npos) {
+        string line = temp.substr(0, pos);
+        temp.erase(0, pos + 1);
+
         if (line.empty()) continue;     // exception (specifically last line)
 
         auto items = split(line, "\t");     // split
