@@ -19,9 +19,8 @@ public:
     ~ScidbSession();
 
     void exec(const string& query, bool save=false);
-    ScidbArr download(const string& arrayName, ScidbDataFormat format=COO);
-    ScidbArrStream downloadstream(const string& arrayName, ScidbDataFormat format=COO);
-    void upload(const string& arrayName, ScidbData data, ScidbDataFormat format=COO);
+    ScidbArr download(const string& query);
+    void upload(const string& arrayName, const ScidbArr& data);
 
     vector<json> fetch() override;
     bool isDone() override;
@@ -32,10 +31,6 @@ private:
     string push(string data);
     string pull();
     ScidbSchema schema(const string& arrayName);
-
-    static string conversionCooScidbDataToTsv(ScidbData pMap, const ScidbSchema& schema);
-    static ScidbData conversionTsvToCooScidbData(const string& basicString, const ScidbSchema& schema);
-//    static ScidbStream conversionTsvToCooScidbStream(const string& basicString, const ScidbSchema& schema);
 
     static ScidbSchema parsingSchema(const string& basicString);
 };

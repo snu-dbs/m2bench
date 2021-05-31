@@ -18,18 +18,12 @@ unique_ptr<Cursor> ScidbConnection::exec(string query) {
     return nullptr;
 }
 
-ScidbArr ScidbConnection::download(const string& arrayName, ScidbDataFormat format) {
+ScidbArr ScidbConnection::download(const string& query) {
     unique_ptr<ScidbSession> session(new ScidbSession(url));
-    return session->download(arrayName, format);
+    return session->download(query);
 }
 
-ScidbArrStream ScidbConnection::downloadstream(const string& arrayName, ScidbDataFormat format) {
+void ScidbConnection::upload(const string& arrayName, const ScidbArr& arr) {
     unique_ptr<ScidbSession> session(new ScidbSession(url));
-    return session->downloadstream(arrayName, format);
-}
-
-
-void ScidbConnection::upload(const string& arrayName, ScidbData data, ScidbDataFormat format) {
-    unique_ptr<ScidbSession> session(new ScidbSession(url));
-    session->upload(arrayName, data, format);
+    session->upload(arrayName, arr);
 }

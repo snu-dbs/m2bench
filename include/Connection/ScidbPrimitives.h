@@ -4,7 +4,9 @@
 
 #ifndef M2BENCH_AO_SCIDBPRIMITIVES_H
 #define M2BENCH_AO_SCIDBPRIMITIVES_H
+
 #include <variant>
+#include <string>
 
 typedef vector<variant<int, float, double, string>> ScidbLineType;
 
@@ -19,7 +21,6 @@ public:
     void add(ScidbLineType input) { data.push_back(input); }
 
 } ScidbData;
-
 
 typedef struct ScidbDim {
     std::string name{};
@@ -46,25 +47,22 @@ typedef struct ScidbSchema {
 
 enum ScidbDataFormat { COO };
 
-typedef struct ScidbArr {
 
-    ScidbSchema schema;     // readonly
-    ScidbData data;
-    ScidbDataFormat format;     // only COO available
-
-    ScidbArr(ScidbSchema schema1, ScidbData data1): schema(schema1), data(data1) {}
-    ~ScidbArr() {
-    }
-} ScidbArr;
-
-
-
-typedef class ScidbStream {
+typedef class ScidbArr {
 private:
-    ScidbSchema schema;     // readonly
-    stringstream datastream;       // TODO: this will replaced as file-based implementation available
+    ScidbDataFormat format = COO;     // only COO available
+
+    // Download schema
+    ScidbSchema downloadedSchema;     // readonly
+    stringstream datastream{};
+
+    // Upload schema
+    vector<ScidbLineType> uploadData;       // TODO: will be replaced
+
 public:
-    // TODO: separate declare and impl
+    ScidbArr() = default;
+    ScidbArr(ScidbSchema schema1, stringstream datastream1)
+            :downloadedSchema(schema1), datastream(move(datastream1)) {}
 
     std::vector<string> split(string str, const string& c) {
         vector<string> ret;
@@ -77,10 +75,8 @@ public:
         return ret;
     }
 
-    vector<any> readvalue(){
-
-
-        vector<any> linedata;           // one line data
+    ScidbLineType readvalue(){
+        ScidbLineType linedata;           // one line data
         string line;
         getline(datastream,line);
         if (line.empty()) return linedata;           // one line data
@@ -90,44 +86,39 @@ public:
         size_t idx = 0;                 // idx in linedata
 
         // dim
-        for (auto& dim : schema.dims) linedata.emplace_back(stoi(items[idx++]));
+        for (auto& dim : downloadedSchema.dims) linedata.emplace_back(stoi(items[idx++]));
         // attr
-        for (auto& attr : schema.attrs) {
-            if (attr.type.find("float") != string::npos) linedata.emplace_back(stof(items[idx++]));
-            else if (attr.type.find("double") != string::npos) linedata.emplace_back(stod(items[idx++]));
-            else if (attr.type.find("int") != string::npos) linedata.emplace_back(stoi(items[idx++]));
-            else if (attr.type.find("string") != string::npos) linedata.emplace_back(items[idx++]);
+        for (auto& attr : downloadedSchema.attrs) {
+            if (attr.type == FLOAT) linedata.emplace_back(stof(items[idx++]));
+            else if (attr.type == DOUBLE) linedata.emplace_back(stod(items[idx++]));
+            else if (attr.type == INT32) linedata.emplace_back(stoi(items[idx++]));
+            else if (attr.type == STRING) linedata.emplace_back(items[idx++]);
         }
 
         return linedata;
     }
 
-    void setString(const string& raw){
-        cout<<raw.size()<< endl;
-        datastream << raw;
+    string toTsv(ScidbSchema schema) const {
+        stringstream ss;
+
+        for (auto& linedata: uploadData) {
+            for (size_t i = 0; i < schema.attrs.size(); i++) {
+                if (schema.attrs.at(i).type == FLOAT) ss << get<float>(linedata.at(i)) << "\t";
+                else if (schema.attrs.at(i).type == DOUBLE) ss << get<double>(linedata.at(i)) << "\t";
+                else if (schema.attrs.at(i).type == INT32) ss << get<int>(linedata.at(i)) << "\t";
+                else if (schema.attrs.at(i).type == STRING) ss << get<string>(linedata.at(i)) << "\t";
+            }
+            ss << "\n";
+        }
+
+        return ss.str();
     }
-    void setSchema(ScidbSchema pschema){
-        schema = pschema;
+
+    void add(ScidbLineType linedata) {
+        uploadData.push_back(linedata);
     }
 
-
-} ScidbStream;
-
-
-typedef struct ScidbArrStream {
-
-    ScidbStream data;
-    ScidbDataFormat format;     // only COO available
-
-    ScidbArrStream(ScidbSchema schema1, const string& data1) {
-        cout << "init" << endl;
-        data.setString(data1);
-        data.setSchema(schema1);
-
-    }
-    ~ScidbArrStream() {
-    }
-} ScidbArrStream;
+} ScidbArr;
 
 
 #endif //M2BENCH_AO_SCIDBPRIMITIVES_H
