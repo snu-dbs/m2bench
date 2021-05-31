@@ -51,15 +51,8 @@ int main() {
 //    timer(T6, 9);
 
       timer(T16);
-//    scidb_test();
 
-//    istringstream hello("HELLO\nBye");
-//    auto a = ScidbStreamIterator(hello);
-//    for ( auto f : )
-//    {
-//        cout << f << endl;
-//    }
-
+//    coo_finedust();
     return 0;
 }
 
