@@ -16,9 +16,8 @@ class ScidbConnection: Connection {
 public:
     explicit ScidbConnection(const string& url);
     unique_ptr<Cursor> exec(string query) override;
-    ScidbArr download(const string& arrayName, ScidbDataFormat format=COO);
-    ScidbArrStream downloadstream(const string& arrayName, ScidbDataFormat format=COO);
-    void upload(const string& arrayName, ScidbData data, ScidbDataFormat format=COO);
+    ScidbArr download(const string& arrayName);
+    void upload(const string& arrayName, const ScidbArr& arr);
 };
 
 #endif //M2BENCH_AO_SCIDBCONNECTION_H
