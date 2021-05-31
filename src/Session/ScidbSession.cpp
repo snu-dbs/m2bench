@@ -169,8 +169,13 @@ ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, c
     ScidbData ret;
     // filling the table (vectors) by iterating tsv lines
 
-    vector<string> lines = split(basicString, "\n");
-    for (auto& line : lines) {
+    int nrow= 0;
+    size_t pos = 0;
+    string temp = basicString;
+    while ((pos = temp.find("\n")) != string::npos) {
+        string line = temp.substr(0, pos);
+        temp.erase(0, pos + 1);
+
         if (line.empty()) continue;     // exception (specifically last line)
 
         auto items = split(line, "\t");     // split
@@ -188,6 +193,7 @@ ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, c
             else if (attr.type.find("string") != string::npos) linedata.emplace_back(items[idx++]);
         }
         // append to ret
+        cout << nrow++ << endl;
         ret.add(linedata);
     }
 
