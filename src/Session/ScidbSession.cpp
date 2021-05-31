@@ -63,14 +63,12 @@ ScidbArr ScidbSession::download(const string& arrayName, ScidbDataFormat format)
     ScidbSchema schema = this->schema(arrayName);
     this->exec("scan(" + arrayName + ")", true);
     string raw = this->pull();
-    cout << "retrieved" << endl;
     return ScidbArr(schema, conversionTsvToCooScidbData(raw, schema));
 }
 
 ScidbArrStream ScidbSession::downloadstream(const string& arrayName, ScidbDataFormat format) {
     ScidbSchema schema = this->schema(arrayName);
     this->exec("scan(" + arrayName + ")", true);
-    cout << "retrived" << endl;
     return ScidbArrStream(schema, this->pull());
 }
 
@@ -113,7 +111,7 @@ string ScidbSession::push(string data) {
 }
 
 ScidbSchema ScidbSession::parsingSchema(const string& basicString) {
-    regex structure(R"(([\w\d]*)<(.*)>.*\[(.*)\])");       // array name, attrs, dims
+    regex structure(R"(([@\w\d]*)<(.*)>.*\[(.*)\])");       // array name, attrs, dims
     smatch match;
 
     if (!regex_match(basicString, match, structure)) throw runtime_error("regex failed");

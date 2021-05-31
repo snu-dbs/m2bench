@@ -99,7 +99,7 @@ public:
     }
 
     void setString(const string& raw){
-        cout<<raw.size()<< endl;
+
         datastream << raw;
     }
     void setSchema(ScidbSchema pschema){
@@ -116,7 +116,6 @@ typedef struct ScidbArrStream {
     ScidbDataFormat format;     // only COO available
 
     ScidbArrStream(ScidbSchema schema1, const string& data1) {
-        cout << "init" << endl;
         data.setString(data1);
         data.setSchema(schema1);
 

@@ -48,9 +48,10 @@ int main() {
 //    timer(T1);
 //    timer(T2);
 
-//    timer(T6, 9);
-    coo_stream();
-//      timer(T16);
+//      timer(T6, 9);
+
+    long ts = 1600182000+10800*3.5;
+    timer(T16,ts);
 
 
 //    coo_finedust();
