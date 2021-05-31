@@ -75,7 +75,7 @@ public:
         return ret;
     }
 
-    ScidbLineType readvalue(){
+    ScidbLineType readcell(){
         ScidbLineType linedata;           // one line data
         string line;
         getline(datastream,line);
