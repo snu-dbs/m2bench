@@ -3,8 +3,8 @@
 //#include "src/Example/mysql_example.h"
 //#include "src/Example/mongodb_example.h"
 //#include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
-#include "src/Scenarios/PolyglotDB/Ecommerce_Tasks.h"
-//#include "src/Scenarios/PolyglotDB/Disaster_Tasks.h"
+//#include "src/Scenarios/PolyglotDB/Ecommerce_Tasks.h"
+#include "src/Scenarios/PolyglotDB/Disaster_Tasks.h"
 
 #include <chrono>
 #include <nlohmann/json.hpp>
@@ -46,11 +46,14 @@ int main() {
 
     /* M2Bench */
 //    timer(T1);
-//        timer(T2);
-//    timer(T6, 9);
+//    timer(T2);
 
-//    coo();
-    coo_finedust();
+//    timer(T6, 9);
+    coo_stream();
+//      timer(T16);
+
+
+//    coo_finedust();
     return 0;
 }
 
