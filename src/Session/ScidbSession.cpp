@@ -63,8 +63,17 @@ ScidbArr ScidbSession::download(const string& arrayName, ScidbDataFormat format)
     ScidbSchema schema = this->schema(arrayName);
     this->exec("scan(" + arrayName + ")", true);
     string raw = this->pull();
+    cout << "retrieved" << endl;
     return ScidbArr(schema, conversionTsvToCooScidbData(raw, schema));
 }
+
+ScidbArrStream ScidbSession::downloadstream(const string& arrayName, ScidbDataFormat format) {
+    ScidbSchema schema = this->schema(arrayName);
+    this->exec("scan(" + arrayName + ")", true);
+    cout << "retrived" << endl;
+    return ScidbArrStream(schema, this->pull());
+}
+
 
 void ScidbSession::upload(const string& arrayName, ScidbData data, ScidbDataFormat format) {
     string body;
@@ -166,8 +175,8 @@ string ScidbSession::conversionCooScidbDataToTsv(ScidbData pMap, const ScidbSche
 
 ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, const ScidbSchema& schema) {
     ScidbData ret;
-
     // filling the table (vectors) by iterating tsv lines
+
     size_t pos = 0;
     string temp = basicString;
     while ((pos = temp.find("\n")) != string::npos) {
@@ -190,7 +199,6 @@ ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, c
             else if (attr.type == INT32) linedata.emplace_back(stoi(items[idx++]));
             else if (attr.type == STRING) linedata.emplace_back(items[idx++]);
         }
-
         // append to ret
         ret.add(linedata);
     }
@@ -198,3 +206,9 @@ ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, c
     return ret;
 }
 
+
+
+//ScidbData ScidbSession::conversionTsvToCooScidbDataStream(const string& basicString, const ScidbSchema& schema) {
+//
+//    return ScidbDataStream;
+//}

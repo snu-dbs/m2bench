@@ -23,6 +23,12 @@ ScidbArr ScidbConnection::download(const string& arrayName, ScidbDataFormat form
     return session->download(arrayName, format);
 }
 
+ScidbArrStream ScidbConnection::downloadstream(const string& arrayName, ScidbDataFormat format) {
+    unique_ptr<ScidbSession> session(new ScidbSession(url));
+    return session->downloadstream(arrayName, format);
+}
+
+
 void ScidbConnection::upload(const string& arrayName, ScidbData data, ScidbDataFormat format) {
     unique_ptr<ScidbSession> session(new ScidbSession(url));
     session->upload(arrayName, data, format);
