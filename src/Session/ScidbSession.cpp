@@ -59,28 +59,17 @@ void ScidbSession::exec(const string& query, bool save) {
     }
 }
 
-ScidbArr ScidbSession::download(const string& arrayName, ScidbDataFormat format) {
+ScidbArr ScidbSession::download(const string& arrayName) {
     ScidbSchema schema = this->schema(arrayName);
     this->exec("scan(" + arrayName + ")", true);
-    string raw = this->pull();
-    cout << "retrieved" << endl;
-    return ScidbArr(schema, conversionTsvToCooScidbData(raw, schema));
+    stringstream ss(this->pull());
+    return ScidbArr(schema, move(ss));
 }
 
-ScidbArrStream ScidbSession::downloadstream(const string& arrayName, ScidbDataFormat format) {
-    ScidbSchema schema = this->schema(arrayName);
-    this->exec("scan(" + arrayName + ")", true);
-    cout << "retrived" << endl;
-    return ScidbArrStream(schema, this->pull());
-}
-
-
-void ScidbSession::upload(const string& arrayName, ScidbData data, ScidbDataFormat format) {
+void ScidbSession::upload(const string& arrayName, const ScidbArr& arr) {
     string body;
     ScidbSchema schema = this->schema(arrayName);
-    body = conversionCooScidbDataToTsv(data, schema);
-
-    string path = this->push(body);
+    string path = this->push(arr.toTsv(schema));
     this->exec("load(" + arrayName + ", '" + path + "', -2, 'tsv')");
 }
 
@@ -152,63 +141,3 @@ ScidbSchema ScidbSession::parsingSchema(const string& basicString) {
     return schema;
 }
 
-string ScidbSession::conversionCooScidbDataToTsv(ScidbData pMap, const ScidbSchema& schema) {
-    if (schema.dims.size() > 1) throw runtime_error("SciDB only accept 1D array");
-
-    string ret;
-    for (auto item = pMap.begin(); item != pMap.end(); item++) {
-        string line;
-        for (size_t j = 0; j < schema.attrs.size(); j++) {
-            auto attr = schema.attrs.at(j);
-            if (attr.type == FLOAT) line += to_string(get<float>((*item).at(j)));
-            else if (attr.type == DOUBLE) line += to_string(get<double>((*item).at(j)));
-            else if (attr.type == INT32) line += to_string(get<int>((*item).at(j)));
-            else if (attr.type == STRING) line += get<string>((*item).at(j));
-
-            if (j < schema.attrs.size() - 1) line += "\t";
-        }
-        ret += line + "\n";
-    }
-
-    return ret;
-}
-
-ScidbData ScidbSession::conversionTsvToCooScidbData(const string& basicString, const ScidbSchema& schema) {
-    ScidbData ret;
-    // filling the table (vectors) by iterating tsv lines
-
-    size_t pos = 0;
-    string temp = basicString;
-    while ((pos = temp.find("\n")) != string::npos) {
-        string line = temp.substr(0, pos);
-        temp.erase(0, pos + 1);
-
-        if (line.empty()) continue;     // exception (specifically last line)
-
-        auto items = split(line, "\t");     // split
-        ScidbLineType linedata;         // one line data
-        size_t idx = 0;                 // idx in linedata
-
-        // dim
-        for (auto& dim : schema.dims) linedata.emplace_back(stoi(items[idx++]));
-
-        // attr
-        for (auto& attr : schema.attrs) {
-            if (attr.type == FLOAT) linedata.emplace_back(stof(items[idx++]));
-            else if (attr.type == DOUBLE) linedata.emplace_back(stod(items[idx++]));
-            else if (attr.type == INT32) linedata.emplace_back(stoi(items[idx++]));
-            else if (attr.type == STRING) linedata.emplace_back(items[idx++]);
-        }
-        // append to ret
-        ret.add(linedata);
-    }
-
-    return ret;
-}
-
-
-
-//ScidbData ScidbSession::conversionTsvToCooScidbDataStream(const string& basicString, const ScidbSchema& schema) {
-//
-//    return ScidbDataStream;
-//}
