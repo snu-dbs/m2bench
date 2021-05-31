@@ -77,6 +77,7 @@ void ScidbSession::upload(const string& arrayName, ScidbData data, ScidbDataForm
         body = conversionDenseScidbDataToTsv(data, schema);
     } else if (format == COO) {
         body = conversionCooScidbDataToTsv(data, schema);
+        cout << "converted" << endl;
     }
 
     string path = this->push(body);
