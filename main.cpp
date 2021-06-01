@@ -2,8 +2,8 @@
 //#include "src/Example/neo4j_example.h"
 //#include "src/Example/mysql_example.h"
 //#include "src/Example/mongodb_example.h"
-//#include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
-//#include "src/Scenarios/PolyglotDB/Ecommerce_Tasks.h"
+#include "src/Scenarios/PolyglotDB/Healthcare_Tasks.h"
+#include "src/Scenarios/PolyglotDB/Ecommerce_Tasks.h"
 #include "src/Scenarios/PolyglotDB/Disaster_Tasks.h"
 
 #include <chrono>
@@ -18,6 +18,20 @@ using std::chrono::duration_cast;
 using std::chrono::duration;
 using std::chrono::milliseconds;
 
+
+template <typename T, typename O>
+void timer( void (*f)(T,O), T x, O y)
+{
+    cout << "======================= TASK START =========================" << endl;
+    auto t1 = high_resolution_clock::now();
+    (*f)(x,y);
+    auto t2 = high_resolution_clock::now();
+    auto ms_int = duration_cast<milliseconds>(t2 - t1);
+    cout << "ELAPSED TIME: " << ms_int.count() << " ms" << endl;
+    cout << "======================= TASK COMPLETE ======================\n" << endl;
+
+}
+
 template <typename T>
 void timer( void (*f)(T), T x){
     cout << "======================= TASK START =========================" << endl;
@@ -29,6 +43,7 @@ void timer( void (*f)(T), T x){
     cout << "======================= TASK COMPLETE ======================\n" << endl;
 
 }
+
 void timer( void (*f)()){
     cout << "======================= TASK START =========================" << endl;
     auto t1 = high_resolution_clock::now();
@@ -47,11 +62,15 @@ int main() {
     /* M2Bench */
 //    timer(T1);
 //    timer(T2);
+     timer(T6, 9);
+//    long ts = 1600182000+10800*3.5;
+//    timer(T16,ts);
 
-//      timer(T6, 9);
 
-    long ts = 1600182000+10800*3.5;
-    timer(T16,ts);
+
+    string pid = "B007SYGLZO";
+    string curdate = "2021-06-01";
+    timer(T5,pid, curdate);
 
 
 //    coo_finedust();
