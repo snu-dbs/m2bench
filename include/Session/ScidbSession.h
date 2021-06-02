@@ -20,6 +20,7 @@ public:
 
     void exec(const string& query, bool save=false);
     ScidbArr download(const string& query);
+    ScidbArr download(const string& query, const ScidbSchema& schema);
     void upload(const string& arrayName, const ScidbArr& data);
 
     vector<json> fetch() override;

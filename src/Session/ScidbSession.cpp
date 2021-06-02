@@ -66,6 +66,12 @@ ScidbArr ScidbSession::download(const string& arrayName) {
     return ScidbArr(schema, move(ss));
 }
 
+ScidbArr ScidbSession::download(const string& query, const ScidbSchema& schema) {
+    this->exec(query, true);
+    stringstream ss(this->pull());
+    return ScidbArr(schema, move(ss));
+}
+
 void ScidbSession::upload(const string& arrayName, const ScidbArr& arr) {
 
     string body;
