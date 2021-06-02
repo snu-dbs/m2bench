@@ -62,15 +62,15 @@ int main() {
     /* M2Bench */
 //    timer(T1);
 //    timer(T2);
-     timer(T6, 9);
+     //timer(T6, 9);
 //    long ts = 1600182000+10800*3.5;
-//    timer(T16,ts);
+  //  timer(T16,ts);
+timer(T8,9);
 
 
-
-    string pid = "B007SYGLZO";
-    string curdate = "2021-06-01";
-    timer(T5,pid, curdate);
+    //string pid = "B007SYGLZO";
+    //string curdate = "2021-06-01";
+    //timer(T5,pid, curdate);
 
 
 //    coo_finedust();
