@@ -33,6 +33,7 @@ void neo4j_example() {
             int pos = 0;
             while (1) {
                 auto n = neo4j_result_field(result, pos);
+
                 if (!neo4j_is_null(n)) {
                     std::string str = neo4j_tostring(n, buffer, sizeof(buffer));
                     cout << str << "\t";
