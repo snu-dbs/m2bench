@@ -8,7 +8,8 @@
 #include <variant>
 #include <string>
 
-typedef vector<variant<int, float, double, string>> ScidbLineType;
+// long long is for int64
+typedef vector<variant<int, float, double, string, long long>> ScidbLineType;
 
 typedef class ScidbData {
 private:
@@ -31,7 +32,7 @@ typedef struct ScidbDim {
             name(name), start(start), end(end), overlap(overlap), interval(interval) {}
 } ScidbDim;
 
-enum ScidbDataType { UNSUPPORTED, INT32, STRING, DOUBLE, FLOAT,  };
+enum ScidbDataType { UNSUPPORTED, INT32, STRING, DOUBLE, FLOAT, INT64 };
 
 typedef struct ScidbAttr {
     std::string name{};
@@ -92,6 +93,7 @@ public:
             if (attr.type == FLOAT) linedata.emplace_back(stof(items[idx++]));
             else if (attr.type == DOUBLE) linedata.emplace_back(stod(items[idx++]));
             else if (attr.type == INT32) linedata.emplace_back(stoi(items[idx++]));
+            else if (attr.type == INT64) linedata.emplace_back(stoll(items[idx++]));
             else if (attr.type == STRING) linedata.emplace_back(items[idx++]);
         }
 
@@ -106,6 +108,7 @@ public:
                 if (schema.attrs.at(i).type == FLOAT) ss << get<float>(linedata.at(i)) << "\t";
                 else if (schema.attrs.at(i).type == DOUBLE) ss << get<double>(linedata.at(i)) << "\t";
                 else if (schema.attrs.at(i).type == INT32) ss << get<int>(linedata.at(i)) << "\t";
+                else if (schema.attrs.at(i).type == INT64) ss << get<long long>(linedata.at(i)) << "\t";
                 else if (schema.attrs.at(i).type == STRING) ss << get<string>(linedata.at(i)) << "\t";
             }
             ss << "\n";
