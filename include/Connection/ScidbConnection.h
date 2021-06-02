@@ -17,6 +17,7 @@ public:
     explicit ScidbConnection(const string& url);
     unique_ptr<Cursor> exec(string query) override;
     ScidbArr download(const string& arrayName);
+    ScidbArr download(const string& query, const ScidbSchema& schema);
     void upload(const string& arrayName, const ScidbArr& arr);
 };
 
