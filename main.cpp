@@ -70,6 +70,8 @@ int main() {
 
 //    timer(T6, 9);
 
+//    timer(T8,9);
+
 //    timer(T9);
 
 //    string ts1 = "2020-09-17";
@@ -84,7 +86,6 @@ int main() {
 
 
 
-//    coo_finedust();
     return 0;
 }
 

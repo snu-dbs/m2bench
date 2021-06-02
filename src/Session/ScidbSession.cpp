@@ -66,6 +66,12 @@ ScidbArr ScidbSession::download(const string& arrayName) {
     return ScidbArr(schema, move(ss));
 }
 
+ScidbArr ScidbSession::download(const string& query, const ScidbSchema& schema) {
+    this->exec(query, true);
+    stringstream ss(this->pull());
+    return ScidbArr(schema, move(ss));
+}
+
 void ScidbSession::upload(const string& arrayName, const ScidbArr& arr) {
 
     string body;
@@ -119,7 +125,8 @@ ScidbSchema ScidbSession::parsingSchema(const string& basicString) {
         // TODO 8, 16, 32, 64 bit primitive types
         if (nat.at(1).find("float") != string::npos) type = FLOAT;
         else if (nat.at(1).find("double") != string::npos) type = DOUBLE;
-        else if (nat.at(1).find("int") != string::npos) type = INT32;
+        else if (nat.at(1).find("int32") != string::npos) type = INT32;
+        else if (nat.at(1).find("int64") != string::npos) type = INT64;
         else if (nat.at(1).find("string") != string::npos) type = STRING;
 
         ScidbAttr attr1(nat.at(0), type);
