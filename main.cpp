@@ -64,6 +64,7 @@ int main() {
     timer(T1, curdate);
 
 //    timer(T2);
+//     timer(T6, 9);
 
 //    string pid = "B007SYGLZO";
 //    string curdate = "2021-06-01";
@@ -82,10 +83,20 @@ int main() {
 //    long ts = 1600182000+10800*3.5;
 //    timer(T16,ts);
 
+//    string ts1 = "2020-05-01 00:00:00";
+//    string ts2 = "2020-06-30 23:59:59";
+//    timer(T10,ts1,ts2);
+//
+//    int earthquake_X_id = 41865;
+//    timer(T11, earthquake_X_id);
 
+//     timer(T14, 0, 60);
 
+//    string pid = "B007SYGLZO";
+//    string curdate = "2021-06-01";
+//    timer(T5,pid, curdate);
 
-
+//    coo_finedust();
 
     return 0;
 }
