@@ -60,7 +60,8 @@ int main() {
     // sample_connection();
 
     /* M2Bench */
-//    timer(T1);
+    string curdate = "2021-06-01";
+    timer(T1, curdate);
 
 //    timer(T2);
 
@@ -78,8 +79,8 @@ int main() {
 //    string ts2 = "2020-09-18";
 //    timer(T12,ts1,ts2);
 
-    long ts = 1600182000+10800*3.5;
-     timer(T16,ts);
+//    long ts = 1600182000+10800*3.5;
+//    timer(T16,ts);
 
 
 
