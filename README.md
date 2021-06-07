@@ -24,6 +24,9 @@ $ sudo make install
 
 Install mysql connector
 ```
+download apt repository : https://dev.mysql.com/downloads/repo/apt/
+$ sudo dpkg -i ....deb
+$ sudo apt update
 $ sudo apt install libmysqlcppconn-dev
 ```
 
