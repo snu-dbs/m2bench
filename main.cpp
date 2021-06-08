@@ -60,15 +60,14 @@ int main() {
     // sample_connection();
 
     /* M2Bench */
-    string curdate = "2021-06-01";
-    timer(T1, curdate);
-
+//    string curdate = "2021-06-01";
+//    T4();
 //    timer(T2);
 //     timer(T6, 9);
 
-//    string pid = "B007SYGLZO";
-//    string curdate = "2021-06-01";
-//    timer(T5,pid, curdate);
+    string pid = "B007SYGLZO";
+    string curdate = "2021-06-01";
+    timer(T5,pid, curdate);
 
 //    timer(T6, 9);
 
