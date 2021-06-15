@@ -83,7 +83,7 @@ int main() {
 //    timer(T16,ts);
 
 //    string ts1 = "2020-05-01 00:00:00";
-//    string ts2 = "2020-06-30 23:59:59";
+//    string ts2 = "2020-07-01 00:00:00";
 //    timer(T10,ts1,ts2);
 //
 //    int earthquake_X_id = 41865;
