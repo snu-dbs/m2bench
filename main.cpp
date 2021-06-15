@@ -62,12 +62,12 @@ int main() {
     /* M2Bench */
 //    string curdate = "2021-06-01";
 //    T4();
-//    timer(T2);
+    timer(T2);
 //     timer(T6, 9);
 
-    string pid = "B007SYGLZO";
-    string curdate = "2021-06-01";
-    timer(T5,pid, curdate);
+//    string pid = "B007SYGLZO";
+//    string curdate = "2021-06-01";
+//    timer(T5,pid, curdate);
 
 //    timer(T6, 9);
 
@@ -75,8 +75,8 @@ int main() {
 
 //    timer(T9);
 
-//    string ts1 = "2020-09-17";
-//    string ts2 = "2020-09-18";
+//    string ts1 = "2020-09-16 00:00:00";
+//    string ts2 = "2020-09-16 01:00:00";
 //    timer(T12,ts1,ts2);
 
 //    long ts = 1600182000+10800*3.5;
