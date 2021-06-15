@@ -83,6 +83,7 @@ void ScidbSession::upload(const string& arrayName, const ScidbArr& arr) {
 ScidbSchema ScidbSession::schema(const string& arrayName) {
     this->exec("show(" + arrayName + ")", true);
     string text = split(this->pull(), "\t").at(1);
+    text = std::regex_replace(text, std::regex("not empty "), ""); // replace 'def' -> 'klm'
     return parsingSchema(text);
 }
 
@@ -109,6 +110,7 @@ string ScidbSession::push(string data) {
 }
 
 ScidbSchema ScidbSession::parsingSchema(const string& basicString) {
+
     regex structure(R"(([@\w\d]*)<(.*)>.*\[(.*)\])");       // array name, attrs, dims
     smatch match;
 

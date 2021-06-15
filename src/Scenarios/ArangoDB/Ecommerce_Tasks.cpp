@@ -91,6 +91,180 @@ void T2(){
 //    Filter review.order_id == order.order_id
 //    Return {customer_id: order.customer_id, product_id: review.product_id, rating: review.rating}
 
+/*
+
+   db.V.drop()
+   db.W.drop()
+   db.H.drop()
+   db.WtV.drop()
+   db.WtWH.drop()
+   db.newH.drop()
+   db.VHt.drop()
+   db.WHHt.drop()
+   db.newW.drop()
+
+   db._create("V")
+   db._create("W")
+   db._create("H")
+   db._create("WtV")
+   db._create("WtWH")
+   db._create("newH")
+   db._create("VHt")
+   db._create("WHHt")
+   db._create("newW")
+
+
+   db.V.ensureIndex({type:"persistent", fields:["product_id"]})
+   db.V.ensureIndex({type:"persistent", fields:["customer_id"]})
+
+   db.H.ensureIndex({type:"persistent", fields:["feature_id"]})
+   db.H.ensureIndex({type:"persistent", fields:["product_id"]})
+   db.H.ensureIndex({type:"persistent", fields:["product_id", "feature_id"]})
+
+   db.W.ensureIndex({type:"persistent", fields:["customer_id"]})
+   db.W.ensureIndex({type:"persistent", fields:["feature_id"]})
+   db.W.ensureIndex({type:"persistent", fields:["feature_id", "customer_id"]})
+
+   db.WtV.ensureIndex({type:"persistent", fields:["feature_id", "product_id"]})
+   db.WtV.ensureIndex({type:"persistent", fields:["product_id"]})
+   db.WtV.ensureIndex({type:"persistent", fields:["feature_id"]})
+
+   db.WtWH.ensureIndex({type:"persistent", fields:["feature_id", "product_id"]})
+   db.WtWH.ensureIndex({type:"persistent", fields:["product_id"]})
+   db.WtWH.ensureIndex({type:"persistent", fields:["feature_id"]})
+
+   db.newH.ensureIndex({type:"persistent", fields:["feature_id", "product_id"]})
+   db.newH.ensureIndex({type:"persistent", fields:["product_id"]})
+   db.newH.ensureIndex({type:"persistent", fields:["feature_id"]})
+
+
+   db.VHt.ensureIndex({type:"persistent", fields:["feature_id", "customer_id"]})
+   db.VHt.ensureIndex({type:"persistent", fields:["customer_id"]})
+   db.VHt.ensureIndex({type:"persistent", fields:["feature_id"]})
+
+   db.WHHt.ensureIndex({type:"persistent", fields:["feature_id", "customer_id"]})
+   db.WHHt.ensureIndex({type:"persistent", fields:["customer_id"]})
+   db.WHHt.ensureIndex({type:"persistent", fields:["feature_id"]})
+
+   db.newW.ensureIndex({type:"persistent", fields:["feature_id", "customer_id"]})
+   db.newW.ensureIndex({type:"persistent", fields:["customer_id"]})
+   db.newW.ensureIndex({type:"persistent", fields:["feature_id"]})
+
+
+
+
+ */
+
+
+/* 1 */
+//    Let ratings = (For order in Order
+//    For review in Review
+//    Filter review.order_id == order.order_id
+//    Collect customer_id =  order.customer_id, product_id = review.product_id
+//    Aggregate val = average(review.rating)
+//    Return {customer_id, product_id, val}
+//    )
+//
+//    For v in ratings
+//    Insert v into V
+
+
+/* 2 */
+//    Let D1  = (For v in V
+//    Collect product_id =  v.product_id
+//    Return{product_id}
+//    )
+//
+//    Let Feature_Size = 50
+//
+//    For d in D1
+//    For i IN 1..Feature_Size
+//    Insert {product_id: d.product_id, feature_id: i , val: rand() } into H
+
+
+/* 3 */
+//    Let D1  = (For v in V
+//    Collect customer_id =  v.customer_id
+//    Return{customer_id}
+//    )
+//
+//    Let Feature_Size = 50
+//
+//    For d in D1
+//    For i IN 1..Feature_Size
+//    Insert {customer_id: d.customer_id, feature_id: i , val: rand() } into W
+
+
+
+/* 4 */
+//    For w in W
+//    For v in V
+//    Filter v.customer_id == w.customer_id
+//    collect product_id = v.product_id, feature_id = w.feature_id
+//    aggregate val = sum(v.val*w.val)
+//    Insert  { product_id, feature_id , val } into WtV
+
+
+/* 5 */
+//    Let WtW = (For w1 in W
+//    For w2 in W
+//    Filter w1.customer_id == w2.customer_id
+//    collect feature_id1 = w1.feature_id, feature_id2 = w2.feature_id
+//    aggregate val = sum(w1.val*w2.val)
+//    Return { feature_id1 , feature_id2 , val }
+//    )
+//
+//
+//    For wtw in WtW
+//    For h in H
+//    Filter wtw.feature_id2 == h.feature_id
+//    collect feature_id = wtw.feature_id1,  product_id = h.product_id
+//    aggregate val = sum(wtw.val*h.val)
+//    Insert { product_id, feature_id ,  val } into WtWH
+
+
+/* 6 */
+//    For h in H
+//    For wtwh in WtWH
+//    For wtv in WtV
+//    Filter wtv.product_id == wtwh.product_id and  wtv.feature_id == wtwh.feature_id
+//    Filter h.feature_id == wtwh.feature_id and  h.product_id == wtwh.product_id
+//    Let val = h.val*(wtv.val/wtwh.val)
+//    Insert { product_id: h.product_id, feature_id: h.feature_id ,  val } into newH
+
+/* 7 */
+//    For h in newH
+//    For v in V
+//    Filter v.product_id == h.product_id
+//    Collect customer_id  = v.customer_id, feature_id = h.feature_id
+//    aggregate val = sum(v.val*h.val)
+//    Insert { customer_id , feature_id , val } into VHt
+
+/* 8 */
+//    Let HHt =
+//    ( For  h1 in newH
+//    For h2 in newH
+//    Filter h1.product_id == h2.product_id
+//    Collect feature_id1 = h1.feature_id, feature_id2 = h2.feature_id
+//    Aggregate val = sum(h1.val*h2.val)
+//    Return{ feature_id1 , feature_id2, val } )
+//
+//    For hht in  HHt
+//    For w in W
+//    Filter w.feature_id == hht.feature_id1
+//    Collect customer_id = w.customer_id, feature_id = hht.feature_id2
+//    Aggregate val = sum(w.val*hht.val)
+//    Insert { customer_id, feature_id , val } into WHHt
+
+/* 9 */
+//    For w in W
+//    For vht in VHt
+//    For whht in WHHt
+//    Filter w.customer_id == vht.customer_id and w.feature_id == vht.feature_id
+//    Filter vht.customer_id == whht.customer_id and vht.feature_id == whht.feature_id
+//    Let val = vht.val*w.val/whht.val
+//    Insert { customer_id : w.customer_id , feature_id : w.feature_id , val} into newW
+
 
 
 }
