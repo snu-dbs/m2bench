@@ -268,7 +268,118 @@ void T2(){
 
 
 }
+/**
+ *  [Task3] Product Purchase Propensities ([R, D, G]=>R).
+ *  Given a certain special day, find the customer who spent the highest amount of money in orders, 
+ *  and analyze the purchase propensities of people within 3-hop relationships.
+ *
+ *      A: SELECT cid, SUM(total_price) AS order_price FROM Order
+ *         WHERE  order_date = 2021/12/25
+ *         GROUP BY cid ORDER BY order_price DESC LIMIT 1 // Document
+ *
+ *      B: SELECT SNS.p2.person_id AS 2hop_cid FROM A, SNS
+ *         WHERE (p1:Person) - [r:FOLLOWS*2] - > (p2:Person) AND SNS.p2.person_id=A.cid // Relational
+ * 
+ *      C: SELECT Order.cid AS cid, Order.order_line.pid AS pid, Product.brand_id AS brand_id FROM  B, Order, Product
+ *         UNNEST Order.order_line WHERE Order.cid=B.2hop_cid AND Product.pid=Order.order_line.pid // Document
+ * 
+ *      D: SELECT Brand.industry, COUNT(*) AS customer_count FROM C, Brand WHERE C.brand_id=Brand.brand_id GROUP BY Brand.industry // Relational
+ *
+ */
+ 
+void T3(){
 
+Let param_date = "2018-07-07"
+
+Let A = (for order in Order
+            Filter order.order_date == param_date
+            Collect customer_id = order.customer_id
+            Aggregate order_price = Sum(order.total_price)
+            Sort order_price Desc
+            Limit 1 
+            For customer in Customer
+                Filter customer.customer_id == customer_id
+                Return {person_id: customer.person_id, customer: customer.customer_id})
+
+
+Let B = (For person in Person
+            For a in A
+            Filter a.person_id == TO_NUMBER(person._key)
+                For v, e in 2..2 INBOUND person Follows 
+                Return distinct v)
+                
+
+Let C = (For b in B
+            for customer in Customer 
+                Filter TO_NUMBER(b._key) == customer.person_id
+                For order in Order
+                    Filter customer.customer_id == order.customer_id 
+                    for order_line in order.order_line
+                        For product in Product 
+                            Filter product.product_id == order_line.product_id
+                            Return{cid: order.customer_id, pid: order_line.product_id, brand_id: product.brand_id})
+
+Let D = (for c in C
+            for brand in Brand
+                filter c.brand_id == brand.brand_id
+                collect industry = brand.industry with count into customer_count 
+                return{ industry: industry, customer_count: customer_count})
+
+return D
+}
+
+/**
+ *  [Task4] Customer Interests ([R, D, G]=>R).
+ *  Find the interests of top-N famous customers who made more than a certain amount of orders in a given product category.
+ *
+ *      A: SELECT DISTINCT Order.cid AS cid FROM Product, Order, Brand UNNEST Order.order_line
+ *         WHERE Product.pid=Order.order_line.pid AND Brand.brand_id=Product.brand_id AND Brand.industry = @param // Document
+ * 
+ *      B: SELECT SNS.influencer.person_id AS person_id, COUNT(SNS.n) AS followers FROM A, SNS
+ *         WHERE (n:Person)  - [r:FOLLOWS] - > (influencer:Person) AND SNS.influencer.person_id=A.cid ORDER BY followers DESC LIMIT N = @param // Relational
+ * 
+ *      C: SELECT SNS.t.tid FROM B, SNS  WHERE (p:Person)  - [r:HAS_INTEREST] - > (t:Tag) AND SNS.p.person_id=B.person_id // Relational
+ *
+ *      @param industry
+ *      @param N
+ */
+
+void T4(){
+    
+let param_industry = "Sports"
+let param_topN = 10
+Let A = (for brand in Brand
+            filter brand.industry == param_industry
+            for product in Product
+                filter brand.brand_id == product.brand_id
+                for order in Order
+                    for order_line in order.order_line
+                        //filter "B005G2G2SQ" == order_line.product_id
+                        filter product.product_id == order_line.product_id
+                        collect cid = order.customer_id 
+                        aggregate total_spent = sum(order_line.price)
+                        filter total_spent>100
+                        for customer in Customer 
+                        filter cid == customer.customer_id
+                            return distinct {cpid: customer.person_id, total_spent: total_spent})
+
+Let B =(For person in Person
+            For a in A
+            Filter a.cpid == TO_NUMBER(person._key)
+                For v, e in 1..1 INBOUND person Follows
+                collect pers = v._key with count into followers
+                sort followers Desc limit param_topN
+                Return  {person: pers , followers: followers})
+
+Let C = (for person in Person
+         for b in B
+            filter TO_NUMBER(b.person) == TO_NUMBER(person._key)
+            for v in 1..1 OUTBOUND person Interested_in
+            return distinct v)
+            
+return length(C)
+    
+}
 
 /**
  * [Task5]. Filtering social network (R, D, G) => Graph
