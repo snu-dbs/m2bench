@@ -63,6 +63,9 @@ int main() {
 //    string curdate = "2021-06-01";
 //    T4();
     timer(T2);
+    string curdate = "2018-07-07";//"2021-12-25";
+    timer(T3, curdate);
+    //timer(T4,1000,10);
 //     timer(T6, 9);
 
 //    string pid = "B007SYGLZO";
