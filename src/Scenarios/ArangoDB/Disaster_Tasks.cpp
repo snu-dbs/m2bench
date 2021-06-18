@@ -2,12 +2,78 @@
 // Created by mxmdb on 21. 5. 3..
 //
 
-void T12(){
+void T10(){
 
-
+//    LET Z1 = "2020-05-01T00:00:00.000Z"
+//    LET Z2 = "2020-07-01T00:00:00.000Z"
+//
+//    LET A = (FOR e IN Earthquake
+//                FILTER e.time >= Z1  && e.time < Z2
+//                RETURN {earthquake_id: e._id, latitude: e.latitude, longitude: e.longitude} )
+//
+//
+//    LET B = (FOR node IN Roadnode
+//                FOR a IN A
+//                    LET dist = GEO_DISTANCE([a.longitude, a.latitude], [node.longitude, node.latitude])
+//                    FILTER dist <= 15000
+//                    RETURN node  )
+//
+//
+//    LET C = (FOR b IN B
+//                FOR v, e IN OUTBOUND b Road
+//                RETURN {b, v, e})
+//
+//    RETURN length(C)
 
 }
 
+void T11(){
+
+
+///* Parameter setting */
+//    LET X_id = 41865
+//    FOR e IN Earthquake
+//        FILTER e.earthquake_id == X_id
+//        LET X_latitude = e.latitude
+//        LET X_longitude = e.longitude
+//        LET X_time = e.time
+//
+///* Queries */
+//    LET A = (FOR g IN Gps
+//               LET dist = GEO_DISTANCE([X_longitude, X_latitude], [g.longitude, g.latitude])
+//                FILTER dist <= 20000 && g.time >= X_time && g.time <= DATE_ADD(X_time, "PT1H")
+//                RETURN {id: g.gps_id, latitude: g.latitude, longitude: g.longitude} )
+//
+//    LET B = (FOR a IN A
+//                LET temp = (FOR node in Roadnode
+//                SORT GEO_DISTANCE([a.longitude, a.latitude], [node.longitude, node.latitude]) ASC
+//                LIMIT 1
+//                RETURN node)
+//            RETURN {gps_id: a.id, roadnode_id: temp[0]._id}
+//    )  // GPS
+//
+//
+//    LET C = (FOR s IN Shelter
+//                LET dist = GEO_DISTANCE([X_longitude, X_latitude], [s.longitude, s.latitude])
+//                FILTER dist <= 15000
+//                RETURN {id: s.shelter_id, latitude: s.latitude, longitude: s.longitude} )
+//
+//    LET D = (FOR c IN C
+//                LET temp = (FOR node in Roadnode
+//                SORT GEO_DISTANCE([c.longitude, c.latitude], [node.longitude, node.latitude]) ASC
+//                LIMIT 1
+//                RETURN node)
+//            RETURN {shelter_id: c.id, roadnode_id: temp[0]._id}
+//    )  // Shelter
+//
+//    LET E = (FOR b IN B
+//                FOR d IN D
+//                LET path = ( FOR vertex, edge IN ANY SHORTEST_PATH b.roadnode_id TO d.roadnode_id Road
+//                RETURN edge.distance)
+//                RETURN {gps_id: b.gps_id, shelter_id: d.shelter_id, cost: SUM(path)})
+//
+//    RETURN length(E)
+}
 void T13(){
 
 
