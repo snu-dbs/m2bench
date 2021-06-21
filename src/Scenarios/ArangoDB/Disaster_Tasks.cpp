@@ -74,6 +74,119 @@ void T11(){
 //
 //    RETURN length(E)
 }
+
+/**
+ * [Task 12] New Shelter candidates (R, D, G => Relational)
+ *  For the shelter of which the number of GPS coordinates are the most within 5km from the shelter between time Z1 and Z2,
+ *  find buildings for new shelters located within 2km on foot from the shelter. (The buildings are limited by 5km from the shelter.)
+ *
+ *  A:  SELECT Shelter.id, Shelter.location, COUNT(GPS.id) AS cnt
+ *          FROM Shelter, GPS
+ *          WHERE ST_Distance(GPS.location, Shelter.location) <= 5km
+ *              AND GPS.time >= Z1 AND GPS.time <= Z2
+ *          GROUP BY Shelter.id, Shelter.location ORDER BY cnt DESC LIMIT 1
+ *
+ *  B:  SELECT A.id, ST_ClosestObject(RoadNode, node, A.location) AS node_id
+ *          FROM A,RoadNode //Relational
+ *
+ *  C: SELECT Map.properties.osm_id AS id, Map.geometry, ST_ClosestObject(RoadNode, node, ST_Centroid(Map.geometry)) AS node_id
+ *      FROM A, Map, RoadNode
+ *      WHERE ST_Distance(Map.geometry, A.location) <= 5km
+ *          AND Exists(Map.properties.building) //Relational
+ *
+ *  D: SELECT C.id
+ *      FROM B, C, RoadNode
+ *      WHERE ShortestPath(RoadNode, startNode:B.node_id, endNode:C.node_id) <= 2km //Relationa
+ */
+void T12(){
+
+    //    db.T12_temp.drop()
+    //    db._create("T12_temp")
+
+    /*step 1*/
+//    LET Z1 = "2020-09-17T00:00:00.000Z"
+//    LET Z2 = "2020-09-17T01:00:00.000Z"
+
+//    LET A1 = (FOR gps IN Gps
+//    FILTER gps.time >= Z1  && gps.time <= Z2
+//    RETURN gps )
+
+//    LET A2 = (FOR shelter IN Shelter
+//    FOR a IN A1
+//    FILTER GEO_DISTANCE([shelter.longitude, shelter.latitude], [a.longitude, a.latitude]) <= 5000
+//    COLLECT shelter_id = shelter.shelter_id, latitude = shelter.latitude, longitude= shelter.longitude WITH COUNT into cnt
+//    SORT cnt DESC
+//    LIMIT 1
+//    RETURN {shelter_id, latitude, longitude, cnt}
+//    )
+//
+//    LET B = (FOR node in Roadnode
+//    SORT GEO_DISTANCE([A2[0].longitude, A2[0].latitude], [node.longitude, node.latitude]) ASC
+//    LIMIT 1
+//    RETURN {shelter_id: A2[0].shelter_id, roadnode_id: node._id, latitude: node.latitude, longitude: node.longitude}
+//    )
+//
+//    FOR b IN B
+//    INSERT {shelter_id: B[0].shelter_id, shelter_roadnode_id: B[0].roadnode_id, shelter_lat: B[0].latitude, shelter_lon: B[0].longitude  } INTO T12_temp
+
+
+    /*step 2 */
+//    LET shelter_lon = T12_temp[0].shelter_lon
+//    LET shelter_lat = T12_temp[0].shelter_lat
+//
+//    LET C = (FOR map IN Map
+//    FILTER map.properties.building != null
+//
+//    Let multipolygon = map.geometry.coordinates
+//    Let ZIP =
+//        (For n1 in multipolygon
+//        For n2 in n1
+//        For n3 in n2
+//        Let lon = n3[0]
+//        Let lat = n3[1]
+//        Return {lon, lat} )
+//    Let Centroid = (For zip in ZIP
+//                        Collect
+//                        AGGREGATE lon = AVERAGE(zip.lon), lat = AVERAGE(zip.lat)
+//                        Return {lon, lat} )
+//    FILTER GEO_DISTANCE([shelter_lon, shelter_lat], [Centroid[0].lon, Centroid[0].lat]) <= 5000
+//    Return{map_id: map.map_id, latitude: Centroid[0].lat, longitude: Centroid[0].lon}
+//    )
+//
+//    FOR c IN C
+//        INSERT {map_id: c.map_id, centroid_lat: c.latitude, centroid_long: c.longitude} INTO T12_temp
+
+    /* step 3 */
+//    LET shelter = T12_temp[0]
+//    LET D = (FOR t IN T12_temp
+//                FILTER t.centroid_lat != null
+//                LET temp = (FOR map in Map
+//                                FILTER map.properties.roadnode == "yes"
+//                                SORT GEO_DISTANCE([t.centroid_long, t.centroid_lat], map.geometry) ASC
+//                                LIMIT 1
+//                                RETURN map )
+//    RETURN {building_map_id: t.map_id, closest_node_map_id: temp[0].map_id} )
+
+// (match each closest_to_building_node_map_id to roadnode_id for graph query)
+//    LET E = (FOR node IN Roadnode
+//                FOR d IN D
+//                FILTER node.map_id == d.closest_node_map_id
+//                RETURN node )
+//
+//    LET F = (FOR e IN E
+//                LET path = ( FOR vertex, edge IN ANY SHORTEST_PATH e._id TO shelter.shelter_roadnode_id Road
+//                                RETURN edge.distance)
+//                FILTER SUM(path) < 2000
+//                RETURN e)
+//
+//    RETURN length(F)
+
+
+//    For t in T12_temp
+//        Remove t in T12_temp
+}
+
+
 void T13(){
 
 
