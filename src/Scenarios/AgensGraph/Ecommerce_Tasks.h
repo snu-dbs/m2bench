@@ -11,8 +11,30 @@
 /**
  *  [Task1] Sales Performance ([R, D]=>R).
  *  Find the Top_selling brand in last year
- *  and
- *  Compute the ratio of total revenue to revenue by item class for the Top_selling brand.
+ *  and Compute the ratio of total revenue to revenue by item class for the Top_selling brand.
+ *
+    A: SELECT order_line.product_id , SUM(order_line.price) AS order_price
+        FROM Order  // Relational
+        UNNEST order_line
+        WHERE order_date = current_date - 1 year
+        GROUP BY order_line.product_id // Document
+
+    B: SELECT brand_id, Product.product_id as product_id, title as product_name, order_price
+        FROM A, Product // Relational
+        WHERE Product.product_id = A.product_id
+
+    C:  SELECT B.brand_id AS top_brand, SUM(B.order_price) AS revenue
+        From B
+        GROUP BY B.brand_id
+        ORDER BY revenue DESC LIMIT 1 // Relational
+
+    D: SELECT brand_name, product_name,  (B.order_price/C.revenue)*100 AS percent_of_revenue
+        FROM  Brand, B, C
+        WHERE
+            Brand.brand_id = B.brand_id
+            and B.brand_id = C.top_brand
+        ORDER By percent_of_revenue // Relational
+
 
  With A as (
             Select order_line->>'product_id' as product_id, sum((order_line->>'price')::Float) as order_price
@@ -37,7 +59,7 @@
  From Brand, B, C
  Where  Brand.brand_id = B.brand_id
         and B.brand_id = C.top_brand
- ORDER By percent_of_revenue
+ ORDER By percent_of_revenue desc
 */
 
 
@@ -54,119 +76,7 @@
  *
  *      D: B(<val: latent_factor>[customer_id,k]) * C(<val: latent_factor>[k,product_id]) // Array•E: SELECT pid FROM D WHERE cid=‘x’ AND val > 4 // Relational
  *
- */
 
-
-/* 1 */
-//    Let ratings = (For order in Order
-//    For review in Review
-//    Filter review.order_id == order.order_id
-//    Collect customer_id =  order.customer_id, product_id = review.product_id
-//    Aggregate val = average(review.rating)
-//    Return {customer_id, product_id, val}
-//    )
-//
-//    For v in ratings
-//    Insert v into V
-
-
-/* 2 */
-//    Let D1  = (For v in V
-//    Collect product_id =  v.product_id
-//    Return{product_id}
-//    )
-//
-//    Let Feature_Size = 50
-//
-//    For d in D1
-//    For i IN 1..Feature_Size
-//    Insert {product_id: d.product_id, feature_id: i , val: rand() } into H
-
-
-/* 3 */
-//    Let D1  = (For v in V
-//    Collect customer_id =  v.customer_id
-//    Return{customer_id}
-//    )
-//
-//    Let Feature_Size = 50
-//
-//    For d in D1
-//    For i IN 1..Feature_Size
-//    Insert {customer_id: d.customer_id, feature_id: i , val: rand() } into W
-
-
-
-/* 4 */
-//    For w in W
-//    For v in V
-//    Filter v.customer_id == w.customer_id
-//    collect product_id = v.product_id, feature_id = w.feature_id
-//    aggregate val = sum(v.val*w.val)
-//    Insert  { product_id, feature_id , val } into WtV
-
-
-/* 5 */
-//    Let WtW = (For w1 in W
-//    For w2 in W
-//    Filter w1.customer_id == w2.customer_id
-//    collect feature_id1 = w1.feature_id, feature_id2 = w2.feature_id
-//    aggregate val = sum(w1.val*w2.val)
-//    Return { feature_id1 , feature_id2 , val }
-//    )
-//
-//
-//    For wtw in WtW
-//    For h in H
-//    Filter wtw.feature_id2 == h.feature_id
-//    collect feature_id = wtw.feature_id1,  product_id = h.product_id
-//    aggregate val = sum(wtw.val*h.val)
-//    Insert { product_id, feature_id ,  val } into WtWH
-
-
-/* 6 */
-//    For h in H
-//    For wtwh in WtWH
-//    For wtv in WtV
-//    Filter wtv.product_id == wtwh.product_id and  wtv.feature_id == wtwh.feature_id
-//    Filter h.feature_id == wtwh.feature_id and  h.product_id == wtwh.product_id
-//    Let val = h.val*(wtv.val/wtwh.val)
-//    Insert { product_id: h.product_id, feature_id: h.feature_id ,  val } into newH
-
-/* 7 */
-//    For h in newH
-//    For v in V
-//    Filter v.product_id == h.product_id
-//    Collect customer_id  = v.customer_id, feature_id = h.feature_id
-//    aggregate val = sum(v.val*h.val)
-//    Insert { customer_id , feature_id , val } into VHt
-
-/* 8 */
-//    Let HHt =
-//    ( For  h1 in newH
-//    For h2 in newH
-//    Filter h1.product_id == h2.product_id
-//    Collect feature_id1 = h1.feature_id, feature_id2 = h2.feature_id
-//    Aggregate val = sum(h1.val*h2.val)
-//    Return{ feature_id1 , feature_id2, val } )
-//
-//    For hht in  HHt
-//    For w in W
-//    Filter w.feature_id == hht.feature_id1
-//    Collect customer_id = w.customer_id, feature_id = hht.feature_id2
-//    Aggregate val = sum(w.val*hht.val)
-//    Insert { customer_id, feature_id , val } into WHHt
-
-/* 9 */
-//    For w in W
-//    For vht in VHt
-//    For whht in WHHt
-//    Filter w.customer_id == vht.customer_id and w.feature_id == vht.feature_id
-//    Filter vht.customer_id == whht.customer_id and vht.feature_id == whht.feature_id
-//    Let val = vht.val*w.val/whht.val
-//    Insert { customer_id : w.customer_id , feature_id : w.feature_id , val} into newW
-
-/**
 
     Create temporary table V as
     (

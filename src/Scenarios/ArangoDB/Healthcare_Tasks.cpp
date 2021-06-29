@@ -25,19 +25,20 @@ void T6(){
 
 //    Let param_patient_id = 9
 //
+//
 //    Let A = (For prescription in Prescription
-//        Filter prescription.Patient_id == param_patient_id
-//        Collect drug_id = prescription.drug_id
-//        Return {drug_id}
+//    Filter prescription.patient_id == param_patient_id
+//    Collect drug_id = prescription.drug_id
+//    Return {drug_id}
 //    )
 //
 //
 //    Let B= (For a in A
-//                For drug in Drug
-//                    Filter a.drug_id == drug.drug_id
-//                    For elem in drug.drug_interactions_list
-//                        collect drug_name = elem.interaction_drug.name
-//                        Return drug_name)
+//    For drug in Drug
+//    Filter a.drug_id == drug.drug_id
+//    For elem in drug.drug_interaction_list
+//    collect drug_name = elem.interaction_drug.drug_name
+//    Return drug_name)
 //    Return Length(B)
 
 
