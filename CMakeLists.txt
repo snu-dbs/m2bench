@@ -80,7 +80,7 @@ add_executable(m2bench_ao main.cpp
 
         src/CurlHelper.cpp
         include/CurlHelper.h
-        src/Scenarios/AgensGraph/Ecommerce_Tasks.h)
+        src/Scenarios/AgensGraph/Ecommerce_Tasks.h src/Scenarios/AgensGraph/Healthcare_Tasks.h src/Scenarios/AgensGraph/Disaster_Tasks.h)
 
 target_link_libraries(m2bench_ao PRIVATE cpr::cpr)
 target_link_libraries(m2bench_ao PRIVATE nlohmann_json::nlohmann_json)

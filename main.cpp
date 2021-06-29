@@ -80,9 +80,9 @@ int main() {
 
 //    timer(T9);
 
-    string ts1 = "2020-05-01 00:00:00";
-    string ts2 = "2020-06-01 00:00:00";
-    timer(T10,ts1,ts2);
+//    string ts1 = "2020-05-01 00:00:00";
+//    string ts2 = "2020-06-01 00:00:00";
+//    timer(T10,ts1,ts2);
 //
 //    int earthquake_X_id = 41865;
 //    timer(T11, earthquake_X_id);
@@ -91,8 +91,8 @@ int main() {
 //    string ts2 = "2020-09-16 01:00:00";
 //    timer(T12,ts1,ts2);
 
-//    long ts = 1600182000+10800*3.5;
-//    timer(T16,ts);
+    long ts = 1600182000+10800*3.5;
+    timer(T16,ts);
 
 
 //     timer(T14, 0, 60);
