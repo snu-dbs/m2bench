@@ -8,17 +8,18 @@
  *  and
  *  Compute the ratio of total revenue to revenue by item class for the Top_selling brand.
 
-    A: SELECT order_line.pid AS product_id, SUM(order_line.price) AS order_price
+    A: SELECT order_line.product_id , SUM(order_line.price) AS order_price
         FROM Order  // Relational
         UNNEST order_line
         WHERE order_date = current_date - 1 year
-        GROUP BY order_line.pid // Document
+        GROUP BY order_line.product_id // Document
 
     B: SELECT brand_id, Product.product_id as product_id, title as product_name, order_price
         FROM A, Product // Relational
         WHERE Product.product_id = A.product_id
 
-    C:  SELECT brand_id.id AS top_brand, SUM(B.order_price) AS revenue
+    C:  SELECT B.brand_id AS top_brand, SUM(B.order_price) AS revenue
+        From B
         GROUP BY B.brand_id
         ORDER BY revenue DESC LIMIT 1 // Relational
 
@@ -30,10 +31,12 @@
         ORDER By percent_of_revenue // Relational
  *
  */
+
+
 void T1(){
 
 //Let A = (For order in Order
-//            Filter order.order_date <= "2021-06-01"  && order.order_date >= "2020-06-01"
+//            Filter order.order_date <= "2021-06-01"  and order.order_date >= "2020-06-01"
 //            For order_line in order.order_line
 //                Collect product_id = order_line.product_id  
 //                Aggregate order_price = Sum(order_line.price) 
