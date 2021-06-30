@@ -245,6 +245,57 @@
 **/
 
 
+ /**
+ *  [Task3] Product Purchase Propensities ([R, D, G]=>R).
+ *  Given a certain special day, find the customer who spent the highest amount of money in orders, 
+ *  and analyze the purchase propensities of people within 3-hop relationships.
+ *
+ *      A: SELECT cid, SUM(total_price) AS order_price FROM Order
+ *         WHERE  order_date = 2021/12/25
+ *         GROUP BY cid ORDER BY order_price DESC LIMIT 1 // Document
+ *
+ *      B: SELECT SNS.p2.person_id AS 2hop_cid FROM A, SNS
+ *         WHERE (p1:Person) - [r:FOLLOWS*2] - > (p2:Person) AND SNS.p2.person_id=A.cid // Relational
+ * 
+ *      C: SELECT Order.cid AS cid, Order.order_line.pid AS pid, Product.brand_id AS brand_id FROM  B, Order, Product
+ *         UNNEST Order.order_line WHERE Order.cid=B.2hop_cid AND Product.pid=Order.order_line.pid // Document
+ * 
+ *      D: SELECT Brand.industry, COUNT(*) AS customer_count FROM C, Brand WHERE C.brand_id=Brand.brand_id GROUP BY Brand.industry // Relational
+ *
+ 
+
+      
+      WITH A as (select person_id 
+	from Customer
+	where customer_id = (select customer_id from ( select data->>'customer_id' as customer_id, sum((data->>'total_price')::Float) as order_price
+				from "order"
+				where data->>'order_date'<= '2018/07/07'   
+				group by customer_id 
+				order by order_price DESC LIMIT 1) as cid)
+	),
+	B as (select customer_id 
+		from Customer
+		where Customer.person_id in (select person_id::jsonb::text::numeric
+      			from (MATCH (p1: Person) - [r:follows*2]->(p2:Person) 
+      			where p2.person_id = (select person_id from A as pid)  
+      			return p1.person_id as person_id) as temp) 
+      		),
+      	C as (select data->>'customer_id' as cid, order_line->>'product_id' as pid, Product.brand_id as brand_id
+      		from B, "order",Product, (Select jsonb_array_elements(data->'order_line') as order_line from "order" ) as temp
+      		where data->>'customer_id' = B.customer_id and Product.product_id = order_line->>'product_id'
+      	)
+      	select Brand.industry, count(*) as customer_count 
+      	from C, Brand
+      	Where C.brand_id = Brand.brand_id
+      	group by Brand.industry;
+      	
+   */   	
+      
+      
+       
+      	
+
+      		
 
 
 
