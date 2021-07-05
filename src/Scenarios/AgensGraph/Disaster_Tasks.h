@@ -7,6 +7,33 @@
 
 #endif //M2BENCH_AO_DISASTER_TASKS_H
 
+/**
+ * [Task 10] Road Network Filtering ([R, D, G]=> G)
+ * For the earthquakes which occurred between time Z1 and Z2, find the road network subgraph within 5km from the earthquakes' location.
+ *
+ * A = SELECT n1, r, n2 AS subgraph FROM Earthquake, Site, RoadNode
+ *     WHERE (n1:RoadNode) - [r:Road] -> (n2:RoadNode) AND ST_Distance(Site.geometry, Earthquake.coordinates) <= 5km
+ *     AND Earthquake.time >= Z1 AND Earthquake.time <= Z2 AND RoadNode.site_id = Site.site_id  //Graph
+
+
+     SET graph_path = Road_network;
+
+     Explain Analyze WITH eqk AS (
+        SELECT earthquake_id AS id, time, ST_MakePoint(ST_X(coordinates), ST_Y(coordinates)) AS geom
+        FROM earthquake
+        WHERE time >= '2020-06-01 00:00:00.000' AND time <= '2020-06-01 02:00:00.000'
+        ),
+        roadnodes AS (
+        SELECT eqk.id AS eqk_id, data->'site_id' AS site_id
+        FROM eqk, site
+        WHERE site.data->'properties'->>'type'='roadnode' AND ST_DistanceSphere(eqk.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) <= 5000
+        )
+        SELECT subgraph
+        FROM roadnodes, (MATCH (n:roadnode)-[r:road]->(m:roadnode) RETURN n,r,m) AS subgraph
+        WHERE subgraph.n->'site_id'=roadnodes.site_id;
+
+ */
+
 
 /**
  *  [Task16] Fine Dust Backtesting ([D, A]=> D).
