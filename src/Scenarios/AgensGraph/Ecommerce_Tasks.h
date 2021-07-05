@@ -264,26 +264,34 @@
  *
  
 
-      
-      WITH A as (select person_id 
-	from Customer
-	where customer_id = (select customer_id from ( select data->>'customer_id' as customer_id, sum((data->>'total_price')::Float) as order_price
-				from "order"
-				where data->>'order_date'<= '2018/07/07'   
-				group by customer_id 
-				order by order_price DESC LIMIT 1) as cid)
+ /c ecommerce
+ SET graph_path = social_network;      
+ WITH A as (select person_id
+        	from Customer
+        	where customer_id = (select customer_id from ( select data->>'customer_id' as customer_id, sum((data->>'total_price')::Float) as order_price
+					from "order"
+					where data->>'order_date' = '2018-07-07'
+					group by customer_id
+        				order by order_price DESC LIMIT 1) as cid)
 	),
-	B as (select customer_id 
-		from Customer
-		where Customer.person_id in (select person_id::jsonb::text::numeric
-      			from (MATCH (p1: Person) - [r:follows*2]->(p2:Person) 
-      			where p2.person_id = (select person_id from A as pid)  
-      			return p1.person_id as person_id) as temp) 
-      		),
-      	C as (select data->>'customer_id' as cid, order_line->>'product_id' as pid, Product.brand_id as brand_id
-      		from B, "order",Product, (Select jsonb_array_elements(data->'order_line') as order_line from "order" ) as temp
-      		where data->>'customer_id' = B.customer_id and Product.product_id = order_line->>'product_id'
-      	)
+	
+	B as (select customer_id
+        	from Customer,A, (MATCH (p1: Person) - [r:follows*2]->(p2:Person) return p1,p2) as btemp
+		    where (p2->>'person_id')::numeric = A.person_id and Customer.person_id = (p1->>'person_id')::numeric
+	),
+	
+	C as (  select temp.customer_id as cid,
+                    Product.product_id as pid,
+                    Product.brand_id as brand_id
+        	from B, Product,
+            	(
+                    Select  data->>'customer_id' as customer_id, jsonb_array_elements(data->'order_line')->>'product_id' as product_id
+                    from "order"
+            	) as temp
+        	where temp.customer_id = B.customer_id
+            	and Product.product_id = temp.product_id
+	)
+	
       	select Brand.industry, count(*) as customer_count 
       	from C, Brand
       	Where C.brand_id = Brand.brand_id
@@ -292,7 +300,31 @@
    */   	
       
       
-       
+    /**
+ * [Task5]. Filtering social network (R, D, G) => Graph
+ *  Extract social network whose nodes are woman customers who has bougth the product 'X' within 1 year and wrote the reviews.
+ *  A: SELECT Customer.person_id AS person_id
+ *      FROM Order, Review, Customer
+ *      WHERE Review.product_id=‘X’ AND Review.order_id=Order.order_id
+ *          AND Order.order_date = current_date – 1 year
+ *          AND Order.customer_id=Customer.customer_id AND Customer.gender=‘female’ // Relational
+ *
+ *  B: SELECT p, r, node AS subGraph FROM A, SNS
+ *      WHERE (p:Person) - [r] -> (node)
+ *      AND SNS.p.person_id=A.person_id // Graph
+ 
+ \c ecommerce
+ SET graph_path = social_network;
+ With A as (select Customer.person_id
+ 		From "order", Review, Customer
+ 		where Review.data->>'product_id' = 'B007SYGLZO' and Review.data->>'order_id' =  "order".data->> 'order_id' 
+ 		and "order".data->>'order_date' <= '2021-06-01' and "order".data->>'order_date' >= '2020-06-01'
+ 		and "order".data->> 'customer_id' = Customer.customer_id and Customer.gender = 'F')
+ 
+ 	select p1->>'person_id' as p1,r,p2->>'person_id' as p2 from A, (MATCH (p1: person)-[r:follows]->(p2:person) return p1,r,p2) as b
+ 	where (p1->>'person_id')::numeric =  A.person_id;
+ */
+   
       	
 
       		
