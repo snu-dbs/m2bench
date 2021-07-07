@@ -119,7 +119,7 @@
 
     Create Index on H (feature_id);
     Create Index on H (product_id);
-    Create Index on H (customer_id, feature_id);
+    Create Index on H (product_id, feature_id);
 
     Create temporary table WtV as
     (
@@ -139,8 +139,6 @@
         where W1.customer_id = W2.customer_id
         group by feature_id1, feature_id2
     );
-
-
 
     Create temporary table WtWH as
     (
@@ -198,9 +196,9 @@
         group by customer_id, HHt.feature_id1
     );
 
-    Create Index on WtWH (customer_id);
-    Create Index on WtWH (feature_id);
-    Create Index on WtWH (feature_id, customer_id);
+    Create Index on WHHt (customer_id);
+    Create Index on WHHt (feature_id);
+    Create Index on WHHt (feature_id, customer_id);
 
     Create temporary table newW as
     (
@@ -213,6 +211,8 @@
                 and VHt.customer_id = W.customer_id
 
     );
+
+
 
 
 /* 7 */
@@ -245,6 +245,52 @@
 **/
 
 
+With A as (
+        SELECT  site.data->'site_id' as site_id,  st_geomfromgeojson(site.data->>'geometry') as coordinates
+from site, eqk_x
+Where site.data->'properties'->>'type'='roadnode'
+        and ST_DWithin( st_geomfromgeojson(site.data->>'geometry'), eqk_X.geom, 1)
+)
+, B as (
+        SELECT gps.coordinates as coordinates
+        from gps, eqk_x
+        where gps.time >= eqk_X.time AND gps.time <=eqk_X.time + interval '1 hour'
+and ST_DWithin(gps.coordinates, eqk_X.geom, 1000)
+limit 1
+)
+SELECT count(*)
+FROM B as g1
+CROSS JOIN LATERAL(
+        Select site_id
+        From A
+        Order by A.coordinates <-> g1.coordinates
+        limit 1
+) as g2;;
 
 
 
+
+WITH A as (select person_id
+        from Customer
+        where customer_id = (select customer_id from ( select data->>'customer_id' as customer_id, sum((data->>'total_price')::Float) as order_price
+from "order"
+where data->>'order_date'<= '2018/07/07'
+group by customer_id
+        order by order_price DESC LIMIT 1) as cid)
+),
+B as (select customer_id
+        from Customer,A, (MATCH (p1: Person) - [r:follows*2]->(p2:Person) return p1,p2) as btemp
+where (p2->>'person_id')::numeric = A.person_id and Customer.person_id = (p1->>'person_id')::numeric
+),
+C as (  select B.customer_id as cid,
+                Product.product_id as pid,
+                Product.brand_id as brand_id
+        from B, Product,
+            (
+                    Select  data->>'customer_id' as customer_id, jsonb_array_elements(data->'order_line')->>'product_id' as product_id
+                    from "order"
+            ) as temp
+        where temp.customer_id = B.customer_id
+            and Product.product_id = temp.product_id
+)
+Select count(*) from C;
