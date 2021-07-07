@@ -47,18 +47,20 @@ void T6(){
 
 /**
  * [Task 7] Group of patients with similar disease (RxG=>R)
- * Find patients suffering from a similar disease with a given patient
+ * Find the number of female and male patients suffering from a similar disease with a given patient.
  *
- * A: SELECT snomed_id FROM Diagnosis WHERE patient_id = @param //table
- * B: SELECT SNOMED.concept2.snomed_id FROM SNOMED, A
- *      WHERE SNOMED.concept1(snomed_id=A.snomed_id) - [Has_Relationship*2] - (SNOMED.concept2)//table
- * C: SELECT Diagnosis.patient_id FROM Diagnosis, B WHERE Diagnosis.snomed_id = B.snomed_id //table
+ * A: SELECT disease_id FROM Diagnosis WHERE patient_id = @param
+ * B: SELECT d3.disease_id FROM Disease Network, A
+ *    WHERE (d1: Disease) - [:is_a] -> (d2: Disease) <- [:is_a] - (d3: Disease) AND d1.disease_id in A AND d3.disease_id not in A //table
+ * C: SELECT patient_id FROM Diagnosis, B
+ *    WHERE Diagnosis.disease_id = B.disease_id AND Diagnosis.patient_id != @param
+ * D: SELECT gender, count(gender) FROM Patient, C WHERE Patient.patient_id = C.patient_id GROUP BY gender
  *
  * @param patient_id
  */
 
 void T7(){
-    //
+
     //Let A = (For diagnosis in Diagnosis
     //Filter diagnosis.patient_id == 9
     //Return {disease_id: diagnosis.disease_id})
@@ -66,13 +68,25 @@ void T7(){
     //Let B = (For a in A
     //For disease in Disease_network_nodes
     //FILTER a.disease_id == TO_NUMBER(disease._key)
-    //For v, e in 2..2 Any disease Disease_network_edges
-    //RETURN DISTINCT {disease_id: TO_NUMBER(v._key)})
+    //For v1, e1 in 1..1 OUTBOUND disease Disease_network_edges
+    //For v2, e2 in 1..1 INBOUND v1 Disease_network_edges
+    //RETURN DISTINCT {disease_id: TO_NUMBER(v2._key)})
     //
-    //For diagnosis in Diagnosis
+    //LET T = (For diagnosis in Diagnosis
+    //Filter diagnosis.patient_id == 9
+    //Return diagnosis.disease_id)
+    //
+    //Let C = (For diagnosis in Diagnosis
     //For b in B
-    //Filter diagnosis.disease_id == b.disease_id and diagnosis.patient_id != 9
-    //RETURN DISTINCT diagnosis.patient_id
+    //Filter diagnosis.disease_id == b.disease_id and diagnosis.patient_id != 9 and b.disease_id not in T
+    //RETURN distinct {patient_id: diagnosis.patient_id})
+    //
+    //For p in Patient
+    //For c in C
+    //Filter c.patient_id == p.patient_id
+    //COLLECT gender=p.gender
+    //aggregate count = LENGTH(1)
+    //RETURN {gender, count}
 
 }
 
@@ -94,7 +108,17 @@ void T7(){
  */
 
 void T8(){
-    ////For drug in Drug
+    /*
+     * db.drug_temp.drop()
+     * db.target_temp.drop()
+     * db.has_bond.drop()
+     *
+     * db._create("drug_temp")
+     * db._create("target_temp")
+     * db._create("has_bond")
+     *
+    */
+    /// //For drug in Drug
     ////INSERT {_key:TO_STRING(drug.drug_id), drug_name:drug.drug_name} INTO drug_temp
     //
     ////Let B = (For drug in Drug
@@ -127,14 +151,6 @@ void T8(){
     //sort common_target desc
     //RETURN {drug1, drug2, common_target}
     //
-    ////For d in drug_temp
-    ////Remove d in drug_temp
-    //
-    ////For t in target_temp
-    ////Remove t in target_temp
-    //
-    ////For h in has_bond
-    ////Remove h in has_bond
 }
 
 /**
@@ -146,15 +162,40 @@ void T8(){
  *          UNNEST adverse_effects_list as adverse_effect  //table
  *
  *  B: A.toArray  -> (<is_adverse_effect>[drug, adverse_effect]) //array
- *  C: Cosine_similarity(B) -> (<similarity coefficient>[drug, adverse_effect]) //array
- *  D: SELECT * FROM C WHERE drug in  (Select drug_id  from Prescription where patient_id = X)  //array
+ *  C: Cosine_similarity(B) -> (<similarity coefficient>[drug1, drug2]) //array
+ *  D: SELECT * FROM C WHERE drug1 in (Select drug_id from Prescription where patient_id = X)  //array
  *
  */
 
 void T9(){
+    /*
+     * db.drug_matrix.drop()
+     * db.similarity1.drop()
+     * db.inv_norm.drop()
+     * db.similarity2.drop()
+     * db.drug_similarity.drop()
+     *
+     * db._create("drug_matrix")
+     * db._create("similarity1")
+     * db._create("inv_norm")
+     * db._create("similarity2")
+     * db._create("drug_similarity")
+     *
+     * db.drug_matrix.ensureIndex({type:"persistent", fields:["drug"]})
+     * db.drug_matrix.ensureIndex({type:"persistent", fields:["adverse_effect"]})
+     * db.similarity1.ensureIndex({type:"persistent", fields:["drug1"]})
+     * db.similarity1.ensureIndex({type:"persistent", fields:["drug2"]})
+     * db.inv_norm.ensureIndex({type:"persistent", fields:["drug1"]})
+     * db.inv_norm.ensureIndex({type:"persistent", fields:["drug2"]})
+     * db.similarity2.ensureIndex({type:"persistent", fields:["drug1"]})
+     * db.similarity2.ensureIndex({type:"persistent", fields:["drug2"]})
+     * db.drug_similarity.ensureIndex({type:"persistent", fields:["drug1"]})
+     * db.drug_similarity.ensureIndex({type:"persistent", fields:["drug2"]})
+    */
+
     ////Let A = (for d in Drug
-    ////for ae in d.adverse_effects_list
-    ////return DISTINCT {drug: d.drug_id, adverse_effect: ae.effect.title, is_adverse_effect: 1})
+    ////for ae in d.adverse_effect_list
+    ////return DISTINCT {drug: d.drug_id, adverse_effect: ae.adverse_effect_name, is_adverse_effect: 1})
     ////For a in A
     ////INSERT {drug: a.drug, adverse_effect: a.adverse_effect, is_adverse_effect: a.is_adverse_effect} INTO drug_matrix
     //
