@@ -369,10 +369,10 @@ Let A = (for brand in Brand
 Let B =(For person in Person
             For a in A
             Filter a.cpid == TO_NUMBER(person._key)
-                For v, e in 1..1 INBOUND person Follows
-                collect pers = v._key with count into followers
+                For v in 1..1 INBOUND person Follows
+                collect p = person._key with count into followers
                 sort followers Desc limit param_topN
-                Return  {person: pers , followers: followers})
+                Return  {person: p, followers: followers})
 
 Let C = (for person in Person
          for b in B
