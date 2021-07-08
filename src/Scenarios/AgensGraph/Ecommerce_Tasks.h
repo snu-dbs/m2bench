@@ -265,7 +265,7 @@
  *
  
 
-  ecommerce
+ \c ecommerce
  SET graph_path = social_network;      
  WITH A as (select person_id
         	from Customer
@@ -300,8 +300,59 @@
       	
    */   	
       
+  
+/**
+ *  [Task4] Customer Interests ([R, D, G]=>R).
+ *  Find the interests of top-N famous customers who made more than a certain amount of orders in a given product category.
+ *
+ *      A: SELECT DISTINCT Order.cid AS cid , SUM(Order.Order_line.price) as total_spent
+ *         FROM Product, Order, Brand UNNEST Order.order_line
+ *         WHERE Product.pid=Order.order_line.pid AND Brand.brand_id=Product.brand_id AND Brand.industry = @param
+ *         GROUP BY cid
+ *         HAVING total_spent > @param// Document
+ *
+ *      B: SELECT SNS.influencer.person_id AS person_id, COUNT(SNS.n) AS followers FROM A, SNS
+ *         WHERE (n:Person)  - [r:FOLLOWS] - > (influencer:Person) AND SNS.influencer.person_id=A.cid ORDER BY followers DESC LIMIT N = @param // Relational
+ *
+ *      C: SELECT SNS.t.tid FROM B, SNS  WHERE (p:Person)  - [r:HAS_INTEREST] - > (t:Tag) AND SNS.p.person_id=B.person_id // Relational
+ *
+ *      @param industry
+ *      @param N
+ *      @param min_spent
+ 
+    \c ecommerce
+	SET graph_path = social_network;
+	With A as (
+		select person_id
+		from Customer, (select temp.customer_id as customer_id, sum((temp.price)::Float) as total_spent
+				from Product,Brand,(
+								Select data->>'customer_id' as customer_id,
+								jsonb_array_elements(data->'order_line')->> 'product_id'as product_id, 
+								jsonb_array_elements(data->'order_line')->> 'price' as price
+								from "order" 
+							) as temp
+				where Brand.industry ='Sports'
+				and Product.brand_id = Brand.brand_id
+				and temp.product_id = Product.product_id
+				group by customer_id
+				having sum((temp.price)::Float)>10000
+				) as atemp
+		where atemp.customer_id = Customer.customer_id
+		),
+	B as (
+		Select p2->>'person_id' as person_id, count(p1) as followers 
+		from A, (MATCH (p1: person)-[r:follows]->(p2:person)  return p1,p2) as b
+		where (p2->>'person_id')::numeric = A.person_id
+		group by p2->>'person_id'
+		order by followers DESC limit 10
+		)
+	Select count(distinct c.t->>'tag_id') as tag_id
+	from B, (MATCH (p1: person)-[r:interested_in]->(t: hashtag) return p1,t) as c 
+	where c.p1->>'person_id' = B.person_id;  
+*/  
       
-    /**
+
+/**
  * [Task5]. Filtering social network (R, D, G) => Graph
  *  Extract social network whose nodes are woman customers who has bougth the product 'X' within 1 year and wrote the reviews.
  *  A: SELECT Customer.person_id AS person_id
@@ -314,7 +365,7 @@
  *      WHERE (p:Person) - [r] -> (node)
  *      AND SNS.p.person_id=A.person_id // Graph
  
-  ecommerce
+ /c ecommerce
  SET graph_path = social_network;
  With A as (select Customer.person_id
  		From "order", Review, Customer
