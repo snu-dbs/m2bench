@@ -4,26 +4,28 @@
 
 void T10(){
 
-//    LET Z1 = "2020-05-01T00:00:00.000Z"
-//    LET Z2 = "2020-07-01T00:00:00.000Z"
+//    LET Z1 = "2020-06-01T00:00:00.000Z"
+//    LET Z2 = "2020-06-01T02:00:00.000Z"
 //
 //    LET A = (FOR e IN Earthquake
-//                FILTER e.time >= Z1  && e.time < Z2
-//                RETURN {earthquake_id: e._id, latitude: e.latitude, longitude: e.longitude} )
+//    FILTER e.time >= Z1  && e.time <= Z2
+//    RETURN {eqk_id: e.earthquake_id, eqk_lat: e.latitude, eqk_lon: e.longitude} )
 //
-//
-//    LET B = (FOR node IN Roadnode
-//                FOR a IN A
-//                    LET dist = GEO_DISTANCE([a.longitude, a.latitude], [node.longitude, node.latitude])
-//                    FILTER dist <= 15000
-//                    RETURN node  )
-//
+//    LET B = (FOR s IN Site FILTER s.properties.type == "roadnode"
+//    FOR a IN A
+//    FILTER GEO_DISTANCE([a.eqk_lon, a.eqk_lat], s.geometry) <= 5000
+//    RETURN {site_id: s.site_id} )
 //
 //    LET C = (FOR b IN B
-//                FOR v, e IN OUTBOUND b Road
-//                RETURN {b, v, e})
+//    FOR node IN Roadnode
+//    FILTER node.site_id == b.site_id
+//    RETURN node)
 //
-//    RETURN length(C)
+//    LET D = (FOR c IN C
+//    FOR v, e IN OUTBOUND c Road
+//    RETURN {c, v, e})
+//
+//    RETURN length(D)
 
 }
 
