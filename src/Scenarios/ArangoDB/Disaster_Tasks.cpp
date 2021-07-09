@@ -31,50 +31,54 @@ void T10(){
 
 void T11(){
 
-
-///* Parameter setting */
-//    LET X_id = 41865
-//    FOR e IN Earthquake
-//        FILTER e.earthquake_id == X_id
-//        LET X_latitude = e.latitude
-//        LET X_longitude = e.longitude
-//        LET X_time = e.time
+//    FOR eqk IN Earthquake FILTER eqk.earthquake_id == 41862
+//        LET X_latitude = eqk.latitude
+//        LET X_longitude = eqk.longitude
+//        LET X_time = eqk.time
 //
-///* Queries */
+//
 //    LET A = (FOR g IN Gps
-//               LET dist = GEO_DISTANCE([X_longitude, X_latitude], [g.longitude, g.latitude])
-//                FILTER dist <= 20000 && g.time >= X_time && g.time <= DATE_ADD(X_time, "PT1H")
-//                RETURN {id: g.gps_id, latitude: g.latitude, longitude: g.longitude} )
+//    FILTER GEO_DISTANCE([X_longitude, X_latitude], [g.longitude, g.latitude]) <= 10000 && g.time >= X_time && g.time <= DATE_ADD(X_time, "PT1H")
+//    RETURN {id: g.gps_id, lat: g.latitude, lon: g.longitude} )
 //
 //    LET B = (FOR a IN A
-//                LET temp = (FOR node in Roadnode
-//                SORT GEO_DISTANCE([a.longitude, a.latitude], [node.longitude, node.latitude]) ASC
-//                LIMIT 1
-//                RETURN node)
-//            RETURN {gps_id: a.id, roadnode_id: temp[0]._id}
-//    )  // GPS
+//    LET temp = (FOR s in Site FILTER s.properties.type == "roadnode"
+//    SORT GEO_DISTANCE([a.lon, a.lat], s.geometry) ASC
+//    LIMIT 1
+//    RETURN s)
+//    RETURN {gps_id: a.id, closest_node_site_id: temp[0].site_id})
 //
+//    LET gps_nodes = (FOR n IN Roadnode
+//    FOR b IN B
+//    FILTER n.site_id == b.closest_node_site_id
+//    RETURN {gps_id: b.gps_id, node: n})
 //
-//    LET C = (FOR s IN Shelter
-//                LET dist = GEO_DISTANCE([X_longitude, X_latitude], [s.longitude, s.latitude])
-//                FILTER dist <= 15000
-//                RETURN {id: s.shelter_id, latitude: s.latitude, longitude: s.longitude} )
+//    LET C = (FOR sh IN Shelter
+//    FOR s IN Site
+//    FILTER sh.site_id == s.site_id && GEO_DISTANCE([X_longitude, X_latitude], s.geometry) <= 15000
+//    RETURN {shelter_id: sh.shelter_id, geom: s.geometry })
 //
 //    LET D = (FOR c IN C
-//                LET temp = (FOR node in Roadnode
-//                SORT GEO_DISTANCE([c.longitude, c.latitude], [node.longitude, node.latitude]) ASC
-//                LIMIT 1
-//                RETURN node)
-//            RETURN {shelter_id: c.id, roadnode_id: temp[0]._id}
-//    )  // Shelter
+//    LET temp = (FOR s in Site FILTER s.properties.type == "roadnode"
+//    SORT GEO_DISTANCE(c.geom, s.geometry) ASC
+//    LIMIT 1
+//    RETURN s)
+//    RETURN {shelter_id: c.shelter_id, closest_node_site_id: temp[0].site_id}
+//    )
 //
-//    LET E = (FOR b IN B
-//                FOR d IN D
-//                LET path = ( FOR vertex, edge IN ANY SHORTEST_PATH b.roadnode_id TO d.roadnode_id Road
-//                RETURN edge.distance)
-//                RETURN {gps_id: b.gps_id, shelter_id: d.shelter_id, cost: SUM(path)})
+//    LET shelter_nodes = (FOR n IN Roadnode
+//    FOR d IN D
+//    FILTER n.site_id == d.closest_node_site_id
+//    RETURN {shelter_id: d.shelter_id, node: n})
 //
-//    RETURN length(E)
+//    LET E = (FOR src IN gps_nodes
+//    FOR dst IN shelter_nodes
+//    LET path = (FOR v, e IN OUTBOUND SHORTEST_PATH src.node TO dst.node Road
+//    RETURN e.distance)
+//    RETURN {gps_id: src.gps_id, shelter_id: dst.shelter_id, cost: SUM(path)})
+//
+//    FOR i IN E RETURN i
+
 }
 
 /**
@@ -98,99 +102,76 @@ void T11(){
  *
  *  D: SELECT C.id
  *      FROM B, C, RoadNode
- *      WHERE ShortestPath(RoadNode, startNode:B.node_id, endNode:C.node_id) <= 2km //Relationa
+ *      WHERE ShortestPath(RoadNode, startNode:B.node_id, endNode:C.node_id) <= 2km //Relational
  */
 void T12(){
 
     //    db.T12_temp.drop()
     //    db._create("T12_temp")
 
-    /*step 1*/
+    /* STEP 1 */
 //    LET Z1 = "2020-09-17T00:00:00.000Z"
 //    LET Z2 = "2020-09-17T01:00:00.000Z"
-
-//    LET A1 = (FOR gps IN Gps
-//    FILTER gps.time >= Z1  && gps.time <= Z2
-//    RETURN gps )
-
-//    LET A2 = (FOR shelter IN Shelter
-//    FOR a IN A1
-//    FILTER GEO_DISTANCE([shelter.longitude, shelter.latitude], [a.longitude, a.latitude]) <= 5000
-//    COLLECT shelter_id = shelter.shelter_id, latitude = shelter.latitude, longitude= shelter.longitude WITH COUNT into cnt
-//    SORT cnt DESC
-//    LIMIT 1
-//    RETURN {shelter_id, latitude, longitude, cnt}
-//    )
 //
-//    LET B = (FOR node in Roadnode
-//    SORT GEO_DISTANCE([A2[0].longitude, A2[0].latitude], [node.longitude, node.latitude]) ASC
-//    LIMIT 1
-//    RETURN {shelter_id: A2[0].shelter_id, roadnode_id: node._id, latitude: node.latitude, longitude: node.longitude}
-//    )
+//    LET A = (FOR s IN Shelter
+//            FOR site IN Site FILTER s.site_id == site.site_id
+//            RETURN {shelter_id: s.shelter_id, site: site})
 //
-//    FOR b IN B
-//    INSERT {shelter_id: B[0].shelter_id, shelter_roadnode_id: B[0].roadnode_id, shelter_lat: B[0].latitude, shelter_lon: B[0].longitude  } INTO T12_temp
+//    LET B = (FOR a IN A
+//                FOR g IN (FOR g IN Gps FILTER g.time >= Z1  && g.time <= Z2 RETURN {gps_id: g.gps_id, lat: g.latitude, lon: g.longitude})
+//                FILTER GEO_DISTANCE(a.site.geometry, [g.lon, g.lat]) <= 5000
+//                COLLECT shelter_id = a.shelter_id, shelter_site = a.site WITH COUNT into numGps
+//                SORT numGps DESC
+//                LIMIT 1
+//            RETURN {shelter_id, shelter_site})
+//
+//    LET C = (FOR site in Site
+//                FILTER site.properties.type == "roadnode"
+//                SORT GEO_DISTANCE(B[0].shelter_site.geometry, site.geometry) ASC
+//                LIMIT 1
+//                RETURN site)
+//
+//    FOR n IN Roadnode
+//        FILTER n.site_id == C[0].site_id
+//        INSERT {shelter_id: B[0].shelter_id, geom: B[0].shelter_site.geometry, closest_roadnode: n} INTO T12_temp
 
-
-    /*step 2 */
-//    LET shelter_lon = T12_temp[0].shelter_lon
-//    LET shelter_lat = T12_temp[0].shelter_lat
-//
-//    LET C = (FOR map IN Map
-//    FILTER map.properties.building != null
-//
-//    Let multipolygon = map.geometry.coordinates
-//    Let ZIP =
-//        (For n1 in multipolygon
-//        For n2 in n1
-//        For n3 in n2
-//        Let lon = n3[0]
-//        Let lat = n3[1]
-//        Return {lon, lat} )
-//    Let Centroid = (For zip in ZIP
-//                        Collect
-//                        AGGREGATE lon = AVERAGE(zip.lon), lat = AVERAGE(zip.lat)
-//                        Return {lon, lat} )
-//    FILTER GEO_DISTANCE([shelter_lon, shelter_lat], [Centroid[0].lon, Centroid[0].lat]) <= 5000
-//    Return{map_id: map.map_id, latitude: Centroid[0].lat, longitude: Centroid[0].lon}
-//    )
-//
-//    FOR c IN C
-//        INSERT {map_id: c.map_id, centroid_lat: c.latitude, centroid_long: c.longitude} INTO T12_temp
-
-    /* step 3 */
+    /* STEP 2 */
 //    LET shelter = T12_temp[0]
-//    LET D = (FOR t IN T12_temp
-//                FILTER t.centroid_lat != null
-//                LET temp = (FOR map in Map
-//                                FILTER map.properties.roadnode == "yes"
-//                                SORT GEO_DISTANCE([t.centroid_long, t.centroid_lat], map.geometry) ASC
+//
+//    LET D = (FOR s IN Site
+//                FILTER s.properties.type == "building" && GEO_DISTANCE(shelter.geom, s.geometry) <=1000
+//                RETURN s)
+//
+//    LET E = (FOR d IN D
+//                LET temp = (FOR s in Site FILTER s.properties.type == "roadnode"
+//                                SORT GEO_DISTANCE(d.geometry, s.geometry) ASC
 //                                LIMIT 1
-//                                RETURN map )
-//    RETURN {building_map_id: t.map_id, closest_node_map_id: temp[0].map_id} )
-
-// (match each closest_to_building_node_map_id to roadnode_id for graph query)
-//    LET E = (FOR node IN Roadnode
-//                FOR d IN D
-//                FILTER node.map_id == d.closest_node_map_id
-//                RETURN node )
+//                                RETURN s)
+//                RETURN {building_id: d.site_id, closest_node_site_id: temp[0].site_id})
 //
-//    LET F = (FOR e IN E
-//                LET path = ( FOR vertex, edge IN ANY SHORTEST_PATH e._id TO shelter.shelter_roadnode_id Road
-//                                RETURN edge.distance)
-//                FILTER SUM(path) < 2000
-//                RETURN e)
+//    LET buildings = (FOR n IN Roadnode
+//                        FOR e IN E
+//                        FILTER n.site_id == e.closest_node_site_id
+//                        RETURN {building_id: e.building_id, closest_roadnode: n})
 //
-//    RETURN length(F)
+//    LET F = (FOR b IN buildings
+//                LET path = ( FOR v, e IN OUTBOUND SHORTEST_PATH shelter.closest_roadnode TO b.closest_roadnode Road
+//                                RETURN e.distance)
+//                LET path_cost = SUM(path)
+//                //FILTER path_cost > 0
+//                SORT path_cost
+//                LIMIT 5
+//    RETURN {shelter_id: T12_temp[0].shelter_id, building_id: b.building_id, cost: path_cost})
+//
+//    FOR i IN F return i
 
 
-//    For t in T12_temp
-//        Remove t in T12_temp
+//    For t in T12_temp REMOVE t in T12_temp
 }
 
 
-void T13(){
 
+void T13(){
 
 
 }
