@@ -80,16 +80,16 @@ void tasks(){
 
 //    timer(T9);
 
-    string ts1 = "2020-06-01 00:00:00";
-    string ts2 = "2020-06-01 02:00:00";
-    timer(T10,ts1,ts2);
+//    string ts1 = "2020-06-01 00:00:00";
+//    string ts2 = "2020-06-01 02:00:00";
+//    timer(T10,ts1,ts2);
 
 //    int earthquake_X = 41862;
 //    timer(T11, earthquake_X);
 
-//    string ts1 = "2020-09-16 00:00:00";
-//    string ts2 = "2020-09-16 01:00:00";
-//    timer(T12,ts1,ts2);
+    string ts1 = "2020-09-17 00:00:00";
+    string ts2 = "2020-09-17 01:00:00";
+    timer(T12,ts1,ts2);
 
 //    long ts = 1600182000+10800*3.5;
 //    timer(T16,ts);
@@ -106,12 +106,12 @@ void tasks(){
 
 int main() {
 
-//    tasks();
+    tasks();
 
-    auto ds = DataScaler();
-    ds.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/review_schema.json");
-    ds.scaleJson("/home/mxmdb/m2bench/data/ecommerce/json/review.json", 2);
-    return 0;
+//    auto ds = DataScaler();
+//    ds.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/review_schema.json");
+//    ds.scaleJson("/home/mxmdb/m2bench/data/ecommerce/json/review.json", 2);
+//    return 0;
 
 }
 
