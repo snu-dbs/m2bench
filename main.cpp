@@ -10,6 +10,7 @@
 #include <nlohmann/json.hpp>
 #include "src/Example/scidb.h"
 #include <string>
+#include <Generator/DataScaler.h>
 
 using json = nlohmann::json;         // for convenience
 using namespace std;
@@ -68,15 +69,14 @@ void timer( void (*f)()){
 
 }
 
-int main() {
-    /* Sample Connection */
-    // sample_connection();
-
+void tasks(){
     /* M2Bench */
 //    string curdate = "2021-06-01";
-//    T4();
+    //    T4();
 
+//    timer(T1, curdate);
 //    timer(T2);
+
 
 //    string curdate = "2018-07-07";//"2021-12-25";
 //    timer(T3, curdate);
@@ -97,16 +97,12 @@ int main() {
 
 //    timer(T9);
 
-//    string ts1 = "2020-05-01 00:00:00";
-//    string ts2 = "2020-06-01 00:00:00";
+//    string ts1 = "2020-06-01 00:00:00";
+//    string ts2 = "2020-06-01 02:00:00";
 //    timer(T10,ts1,ts2);
-//
-//    int earthquake_X_id = 41865;
-//    timer(T11, earthquake_X_id);
 
-//    string ts1 = "2020-09-16 00:00:00";
-//    string ts2 = "2020-09-16 01:00:00";
-//    timer(T12,ts1,ts2);
+//    int earthquake_X = 41862;
+//    timer(T11, earthquake_X);
 
     // long ts = 1600182000+10800*3.5;
     // timer(T16,ts);
@@ -120,8 +116,11 @@ int main() {
 //    timer(T5,pid, curdate);
 
 //    coo_finedust();
-    scidbTest();
 
-    return 0;
+//    auto ds = DataScaler();
+//    ds.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/review_schema.json");
+//    ds.scaleJson("/home/mxmdb/m2bench/data/ecommerce/json/review.json", 2);
+//    return 0;
+
 }
 
