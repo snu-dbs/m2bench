@@ -61,7 +61,6 @@ void tasks(){
 //    string curdate = "2021-06-01";
     //    T4();
 
-//    timer(T1, curdate);
 //    timer(T2);
 
 
@@ -104,11 +103,17 @@ void tasks(){
 //    coo_finedust();
 }
 
-int main() {
+void scalingTable(){
+    //    auto ds = DataScaler();
+    //    ds.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/review_schema.json");
+    //    ds.scaleJson("/home/mxmdb/m2bench/data/ecommerce/json/review.json", 2);
+}
 
-    auto ds = DataScaler();
-    ds.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/review_schema.json");
-    ds.scaleJson("/home/mxmdb/m2bench/data/ecommerce/json/review.json", 2);
+int main() {
+//    cout << "TEST" << endl;
+//    string curdate = "2021-06-01";
+    timer(T2);
+
     return 0;
 }
 

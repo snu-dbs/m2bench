@@ -36,7 +36,7 @@
         ORDER By percent_of_revenue // Relational
 
 
- With A as (
+Explain analyze With A as (
             Select order_line->>'product_id' as product_id, sum((order_line->>'price')::Float) as order_price
             From (
                     Select jsonb_array_elements(data->'order_line') as order_line
