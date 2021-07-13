@@ -9,6 +9,9 @@
 #include "Session/ScidbSession.h"
 #include "CurlHelper.h"
 
+/*
+ * Help functions.
+ */
 string& trim(string& str, const char c = ' ') {
     str.erase(0, str.find_first_not_of(c));
     str.erase(str.find_last_not_of(c) + 1);
@@ -27,7 +30,10 @@ vector<string> split(string str, const string& c) {
 }
 
 
-ScidbSession::ScidbSession(const string& url): url(url) {
+/*
+ * Making new session.
+ */
+ScidbSession::ScidbSession(const string& url, bool isFileBased): url(url), isFileBased(isFileBased) {
     cpr::Response r = cpr::Get(cpr::Url{"http://" + url + "/new_session"});
     if (r.status_code != 200) {        // error
         cerr << r.text << endl;
@@ -36,10 +42,19 @@ ScidbSession::ScidbSession(const string& url): url(url) {
     }
 }
 
+/*
+ * Releasing the session.
+ */
 ScidbSession::~ScidbSession() {
+    // release session.
     cpr::Response r = cpr::Get(cpr::Url{"http://" + url + "/release_session?id=" + this->sessionId});
     if (r.status_code != 200) {        // error
         cerr << r.text << endl;
+    }
+
+    // remove tempfiles
+    for (auto& filename: tmpfiles) {
+        if (std::remove(filename.c_str())) cerr << filename << " is not deleted!" << endl;
     }
 }
 
@@ -47,8 +62,14 @@ bool ScidbSession::isDone() {
     return true;
 }
 
+/*
+ * The ScidbSession is not using the parnet method structure.
+ */
 vector<json> ScidbSession::fetch() {}
 
+/*
+ * Executing a SciDB query.
+ */
 void ScidbSession::exec(const string& query, bool save) {
     string reqUrl = "http://" + url + "/execute_query?id=" + this->sessionId + "&query=" + query;
     if (save) reqUrl += "&save=tsv%2B";
@@ -59,27 +80,61 @@ void ScidbSession::exec(const string& query, bool save) {
     }
 }
 
-ScidbArr ScidbSession::download(const string& arrayName) {
+/*
+ * Getting the array's schema and downloading the array with the schema.
+ */
+unique_ptr<ScidbArr> ScidbSession::download(const string& arrayName) {
     ScidbSchema schema = this->schema(arrayName);
     this->exec("scan(" + arrayName + ")", true);
-    stringstream ss(this->pull());
-    return ScidbArr(schema, move(ss));
+
+    if (!isFileBased) {
+        // memory
+        stringstream ss(this->pull());
+        return unique_ptr<ScidbArrMem>(new ScidbArrMem(schema, move(ss)));
+    }
+
+    // file
+    return unique_ptr<ScidbArrFile>(new ScidbArrFile(schema, this->pullToFile()));
 }
 
-ScidbArr ScidbSession::download(const string& query, const ScidbSchema& schema) {
+/*
+ * Downloading the array with the schema.
+ */
+unique_ptr<ScidbArr> ScidbSession::download(const string& query, const ScidbSchema& schema) {
     this->exec(query, true);
-    stringstream ss(this->pull());
-    return ScidbArr(schema, move(ss));
+
+    if (!isFileBased) { 
+        // memory
+        stringstream ss(this->pull());
+        return unique_ptr<ScidbArrMem>(new ScidbArrMem(schema, move(ss)));
+    }
+
+    // file
+    return unique_ptr<ScidbArrFile>(new ScidbArrFile(schema, this->pullToFile()));
 }
 
-void ScidbSession::upload(const string& arrayName, const ScidbArr& arr) {
-
+/*
+ * Parsing the schema, uploading the data, and loading it to the SciDB.
+ */
+void ScidbSession::upload(const string& arrayName, shared_ptr<ScidbArr> arr) {
     string body;
     ScidbSchema schema = this->schema(arrayName);
-    string path = this->push(arr.toTsv(schema));
+
+    string path;
+    if (!isFileBased) { 
+        // memory
+        path = this->push(arr->toTsv(schema));
+    } else {
+        // file
+        path = this->pushFromFile(arr->toTsv(schema));
+    }
+
     this->exec("load(" + arrayName + ", '" + path + "', -2, 'tsv')");
 }
 
+/*
+ * Parsing the array's schema.
+ */
 ScidbSchema ScidbSession::schema(const string& arrayName) {
     this->exec("show(" + arrayName + ")", true);
     string text = split(this->pull(), "\t").at(1);
@@ -87,6 +142,9 @@ ScidbSchema ScidbSession::schema(const string& arrayName) {
     return parsingSchema(text);
 }
 
+/*
+ * Getting the latest saved array that is the latest one.
+ */
 string ScidbSession::pull() {       // get latest
     string reqUrl = "http://" + url + "/read_lines?id=" + this->sessionId;
     cpr::Response r = cpr::Get(cpr::Url{reqUrl});
@@ -97,6 +155,40 @@ string ScidbSession::pull() {       // get latest
     return r.text;
 }
 
+/*
+ * Getting the latest saved array that is the latest one.
+ * It save the array into a file.
+ */
+string ScidbSession::pullToFile() {
+    // gen tmpfile name
+    char *tmpname = strdup("/tmp/dbs-scidbconnector-tempfile-XXXXXX");
+    mkstemp(tmpname);
+    ofstream ofs(tmpname);
+
+    // to delete 
+    tmpfiles.push_back(tmpname);
+
+    // data fetching
+    string reqUrl = "http://" + url + "/read_lines?id=" + this->sessionId;
+    cpr::Response r = cpr::Get(cpr::Url{reqUrl}, cpr::WriteCallback{[&ofs](string data) -> bool {
+        ofs << data;
+        // std::cout << "writecallback!: " << data << std::endl;
+        return true;
+    }});
+
+    if (r.status_code != 200) {        // error
+        cerr << r.text << endl;
+    }
+
+    ofs.close();
+
+    return tmpname;
+}
+
+
+/*
+ * Push the string (TSV array) to the SciDB.
+ */
 string ScidbSession::push(string data) {
     // get schema
     string reqUrl = "http://" + url + "/upload?id=" + this->sessionId;
@@ -109,8 +201,45 @@ string ScidbSession::push(string data) {
     return r.text;      // path in the remote
 }
 
-ScidbSchema ScidbSession::parsingSchema(const string& basicString) {
 
+/*
+ * Push the string of the file to the SciDB.
+ */
+
+string ScidbSession::pushFromFile(string filename) {
+    ifstream ifs(filename);
+
+    // get file size
+    struct stat fs;
+    stat(filename.c_str(), &fs);
+    
+    int bufSize = 1024;
+
+    // data uploading
+    string reqUrl = "http://" + url + "/upload?id=" + this->sessionId;
+    cpr::Response r = cpr::Post(cpr::Url{reqUrl}, cpr::ReadCallback{fs.st_size, [&](char* buffer, size_t& size) -> bool {
+        if (ifs.eof()) {
+            return false;
+        }
+
+        size = ifs.read(buffer, bufSize).gcount();
+        return true;
+    }});
+
+    if (r.status_code != 200) {        // error
+        cerr << r.text << endl;
+        throw runtime_error("ScidbSession uploads failed: " + r.text);
+    }
+
+    ifs.close();
+
+    return r.text;      // path in the remote
+}
+
+/*
+ * Parsing the schema.
+ */
+ScidbSchema ScidbSession::parsingSchema(const string& basicString) {
     regex structure(R"(([@\w\d]*)<(.*)>.*\[(.*)\])");       // array name, attrs, dims
     smatch match;
 
