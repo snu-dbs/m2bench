@@ -49,21 +49,20 @@ typedef struct ScidbSchema {
 enum ScidbDataFormat { COO };
 
 
+// SciDB base class
 typedef class ScidbArr {
-private:
+protected:
     ScidbDataFormat format = COO;     // only COO available
 
-    // Download schema
-    ScidbSchema downloadedSchema;     // readonly
-    stringstream datastream{};
-
-    // Upload schema
-    vector<ScidbLineType> uploadData;       // TODO: will be replaced
+    ScidbSchema schema;     // readonly
 
 public:
     ScidbArr() = default;
-    ScidbArr(ScidbSchema schema1, stringstream datastream1)
-            :downloadedSchema(schema1), datastream(move(datastream1)) {}
+    ScidbArr(ScidbSchema schema1) : schema(schema1) {};
+
+    virtual ScidbLineType readcell() = 0;
+    virtual string toTsv(ScidbSchema schema) = 0;
+    virtual void add(ScidbLineType linedata) = 0;
 
     std::vector<string> split(string str, const string& c) {
         vector<string> ret;
@@ -76,51 +75,127 @@ public:
         return ret;
     }
 
-    ScidbLineType readcell(){
+    ScidbLineType parseLinestring(string line) {
         ScidbLineType linedata;           // one line data
-        string line;
-        getline(datastream,line);
-        if (line.empty()) return linedata;           // one line data
-        // exception (specifically last line)
 
         auto items = split(line, "\t");     // split
         size_t idx = 0;                 // idx in linedata
 
         // dim
-        for (auto& dim : downloadedSchema.dims) linedata.emplace_back(stoi(items[idx++]));
+        for (auto& dim : schema.dims) linedata.emplace_back(stoi(items[idx++]));
         // attr
-        for (auto& attr : downloadedSchema.attrs) {
+        for (auto& attr : schema.attrs) {
             if (attr.type == FLOAT) linedata.emplace_back(stof(items[idx++]));
             else if (attr.type == DOUBLE) linedata.emplace_back(stod(items[idx++]));
             else if (attr.type == INT32) linedata.emplace_back(stoi(items[idx++]));
             else if (attr.type == INT64) linedata.emplace_back(stoll(items[idx++]));
             else if (attr.type == STRING) linedata.emplace_back(items[idx++]);
         }
-
         return linedata;
     }
 
-    string toTsv(ScidbSchema schema) const {
+    string parsingLinedata(ScidbLineType linedata) {
+        stringstream ss;
+
+        for (size_t i = 0; i < schema.attrs.size(); i++) {
+            if (schema.attrs.at(i).type == FLOAT) ss << get<float>(linedata.at(i)) << "\t";
+            else if (schema.attrs.at(i).type == DOUBLE) ss << get<double>(linedata.at(i)) << "\t";
+            else if (schema.attrs.at(i).type == INT32) ss << get<int>(linedata.at(i)) << "\t";
+            else if (schema.attrs.at(i).type == INT64) ss << get<long long>(linedata.at(i)) << "\t";
+            else if (schema.attrs.at(i).type == STRING) ss << get<string>(linedata.at(i)) << "\t";
+        }
+        ss << "\n";
+
+        return ss.str();
+    }
+
+} ScidbArr;
+
+
+// Memory based SciDB
+typedef class ScidbArrMem : public ScidbArr {
+private:
+    // Download schema
+    stringstream datastream{};
+
+    // Upload schema
+    vector<ScidbLineType> uploadData;       
+
+public:
+    ScidbArrMem() = default;
+    ScidbArrMem(ScidbSchema schema1, stringstream datastream1)
+            : ScidbArr(schema1), datastream(move(datastream1)) {}
+
+    ScidbLineType readcell() override {
+        string line;
+        getline(datastream, line);
+        if (line.empty()) return ScidbLineType();           // one line data
+        // exception (specifically last line)
+
+        return parseLinestring(line);
+    }
+
+    string toTsv(ScidbSchema schema) override {
         stringstream ss;
 
         for (auto& linedata: uploadData) {
-            for (size_t i = 0; i < schema.attrs.size(); i++) {
-                if (schema.attrs.at(i).type == FLOAT) ss << get<float>(linedata.at(i)) << "\t";
-                else if (schema.attrs.at(i).type == DOUBLE) ss << get<double>(linedata.at(i)) << "\t";
-                else if (schema.attrs.at(i).type == INT32) ss << get<int>(linedata.at(i)) << "\t";
-                else if (schema.attrs.at(i).type == INT64) ss << get<long long>(linedata.at(i)) << "\t";
-                else if (schema.attrs.at(i).type == STRING) ss << get<string>(linedata.at(i)) << "\t";
-            }
-            ss << "\n";
+            ss << parsingLinedata(linedata);
         }
         return ss.str();
     }
 
-    void add(ScidbLineType linedata) {
+    void add(ScidbLineType linedata) override {
         uploadData.push_back(linedata);
     }
 
-} ScidbArr;
+} ScidbArrMem;
+
+
+// File based SciDB
+typedef class ScidbArrFile : public ScidbArr {
+    // for reading
+    ifstream ifs;       // fp of downloaded array if made with the constructor having filename
+
+    // for writing
+    ofstream ofs;       // tmpfile (in writing)
+    string filename;
+
+public:
+    ScidbArrFile(ScidbSchema schema1) : ScidbArr(schema1) {
+        char *tmpname = strdup("/tmp/dbs-scidbconnector-tempfile-XXXXXX");
+        mkstemp(tmpname);
+        ofs.open(tmpname);
+        filename = tmpname;
+    }
+
+    ScidbArrFile(ScidbSchema schema1, string filename1) : ScidbArr(schema1) {
+        ifs.open(filename1);
+    }
+
+    ~ScidbArrFile() {
+        if (ofs.is_open()) ofs.close();
+        if (ifs.is_open()) ifs.close();
+
+        if (std::remove(filename.c_str())) cerr << filename << " is not deleted!" << endl;
+    }
+
+    ScidbLineType readcell() override {
+        string line;
+        getline(ifs, line);
+        if (line.empty()) return ScidbLineType();
+        return parseLinestring(line);
+    }
+
+    string toTsv(ScidbSchema schema) override {
+        ofs.flush();
+        return filename;
+    }
+
+    void add(ScidbLineType linedata) override {
+        ofs << parsingLinedata(linedata);
+    }
+
+} ScidbArrFile;
 
 
 #endif //M2BENCH_AO_SCIDBPRIMITIVES_H
