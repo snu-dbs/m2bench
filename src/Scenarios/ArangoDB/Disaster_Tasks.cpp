@@ -414,7 +414,7 @@ RETURN B
  */
 
 
-void T16(){
+// void T16(){
 
     /* step 0 */
 //    db.T16_temp.drop()
@@ -509,4 +509,4 @@ void T16(){
 
 
 
-}
+// }
