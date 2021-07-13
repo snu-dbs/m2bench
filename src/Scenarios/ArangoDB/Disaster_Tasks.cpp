@@ -187,11 +187,229 @@ void T12(){
 }
 
 
-void T13(){
+/*
+ * [Task 13] Damage Statistics.
+ *
+ * For the earthquakes of which magnitude is greater than 4.5, find the building statistics.
+ * The buildings are limited by 30km from the earthquake location. (Relational, Document) -> Document
+ *
+ * A =  SELECT Site.properties.description, COUNT(*) 
+ *      FROM Earthquake, Site WHERE ST_Distance(Site.geometry, Earthquake.coordinates) <= 30km 
+ *          AND Site.properties.type = 'building' 
+ *          AND Earthquake.magnitude >= 4.5 
+ *      GROUP BY Site.properties.description // Document
+ *
+ * 
+ * [Query]
+ * 
+ 
+[OLD]
+FOR map IN Map
+    // Exists(Map.properties.building)
+    FILTER map.properties.building != null  
+    
+    FOR eq IN Earthquake
+        // Earthquake.magnitude >= 4.5
+	    FILTER eq.magnitude >= 4.5
+	    
+	    // ST_Distance(Map.geometry,Earthquake.location) <= 30km
+	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], map.geometry)
+	    FILTER dist <= 30000
+	    
+	    // GROUP BY Map.properties.building
+	    COLLECT building = map.properties.building
+	        WITH COUNT INTO cnt
 
 
+[New]
+FOR site IN Site
+    FILTER site.properties.type == 'building'
+    FOR eq IN Earthquake
+	    FILTER eq.magnitude >= 4.5
 
-}
+	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], site.geometry, "wgs84")
+	    FILTER dist <= 30000
+	    
+	    COLLECT description = site.properties.description
+	        WITH COUNT INTO cnt
+	    
+	    RETURN {description, cnt}
+	    
+ */
+
+
+/* 
+ * [Task 14] Sources of Fine Dust.
+ *
+ * Analyze fine dust hotspot by date between time Z1 and Z2.
+ * Print the nearest building with time of the hotspot.
+ * Use window aggregation with a size of 5. (Document, Array) -> Document
+ *
+ * A =  SELECT date, timestamp, latitude, longitude, AVG(pm10) AS pm10_avg 
+ *      FROM FineDust 
+ *      WHERE timestamp >= Z1 
+ *          AND timestamp <= Z2 
+ *      WINDOW 1, 5, 5 // Array
+ * B =  REDIMENSION(A, <pm10_avg: float>[date=0:*, timestamp=0:*, latitude=0:*, longitude=0:*]) // Array
+ * C =  SELECT t1.date, t1.timestamp, (t1.latitude, t1.longitude) AS coordinates 
+ *      FROM B AS t1, (
+ *          SELECT date, MAX(pm10_avg) AS pm10_max 
+ *          FROM B GROUP BY date
+ *      ) AS t2 
+ *      WHERE t1.pm10_avg = t2.pm10_max 
+ *          AND t1.date = t2.date // Array 
+ * D =  SELECT C.date, C.timestamp, ST_ClosestObject(Site, building, C.coordinates) AS site_id 
+ *      FROM C, Site 
+ *      ORDER BY C.date ASC // Document
+ * 
+ * 
+ * [Query]
+  
+ LET Z1 = 1
+ LET Z2 = 1
+  
+ LET AB = (
+    FOR cell IN Finedust
+        // WHERE timestamp >= Z1 AND timestamp <= Z2
+        FILTER ((Z1 * 10800) + 1600182000 <= cell.timestamp) AND
+            (cell.timestamp <= (Z2 * 10800) + 1600182000)
+        
+        // SELECT AVG(pm10) AS pm10_avg, WINDOW 1, 5, 5 
+        LET AVG = (
+            FOR wcell IN Finedust 
+                // I specify 2.5 rather than 2 or 3 due to the floating point op.
+                FILTER (wcell.timestamp == cell.timestamp) AND
+                    ((cell.latitude - (2.5 * 0.000172998)) < wcell.latitude) AND
+                    (wcell.latitude < ((2.5 * 0.000172998) + cell.latitude)) AND
+                    ((cell.longitude - (2.5 * 0.000216636)) < wcell.longitude) AND 
+                    (wcell.longitude < ((2.5 * 0.000216636) + cell.longitude))
+                RETURN wcell.pm10
+            )
+        LIMIT 522*52
+        RETURN {
+            timestamp: cell.timestamp,
+            latitude: cell.latitude,
+            longitude: cell.longitude,
+            date: FLOOR((cell.timestamp - 1600182000) / (10800 * 8)),       // as int idx
+            pm10_avg: AVERAGE(AVG)
+        }
+        
+)
+
+// (SELECT date, MAX(pm10_avg) AS pm10_max FROM B GROUPBY date) (C subquery)
+LET Ct2 = (
+    FOR doc IN AB 
+        COLLECT date = doc.date
+        AGGREGATE pm10_max = MAX(doc.pm10_avg)
+        RETURN {date: date, pm10_max: pm10_max}
+)
+
+LET C = (
+    FOR t1 IN AB
+        FOR t2 IN Ct2
+            // WHERE t1.pm10_avg = t2.pm10_max AND t1.date = t2.date
+            FILTER t1.pm10_avg == t2.pm10_max AND t1.date == t2.date
+            // t1.date, t1.location, t1.timestamp
+            RETURN {date: t1.date, latitude: t1.latitude, longitude: t1.longitude, timestamp: t1.timestamp}
+)
+
+LET D = (
+    FOR c IN C
+        // ST_ClosestObject(Map,building, C.location)
+        LET NEAR = ( 
+            FOR map IN Map
+                FILTER map.properties.building != NULL
+                SORT GEO_DISTANCE([c.longitude, c.latitude], map.geometry) ASC
+                LIMIT 1
+                RETURN map
+        )
+        
+        // ORDER BY C.date ASC
+        SORT c.date ASC
+        
+        // C.date, C.timestamp, ST_ClosestObject(Map,building, C.location) AS osm_id
+        RETURN {
+            date: c.date,
+            timestamp: c.timestamp,
+            osm_id: NEAR[0]
+        }
+)
+
+ */
+
+
+/* 
+ * [Task15] Fine Dust Cleaning Vehicles.
+ *
+ * Recommend the route from the current coordinates by analyzing the hotspot between time Z1 and Z2.
+ * Use window aggregation with a size of 5. (Graph, Document, Array) -> Relational
+ *
+ * A =  SELECT (latitude, longitude) AS coordinates, AVG(pm10) AS pm10_avg 
+ *      FROM FineDust 
+ *      WHERE timestamp >= Z1 
+ *          AND timestamp <= Z2 
+ *      WINDOW *, 5, 5 // Array
+ * B =  SELECT ShortestPath(RoadNode, startNode: ST_ClosestObject(Site, roadnode, current_coordinates), endNode: ST_ClosestObject(Site, roadnode, A.coordinates)) 
+ *      FROM A, RoadNode, Site 
+ *      WHERE Site.site_id = RoadNode.site_id 
+ *      ORDER BY A.pm10_avg DESC
+ *      LIMIT 1 // Relational
+ * 
+ * 
+ * [Query]
+ * 
+ 
+ LET Z1 = 3
+ LET Z2 = 3
+  
+ LET A = (
+    FOR cell IN Finedust
+        // WHERE timestamp >= Z1 AND timestamp <= Z2
+        FILTER cell.pm10 > 2000
+        FILTER ((Z1 * 10800) + 1600182000 <= cell.timestamp) AND
+            (cell.timestamp <= (Z2 * 10800) + 1600182000)
+        
+        // SELECT AVG(pm10) AS pm10_avg, WINDOW *, 5, 5 
+        LET AVG = (
+            FOR wcell IN Finedust 
+                // I specify 2.5 rather than 2 or 3 due to the floating point op.
+                FILTER ((Z1 * 10800) + 1600182000 <= wcell.timestamp) AND
+                    (wcell.timestamp <= (Z2 * 10800) + 1600182000) AND
+                    ((cell.latitude - (2.5 * 0.000172998)) < wcell.latitude) AND
+                    (wcell.latitude < ((2.5 * 0.000172998) + cell.latitude)) AND
+                    ((cell.longitude - (2.5 * 0.000216636)) < wcell.longitude) AND 
+                    (wcell.longitude < ((2.5 * 0.000216636) + cell.longitude))
+                RETURN wcell.pm10
+            )
+        LIMIT 522
+        RETURN {
+            timestamp: cell.timestamp,
+            latitude: cell.latitude,
+            longitude: cell.longitude,
+            date: FLOOR((cell.timestamp - 1600182000) / (10800 * 8)),       // as int idx
+            pm10_avg: AVERAGE(AVG)
+        }
+        
+)
+
+LET B = (
+    FOR a IN A
+        // WHERE A.pm10_avg >= 80
+        FILTER a.pm10_avg >= 2000
+        // ST_ClosestObject(RoadNode, node, A.location)
+        LET map = (
+            FOR node IN Roadnode
+                LET map = (FOR map IN Map FILTER map.id == node.map_id RETURN map)
+                SORT GEO_DISTANCE([a.longitude, a.latitude], map[0].geometry) ASC
+                LIMIT 1
+                RETURN map
+        )
+        RETURN map
+            
+)
+
+RETURN B
+ */
 
 /**
  *  [Task16] Fine Dust Backtesting ([D, A]=> D).
