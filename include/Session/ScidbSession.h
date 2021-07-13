@@ -8,6 +8,7 @@
 #include <string>
 #include <any>
 #include <cpr/cpr.h>
+#include <sys/stat.h>
 
 #include "Session.h"
 #include "Connection/ScidbPrimitives.h"
@@ -15,24 +16,34 @@
 
 class ScidbSession : public Session {
 public:
-    explicit ScidbSession(const string& url);
+    explicit ScidbSession(const string& url, bool isFileBased = true);
     ~ScidbSession();
 
     void exec(const string& query, bool save=false);
-    ScidbArr download(const string& query);
-    ScidbArr download(const string& query, const ScidbSchema& schema);
-    void upload(const string& arrayName, const ScidbArr& data);
+    unique_ptr<ScidbArr> download(const string& query);
+    unique_ptr<ScidbArr> download(const string& query, const ScidbSchema& schema);
+    void upload(const string& arrayName, shared_ptr<ScidbArr> data);
 
     vector<json> fetch() override;
     bool isDone() override;
 
 private:
+    bool isFileBased = true;        // If true, the session maintain the array in a file.
+
+    vector<string> tmpfiles;        // Temporary files. The session maintains it so that it can be deleted.
+
     string url, sessionId, fileId;
 
+    // Memory-based
     string push(string data);
     string pull();
-    ScidbSchema schema(const string& arrayName);
 
+    // File-based
+    string pushFromFile(string filename);
+    string pullToFile();
+
+    // Other functions
+    ScidbSchema schema(const string& arrayName);
     static ScidbSchema parsingSchema(const string& basicString);
 };
 

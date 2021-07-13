@@ -21,7 +21,7 @@ include_directories("/usr/include/mysql-cppconn-8")
 include(FetchContent)
 
 # cpr (curl lib)
-FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/whoshuu/cpr.git GIT_TAG c8d33915dbd88ad6c92b258869b03aba06587ff9) # the commit hash for 1.5.0
+FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/whoshuu/cpr.git GIT_TAG aac5058a15e9ad5ad393973dc6fe44d7614a7f55) # the commit hash for 1.5.0
 FetchContent_MakeAvailable(cpr)
 
 # json
