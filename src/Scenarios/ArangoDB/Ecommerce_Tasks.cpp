@@ -335,8 +335,11 @@ return D
  *  [Task4] Customer Interests ([R, D, G]=>R).
  *  Find the interests of top-N famous customers who made more than a certain amount of orders in a given product category.
  *
- *      A: SELECT DISTINCT Order.cid AS cid FROM Product, Order, Brand UNNEST Order.order_line
- *         WHERE Product.pid=Order.order_line.pid AND Brand.brand_id=Product.brand_id AND Brand.industry = @param // Document
+ *      A: SELECT DISTINCT Order.cid AS cid , SUM(Order.Order_line.price) as total_spent
+ *         FROM Product, Order, Brand UNNEST Order.order_line
+ *         WHERE Product.pid=Order.order_line.pid AND Brand.brand_id=Product.brand_id AND Brand.industry = @param 
+ *         GROUP BY cid
+ *          HAVING total_spent > @param// Document
  * 
  *      B: SELECT SNS.influencer.person_id AS person_id, COUNT(SNS.n) AS followers FROM A, SNS
  *         WHERE (n:Person)  - [r:FOLLOWS] - > (influencer:Person) AND SNS.influencer.person_id=A.cid ORDER BY followers DESC LIMIT N = @param // Relational
@@ -345,23 +348,24 @@ return D
  *
  *      @param industry
  *      @param N
+ *      @param min_spent
  */
 
 void T4(){
     
 let param_industry = "Sports"
 let param_topN = 10
+let param_min_spent = 10000
 Let A = (for brand in Brand
             filter brand.industry == param_industry
             for product in Product
                 filter brand.brand_id == product.brand_id
                 for order in Order
                     for order_line in order.order_line
-                        //filter "B005G2G2SQ" == order_line.product_id
                         filter product.product_id == order_line.product_id
                         collect cid = order.customer_id 
                         aggregate total_spent = sum(order_line.price)
-                        filter total_spent>100
+                        filter total_spent > param_min_spent
                         for customer in Customer 
                         filter cid == customer.customer_id
                             return distinct {cpid: customer.person_id, total_spent: total_spent})
@@ -369,16 +373,15 @@ Let A = (for brand in Brand
 Let B =(For person in Person
             For a in A
             Filter a.cpid == TO_NUMBER(person._key)
-                For v in 1..1 INBOUND person Follows
-                collect p = person._key with count into followers
+                LET followers = LENGTH(FOR v IN 1..1 INBOUND person Follows RETURN 1)
                 sort followers Desc limit param_topN
-                Return  {person: p, followers: followers})
+                Return  {person: person._key, followers: followers})
 
 Let C = (for person in Person
          for b in B
             filter TO_NUMBER(b.person) == TO_NUMBER(person._key)
             for v in 1..1 OUTBOUND person Interested_in
-            return distinct v)
+            return distinct v._id)
             
 return length(C)
     

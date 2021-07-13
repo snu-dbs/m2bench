@@ -1,0 +1,11 @@
+{
+	"customer_id" : "pk_string",
+	"person_id" : "fk_int_sf",
+	"gender" : "category",
+	"date_of_birth" : "date(YYYY-MM-DD)",
+	"firstname" : "string",
+	"lastname" : "string",
+	"nationality" : "category", 
+	"zipcode" : "int",
+	"email" : "email"
+}
