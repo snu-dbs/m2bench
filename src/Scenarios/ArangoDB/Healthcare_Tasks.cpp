@@ -115,7 +115,7 @@ void T8(){
      *
      * db._create("drug_temp")
      * db._create("target_temp")
-     * db._create("has_bond")
+     * db._createEdgeCollection("has_bond")
      *
     */
     /// //For drug in Drug
@@ -157,9 +157,9 @@ void T8(){
  *  [Task9] Drug similarity (R,D=>A)
  *  Find similar drugs for a given patient X's prescribed drug
  *
- *  A: SELECT drug_id as drug, adverse_effect.title as adverse_effect, 1 as is_adverse_effect
+ *  A: SELECT drug_id as drug, adverse_effect_list.adverse_effect_name as adverse_effect, 1 as is_adverse_effect
  *          FROM Drug
- *          UNNEST adverse_effects_list as adverse_effect  //table
+ *          UNNEST adverse_effect_list //table
  *
  *  B: A.toArray  -> (<is_adverse_effect>[drug, adverse_effect]) //array
  *  C: Cosine_similarity(B) -> (<similarity coefficient>[drug1, drug2]) //array
