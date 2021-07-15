@@ -5,7 +5,14 @@ project(m2bench_ao)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
+
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+
+# Boost
+find_package (Boost 1.70.0 REQUIRED COMPONENTS unit_test_framework)
+include_directories(${Boost_INCLUDE_DIR})
+find_library(Boost_LIBRARIES boost ${Boost_LIBRARIES_DIR})
+
 
 #mongoDB driver
 include_directories ("/usr/local/include/mongocxx/v_noabi")
@@ -87,3 +94,4 @@ target_link_libraries(m2bench_ao PRIVATE nlohmann_json::nlohmann_json)
 target_link_libraries(m2bench_ao PUBLIC /usr/local/lib/libmongocxx.so /usr/local/lib/libbsoncxx.so)
 target_link_libraries(m2bench_ao PUBLIC -lneo4j-client)
 target_link_libraries(m2bench_ao PUBLIC -lmysqlcppconn8)
+target_link_libraries(m2bench_ao PUBLIC ${Boost_LIBRARIES})
