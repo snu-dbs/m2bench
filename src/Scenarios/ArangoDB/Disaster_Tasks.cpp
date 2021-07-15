@@ -205,19 +205,18 @@ FOR map IN Map
 
 
 [New]
-FOR site IN Site
-    FILTER site.properties.type == 'building'
-    FOR eq IN Earthquake
-	    FILTER eq.magnitude >= 4.5
+FOR eq IN Earthquake
+    FILTER eq.magnitude >= 4.5
+    FOR site IN Site
+	    FILTER site.properties.type == 'building'
 
-	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], site.geometry, "wgs84")
+	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], site.geometry)
 	    FILTER dist <= 30000
 	    
 	    COLLECT description = site.properties.description
 	        WITH COUNT INTO cnt
 	    
 	    RETURN {description, cnt}
-	    
  */
 
 void T13(){
