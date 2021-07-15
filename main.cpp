@@ -21,6 +21,19 @@ using std::chrono::milliseconds;
 
 
 template <typename T, typename O>
+void timer( void (*f)(T,T,O,O), T x, T y, O a, O b)
+{
+    cout << "======================= TASK START =========================" << endl;
+    auto t1 = high_resolution_clock::now();
+    (*f)(x, y, a, b);
+    auto t2 = high_resolution_clock::now();
+    auto ms_int = duration_cast<milliseconds>(t2 - t1);
+    cout << "ELAPSED TIME: " << ms_int.count() << " ms" << endl;
+    cout << "======================= TASK COMPLETE ======================\n" << endl;
+
+}
+
+template <typename T, typename O>
 void timer( void (*f)(T,O), T x, O y)
 {
     cout << "======================= TASK START =========================" << endl;
@@ -67,7 +80,11 @@ void tasks(){
 //    string curdate = "2018-07-07";//"2021-12-25";
 //    timer(T3, curdate);
 
-//    timer(T4,1000,10);
+//    timer(T14, 8, 15);
+    // cout << to_string(distance_haversine(34.022451596557452547, -118.26615451837935211, 34.022079977777786,  -118.26600173333334)) << endl;
+
+    // timer(T15, 0, 1, 34.1186023, -118.3007336);
+//    timer(T13);
 
 //    string pid = "B007SYGLZO";
 //    string curdate = "2021-06-01";
@@ -86,12 +103,9 @@ void tasks(){
 //    int earthquake_X = 41862;
 //    timer(T11, earthquake_X);
 
-    string ts1 = "2020-09-17 00:00:00";
-    string ts2 = "2020-09-17 01:00:00";
-    timer(T12,ts1,ts2);
-
-//    long ts = 1600182000+10800*3.5;
-//    timer(T16,ts);
+    // long ts = 1600182000+10800*3.5;
+    // timer(T16,ts);
+    // timer(T13);
 
 
 //     timer(T14, 0, 60);
