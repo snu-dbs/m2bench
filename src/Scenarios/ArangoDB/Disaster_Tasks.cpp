@@ -72,10 +72,11 @@ void T11(){
 //    RETURN {shelter_id: d.shelter_id, node: n})
 //
 //    LET E = (FOR src IN gps_nodes
-//    FOR dst IN shelter_nodes
-//    LET path = (FOR v, e IN OUTBOUND SHORTEST_PATH src.node TO dst.node Road
-//    RETURN e.distance)
-//    RETURN {gps_id: src.gps_id, shelter_id: dst.shelter_id, cost: SUM(path)})
+//                  FOR dst IN shelter_nodes
+//                      LET path = (FOR v, e IN OUTBOUND SHORTEST_PATH src.node TO dst.node Road
+//                                  OPTIONS {weightAttribute: 'distance'}
+//                                  RETURN e.distance )
+//     RETURN {gps_id: src.gps_id, shelter_id: dst.shelter_id, cost: SUM(path)} )
 //
 //    FOR i IN E RETURN i
 
