@@ -62,3 +62,84 @@ void T1(){
 
 void T2(){}
 
+
+/**
+ *  [Task3] Product Purchase Propensities ([R, D, G]=>R).
+ *  Given a certain special day, find the customer who spent the highest amount of money in orders, 
+ *  and analyze the purchase propensities of people within 3-hop relationships.
+ *
+ *      A: SELECT cid, SUM(total_price) AS order_price FROM Order
+ *         WHERE  order_date = 2021/12/25
+ *         GROUP BY cid ORDER BY order_price DESC LIMIT 1 // Document
+ *
+ *      B: SELECT SNS.p2.person_id AS 2hop_cid FROM A, SNS
+ *         WHERE (p1:Person) - [r:FOLLOWS*2] - > (p2:Person) AND SNS.p2.person_id=A.cid // Relational
+ * 
+ *      C: SELECT Order.cid AS cid, Order.order_line.pid AS pid, Product.brand_id AS brand_id FROM  B, Order, Product
+ *         UNNEST Order.order_line WHERE Order.cid=B.2hop_cid AND Product.pid=Order.order_line.pid // Document
+ * 
+ *      D: SELECT Brand.industry, COUNT(*) AS customer_count FROM C, Brand WHERE C.brand_id=Brand.brand_id GROUP BY Brand.industry // Relational
+
+
+void T3(){
+    
+select count(tag_id)
+from (select distinct tag_id as tag_id 
+from (select out('Interested_in').tag_id as tag_id
+from Person
+where person_id in 
+(select person_id 
+ from (select in('Follows').size() as follower, person_id
+from Person 
+where person_id in (select person_id
+		from Customer 
+		where customer_id in (select distinct customer_id
+			from (select customer_id, product_id,total_spent 
+				from (select customer_id, order_line.product_id as product_id, sum(order_line.price) as total_spent
+			from Order
+			group by customer_id
+			unwind order_line, product_id, price)
+		where total_spent>10000
+		and product_id in (select product_id 
+                  		from Product
+                  		where brand_id in (select brand_id 
+                                    		from Brand 
+                                    		where industry = "Sports")))))
+group by person_id
+order by follower desc limit 10))
+unwind tag_id))    
+    
+}
+
+*/
+
+/**
+ * [Task5]. Filtering social network (R, D, G) => Graph
+ *  Extract social network whose nodes are woman customers who has bougth the product 'X' within 1 year and wrote the reviews. 2021-06-01
+ *  A: SELECT Customer.person_id AS person_id
+ *      FROM Order, Review, Customer
+ *      WHERE Review.product_id=‘B007SYGLZO’ AND Review.order_id=Order.order_id
+ *          AND Order.order_date = current_date – 1 year
+ *          AND Order.customer_id=Customer.customer_id AND Customer.gender=‘female’ // Relational
+ *
+ *  B: SELECT p, r, node AS subGraph FROM A, SNS
+ *      WHERE (p:Person) - [r] -> (node)
+ *      AND SNS.p.person_id=A.person_id // Graph
+
+void T5(){
+    
+select expand(out('Follows')) 
+from Person 
+where person_id in (select person_id 
+from Customer
+Where gender = "F"
+and customer_id in (Select customer_id 
+                   from Order
+                   where order_date > "2020-06-21"
+                   and order_date<"2021-06-21"
+                   and order_id in (select order_id
+                                   from Review 
+                                   where product_id = "B007SYGLZO")))    
+    
+}
+*/
