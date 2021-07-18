@@ -181,12 +181,13 @@
  * 
  * [Query]
  * 
- * SELECT Site.data->'properties'->'description' AS description, COUNT(*) 
- * FROM Earthquake, Site
- * WHERE ST_Distance(ST_GeomFromGeoJSON(Site.data->>'geometry'), Earthquake.coordinates) <= 30000 
- *     AND Site.data->'properties'->>'type' = 'building'
- *     AND Earthquake.magnitude >= 4.5 
- * GROUP BY Site.data->'properties'->'description';
+SELECT Site.data->'properties'->'description' AS description, COUNT(*)
+FROM Earthquake, Site
+WHERE ST_DistanceSphere(ST_GeomFromGeoJSON(Site.data->>'geometry'), Earthquake.coordinates) <= 30000
+        AND Site.data->'properties'->>'type' = 'building'
+        AND Earthquake.magnitude >= 4.5
+GROUP BY Site.data->'properties'->'description';;
+
  */
 
 
@@ -216,44 +217,36 @@
  * 
  * 
  * [Query]
- * // TEMP TABLE FOR A 
- * CREATE TEMP TABLE T14A (date integer, timestamp integer, latitude float, longitude float, pm10_avg float);
- * 
- * // INSERT INTO T14A
- * INSERT INTO T14A
- * SELECT t1.timestamp / 10800000 as date, t1.timestamp, t1.latitude, t1.longitude, avg(t2.pm10) AS pm10_avg
- * FROM FineDust as t1, FineDust as t2
- * WHERE (Z1 <= t1.timestamp)
- *     AND (t1.timestamp <= Z2)
- *     AND ((t1.latitude - 0.000172998 * 2.01) <= t2.latitude)
- *     AND (t2.latitude <= (t1.latitude + 0.000172998 * 2.01))
- *     AND ((t1.longitude - 0.000216636 * 2.01) <= t2.longitude)
- *     AND (t2.longitude <= (t1.longitude + 0.000216636 * 2.01))
- *     AND (t1.timestamp = t2.timestamp)
- * GROUP BY t1.timestamp / 10800000, t1.timestamp, t1.latitude, t1.longitude;
- * 
- * // No B 
- * 
- * // C 
- * CREATE TEMP TABLE T14C (date integer, timestamp integer, coordinates geometry);
- * 
- * INSERT INTO T14C
- * SELECT t1.date, t1.timestamp, ST_Point(t1.longitude, t1.latitude) AS coordinates
- * FROM T14A as t1, (SELECT date, MAX(pm10_avg) as pm10_max FROM T14A GROUP BY date) as t2
- * WHERE (t1.pm10_avg = t2.pm10_max)
- *     AND (t1.date = t2.date);
- * 
- * // D 
- * SELECT T14C.date, T14C.timestamp, (
- *     SELECT Site.data->>'site_id'
- *     FROM Site
- *     ORDER BY ST_Distance(ST_GeomFromGeoJSON(Site.data->>'geometry'), T14C.coordinates) ASC
- *     LIMIT 1
- * ) AS site_id
- * FROM T14C;
- * 
- * DROP TABLE T14A;
- * DROP TABLE T14C;
+CREATE TEMP TABLE T14A (date integer, timestamp integer, latitude integer, longitude integer, pm10_avg double precision);
+
+INSERT INTO T14A
+SELECT t1.timestamp / 8 as date, t1.timestamp, t1.latitude, t1.longitude, avg(t2.pm10) AS pm10_avg
+FROM FineDust_idx as t1, FineDust_idx as t2
+WHERE (:Z1 <= t1.timestamp) AND (t1.timestamp <= :Z2)
+    AND (t1.timestamp = t2.timestamp)
+    AND ((t1.latitude - 2) <= t2.latitude) AND (t2.latitude <= (t1.latitude + 2))
+    AND ((t1.longitude - 2) <= t2.longitude) AND (t2.longitude <= (t1.longitude + 2))
+GROUP BY t1.timestamp / 8, t1.timestamp, t1.latitude, t1.longitude;
+
+CREATE TEMP TABLE T14C (date integer, timestamp integer, coordinates geometry);
+
+INSERT INTO T14C
+SELECT t1.date, t1.timestamp, ST_Point(-118.34501002237936 + (t1.longitude * 0.000216636), 34.011898718557454 + (t1.latitude * 0.000172998)) AS coordinates
+FROM T14A as t1, (SELECT date, MAX(pm10_avg) as pm10_max FROM T14A GROUP BY date) as t2
+WHERE (t1.pm10_avg = t2.pm10_max)
+    AND (t1.date = t2.date);
+
+SELECT T14C.date, T14C.timestamp, (
+    SELECT Site.data->>'site_id'
+    FROM Site
+    WHERE data->'properties'->>'type' = 'building'
+    ORDER BY ST_DistanceSpheroid(ST_Centroid(ST_GeomFromGeoJSON(Site.data->>'geometry')), T14C.coordinates, 'SPHEROID["WGS 84",6378137,298.257223563]') ASC
+    LIMIT 1
+) AS site_id
+FROM T14C;
+
+DROP TABLE T14A;
+DROP TABLE T14C; 
  */
 
 
@@ -276,40 +269,45 @@
  * 
  * 
  * [Query]
- * 
- * SET graph_path = Road_network;
- * 
- * // TEMP TABLE FOR A
- * CREATE TEMP TABLE T15A (coordinates geometry, pm10_avg float);
- * 
- * INSERT INTO T15A
- * SELECT ST_Point(t1.longitude, t1.latitude) AS coordinates, avg(t1.pm10) AS pm10_avg
- * FROM FineDust as t1, FineDust as t2
- * WHERE (Z1 <= t1.timestamp)
- *    AND (t1.timestamp <= Z2)
- *    AND ((t1.latitude - 0.000172998 * 2.01) <= t2.latitude)
- *    AND (t2.latitude <= (t1.latitude + 0.000172998 * 2.01))
- *    AND ((t1.longitude - 0.000216636 * 2.01) <= t2.longitude)
- *    AND (t2.longitude <= (t1.longitude + 0.000216636 * 2.01))
- * GROUP BY coordinates;
- * 
- * MATCH (n: RoadNode {roadnode_id: (
- *    SELECT Site.data->>'site_id'
- *    FROM Site
- *    ORDER BY ST_Distance(ST_GeomFromGeoJSON(Site.data->>'geometry'), ST_Point(current_longitude, current_latitude)) ASC
- *    LIMIT 1
- * )}), (m: RoadNode {roadnode_id: (
- *     SELECT Site.data->>'site_id'
- *     FROM Site
- *     ORDER BY ST_Distance(ST_GeomFromGeoJSON(Site.data->>'geometry'), (
- *         SELECT MAX(T15A.coordinates)
- *         FROM T15A
- *     )::geometry) ASC
- *     LIMIT 1
- * )}), path=DIJKSTRA((n)-[e:Road]->(m), e.distance) 
- * RETURN path;
- * 
- * DROP TABLE T15A;
+SET graph_path = Road_network;
+
+CREATE TEMP TABLE T15A (longitude int, latitude int, pm10_sum double precision, pm10_count int);
+CREATE TEMP TABLE T15B (coordinates geometry, pm10_avg double precision);
+
+INSERT INTO T15A
+SELECT longitude, latitude, sum(pm10) AS pm10_sum, count(pm10) AS pm10_count
+FROM Finedust_idx
+WHERE (:Z1 <= timestamp) AND (timestamp <= :Z2)
+GROUP BY longitude, latitude;
+
+INSERT INTO T15B
+SELECT ST_Point(-118.34501002237936 + (t1.longitude * 0.000216636), 34.011898718557454 + (t1.latitude * 0.000172998)) AS coordinates, SUM(t2.pm10_sum) / SUM(t2.pm10_count) AS pm10_avg
+FROM T15A as t1, T15A as t2
+WHERE ((t1.latitude - 2) <= t2.latitude) AND (t2.latitude <= (t1.latitude + 2))
+    AND ((t1.longitude - 2) <= t2.longitude) AND (t2.longitude <= (t1.longitude + 2))
+GROUP BY coordinates;
+
+MATCH (n: RoadNode), (m: RoadNode), path=DIJKSTRA((n)-[e:Road]->(m), e.distance)
+WHERE n.site_id = (
+        SELECT CAST(Site.data->>'site_id' AS INT)
+        FROM Site
+        WHERE Site.data->'properties'->>'type' = 'roadnode'
+        ORDER BY ST_DistanceSphere(ST_GeomFromGeoJSON(Site.data->>'geometry'), ST_Point(:CLON, :CLAT)) ASC
+        LIMIT 1
+    )
+AND m.site_id =  (
+        SELECT CAST(Site.data->>'site_id' AS INT)
+        FROM Site
+        WHERE Site.data->'properties'->>'type' = 'roadnode'
+        ORDER BY ST_DistanceSphere(ST_GeomFromGeoJSON(Site.data->>'geometry'), (
+            SELECT T15B.coordinates FROM T15B, (SELECT MAX(T15B.pm10_avg) as max_avg FROM T15B) as tc1 WHERE T15B.pm10_avg = tc1.max_avg LIMIT 1
+        )::geometry) ASC
+        LIMIT 1
+)
+RETURN path;
+
+DROP TABLE T15A;
+DROP TABLE T15B;
  */
 
 

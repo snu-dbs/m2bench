@@ -184,34 +184,14 @@ void T12(){
  *      GROUP BY Site.properties.description // Document
  *
  * 
- * [Query]
- * 
- 
-[OLD]
-FOR map IN Map
-    // Exists(Map.properties.building)
-    FILTER map.properties.building != null  
+[Query]
+FOR site IN Site
+    FILTER site.properties.type == 'building'
     
     FOR eq IN Earthquake
-        // Earthquake.magnitude >= 4.5
 	    FILTER eq.magnitude >= 4.5
 	    
-	    // ST_Distance(Map.geometry,Earthquake.location) <= 30km
-	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], map.geometry)
-	    FILTER dist <= 30000
-	    
-	    // GROUP BY Map.properties.building
-	    COLLECT building = map.properties.building
-	        WITH COUNT INTO cnt
-
-
-[New]
-FOR eq IN Earthquake
-    FILTER eq.magnitude >= 4.5
-    FOR site IN Site
-	    FILTER site.properties.type == 'building'
-
-	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], site.geometry)
+	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], site.geometry, "wgs84")
 	    FILTER dist <= 30000
 	    
 	    COLLECT description = site.properties.description
@@ -247,40 +227,34 @@ void T13(){
  *      ORDER BY C.date ASC // Document
  * 
  * 
- * [Query]
-  
- LET Z1 = 1
- LET Z2 = 1
+ [Query]
+ LET Z1 = 5
+ LET Z2 = 10
   
  LET AB = (
-    FOR cell IN Finedust
-        // WHERE timestamp >= Z1 AND timestamp <= Z2
-        FILTER ((Z1 * 10800) + 1600182000 <= cell.timestamp) AND
-            (cell.timestamp <= (Z2 * 10800) + 1600182000)
+    FOR cell IN Finedust_idx
+        FILTER (Z1 <= cell.timestamp) AND (cell.timestamp <= Z2)
         
-        // SELECT AVG(pm10) AS pm10_avg, WINDOW 1, 5, 5 
         LET AVG = (
-            FOR wcell IN Finedust 
-                // I specify 2.5 rather than 2 or 3 due to the floating point op.
+            FOR wcell IN Finedust_idx 
                 FILTER (wcell.timestamp == cell.timestamp) AND
-                    ((cell.latitude - (2.5 * 0.000172998)) < wcell.latitude) AND
-                    (wcell.latitude < ((2.5 * 0.000172998) + cell.latitude)) AND
-                    ((cell.longitude - (2.5 * 0.000216636)) < wcell.longitude) AND 
-                    (wcell.longitude < ((2.5 * 0.000216636) + cell.longitude))
+                    ((cell.latitude - 2) <= wcell.latitude) AND
+                    (wcell.latitude <= (2 + cell.latitude)) AND
+                    ((cell.longitude - 2) <= wcell.longitude) AND
+                    (wcell.longitude <= (2 + cell.longitude))
                 RETURN wcell.pm10
             )
-        LIMIT 522*52
+
         RETURN {
             timestamp: cell.timestamp,
             latitude: cell.latitude,
             longitude: cell.longitude,
-            date: FLOOR((cell.timestamp - 1600182000) / (10800 * 8)),       // as int idx
+            date: FLOOR(cell.timestamp / 8),
             pm10_avg: AVERAGE(AVG)
         }
         
 )
 
-// (SELECT date, MAX(pm10_avg) AS pm10_max FROM B GROUPBY date) (C subquery)
 LET Ct2 = (
     FOR doc IN AB 
         COLLECT date = doc.date
@@ -291,34 +265,30 @@ LET Ct2 = (
 LET C = (
     FOR t1 IN AB
         FOR t2 IN Ct2
-            // WHERE t1.pm10_avg = t2.pm10_max AND t1.date = t2.date
             FILTER t1.pm10_avg == t2.pm10_max AND t1.date == t2.date
-            // t1.date, t1.location, t1.timestamp
-            RETURN {date: t1.date, latitude: t1.latitude, longitude: t1.longitude, timestamp: t1.timestamp}
+            RETURN {m: t2.pm10_max, date: t1.date, latitude: t1.latitude, longitude: t1.longitude, timestamp: t1.timestamp}
 )
 
 LET D = (
     FOR c IN C
-        // ST_ClosestObject(Map,building, C.location)
         LET NEAR = ( 
-            FOR map IN Map
-                FILTER map.properties.building != NULL
-                SORT GEO_DISTANCE([c.longitude, c.latitude], map.geometry) ASC
+            FOR site IN Site
+                FILTER site.properties.type == 'building'
+                SORT GEO_DISTANCE([-118.34501002237936 + (c.longitude * 0.000216636), 34.011898718557454 + (c.latitude * 0.000172998)], site.geometry) ASC
                 LIMIT 1
-                RETURN map
+                RETURN site
         )
         
-        // ORDER BY C.date ASC
         SORT c.date ASC
         
-        // C.date, C.timestamp, ST_ClosestObject(Map,building, C.location) AS osm_id
         RETURN {
             date: c.date,
             timestamp: c.timestamp,
-            osm_id: NEAR[0]
+            site_id: NEAR[0].site_id
         }
 )
 
+RETURN D
  */
 
 
@@ -341,58 +311,92 @@ LET D = (
  * 
  * 
  * [Query]
- * 
+ LET Z1 = 0
+ LET Z2 = 1
+ LET CLON = -118.0614431
+ LET CLAT = 34.068509
  
- LET Z1 = 3
- LET Z2 = 3
-  
- LET A = (
-    FOR cell IN Finedust
-        // WHERE timestamp >= Z1 AND timestamp <= Z2
-        FILTER cell.pm10 > 2000
-        FILTER ((Z1 * 10800) + 1600182000 <= cell.timestamp) AND
-            (cell.timestamp <= (Z2 * 10800) + 1600182000)
-        
-        // SELECT AVG(pm10) AS pm10_avg, WINDOW *, 5, 5 
-        LET AVG = (
-            FOR wcell IN Finedust 
-                // I specify 2.5 rather than 2 or 3 due to the floating point op.
-                FILTER ((Z1 * 10800) + 1600182000 <= wcell.timestamp) AND
-                    (wcell.timestamp <= (Z2 * 10800) + 1600182000) AND
-                    ((cell.latitude - (2.5 * 0.000172998)) < wcell.latitude) AND
-                    (wcell.latitude < ((2.5 * 0.000172998) + cell.latitude)) AND
-                    ((cell.longitude - (2.5 * 0.000216636)) < wcell.longitude) AND 
-                    (wcell.longitude < ((2.5 * 0.000216636) + cell.longitude))
+  LET A = (
+    FOR cell IN Finedust_idx
+        FILTER (Z1 <= cell.timestamp) AND (cell.timestamp <= Z2)
+        LET win = (
+            FOR wcell IN Finedust_idx 
+                FILTER (cell.timestamp == wcell.timestamp) AND
+                    ((cell.latitude - 2) <= wcell.latitude) AND
+                    (wcell.latitude <= (2 + cell.latitude)) AND
+                    ((cell.longitude - 2) <= wcell.longitude) AND
+                    (wcell.longitude <= (2 + cell.longitude))
                 RETURN wcell.pm10
             )
-        LIMIT 522
+            
         RETURN {
-            timestamp: cell.timestamp,
             latitude: cell.latitude,
             longitude: cell.longitude,
-            date: FLOOR((cell.timestamp - 1600182000) / (10800 * 8)),       // as int idx
-            pm10_avg: AVERAGE(AVG)
+            pm10_sum: SUM(win[*]),
+            pm10_count: COUNT(win[*])
         }
+    
+)
+
+ 
+ LET B = (
+    FOR cell IN A
+        COLLECT latitude = cell.latitude, longitude = cell.longitude INTO g
         
+        RETURN {
+            latitude: latitude,
+            longitude: longitude,
+            pm10_avg : (SUM(g[*].cell.pm10_sum) / SUM(g[*].cell.pm10_count)) 
+        }
+    
+ )
+
+
+LET Ct1 = (
+    RETURN MAX(FOR cell in B RETURN cell.pm10_avg)
 )
 
-LET B = (
-    FOR a IN A
-        // WHERE A.pm10_avg >= 80
-        FILTER a.pm10_avg >= 2000
-        // ST_ClosestObject(RoadNode, node, A.location)
-        LET map = (
-            FOR node IN Roadnode
-                LET map = (FOR map IN Map FILTER map.id == node.map_id RETURN map)
-                SORT GEO_DISTANCE([a.longitude, a.latitude], map[0].geometry) ASC
-                LIMIT 1
-                RETURN map
-        )
-        RETURN map
-            
+LET Ct2 = (
+    FOR cell IN B
+        FILTER cell.pm10_avg == Ct1[0]
+        RETURN cell
 )
 
-RETURN B
+LET Ct3src = (
+    FOR site IN Site
+        FILTER site.properties.type == 'roadnode'
+        SORT GEO_DISTANCE([CLON, CLAT], site.geometry) ASC
+        LIMIT 1
+        RETURN site
+)
+
+LET Ct4dst = (
+    FOR site IN Site
+        FILTER site.properties.type == 'roadnode'
+        SORT GEO_DISTANCE([-118.34501002237936 + (Ct2[0].longitude * 0.000216636), 34.011898718557454 + (Ct2[0].latitude * 0.000172998)], site.geometry) ASC
+        LIMIT 1
+        RETURN site
+)
+
+LET Ct5src = (
+    FOR node IN Roadnode
+        FILTER node.site_id == Ct3src[0].site_id
+        RETURN node
+)
+
+LET Ct6dst = (
+    FOR node IN Roadnode
+        FILTER node.site_id == Ct4dst[0].site_id
+        RETURN node
+)
+
+LET C = (
+    FOR v, e IN OUTBOUND SHORTEST_PATH Ct5src[0] TO Ct6dst[0] GRAPH 'Road_Network' OPTIONS {weightAttribute: 'distance'}
+        RETURN {v, e}
+)
+
+RETURN C
+ 
  */
 
 /**
