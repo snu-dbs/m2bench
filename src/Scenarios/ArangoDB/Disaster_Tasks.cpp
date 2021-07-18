@@ -311,8 +311,8 @@ RETURN D
  * 
  * 
  * [Query]
- LET Z1 = 0
- LET Z2 = 1
+ LET Z1 = 5
+ LET Z2 = 10
  LET CLON = -118.0614431
  LET CLAT = 34.068509
  
