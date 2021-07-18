@@ -186,7 +186,7 @@ FROM Earthquake, Site
 WHERE ST_DistanceSphere(ST_GeomFromGeoJSON(Site.data->>'geometry'), Earthquake.coordinates) <= 30000
         AND Site.data->'properties'->>'type' = 'building'
         AND Earthquake.magnitude >= 4.5
-GROUP BY Site.data->'properties'->'description';;
+GROUP BY Site.data->'properties'->'description';
 
  */
 
