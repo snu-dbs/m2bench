@@ -54,42 +54,36 @@
     SELECT time, ST_MakePoint(ST_X(coordinates), ST_Y(coordinates)) AS geom INTO TEMP TABLE eqk_x FROM earthquake WHERE earthquake_id=41862;
     SET graph_path = Road_network;
     WITH A AS (
-        SELECT filtered_gps.gps_id AS gps_id, site.data->'site_id' AS site_id, ST_DistanceSphere(filtered_gps.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) AS dist
-        FROM (SELECT gps.gps_id AS gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom
-              FROM gps, eqk_x WHERE gps.time >= eqk_X.time AND gps.time<=eqk_X.time + interval '1 hour'
-              AND ST_DistanceSphere(eqk_X.geom, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)))<=10000) AS filtered_gps, site
-        WHERE site.data->'properties'->>'type'='roadnode'
-	    ),
-	    gps_node AS (
-	    SELECT t1.gps_id, t1.site_id
-	    FROM A t1, (SELECT  gps_id, MIN(dist) as mindist FROM A GROUP BY gps_id) t2
-	    WHERE t1.gps_id = t2.gps_id AND t1.dist = t2.mindist
-	    ),
-	    B AS (
+      SELECT gps.gps_id AS gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom
+      FROM gps, eqk_x
+      WHERE gps.time >= eqk_X.time AND gps.time<=eqk_X.time + interval '1 hour'
+      AND ST_DistanceSphere(eqk_X.geom, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)))<=10000
+      ),
+      gps_nodes AS (
+        SELECT t1.gps_id AS gps_id, t2.site_id AS site_id
+        FROM A t1 LEFT JOIN LATERAL (SELECT site.data->'site_id' AS site_id FROM site WHERE site.data->'properties'->>'type'='roadnode' ORDER BY ST_DistanceSphere(t1.geom, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry'))) LIMIT 1) t2 on true
+      ),
+      B AS (
         SELECT shelter.shelter_id AS shelter_id, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry')) AS geom
         FROM eqk_x, shelter, site
         WHERE shelter.site_id = (site.data->>'site_id')::int AND ST_DistanceSphere(eqk_x.geom, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry'))) <=15000
-	    ),
-	    C AS (
-        SELECT B.shelter_id AS shelter_id, site.data->'site_id' AS site_id, ST_DistanceSphere(B.geom, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry'))) AS dist
-        FROM B, site WHERE site.data->'properties'->>'type'='roadnode'
-        ),
-        shelter_node AS (
-        SELECT t1.shelter_id, t1.site_id
-        FROM C t1, (SELECT shelter_id, MIN(dist) as mindist FROM C GROUP BY shelter_id) t2
-        WHERE t1.shelter_id = t2.shelter_id AND t1.dist = t2.mindist
-	    ),
-	    D AS (
-        SELECT src, dest, (unnest(roads)->>'distance')::INT AS distance FROM gps_node AS src CROSS JOIN shelter_node AS dest
+      ),
+      shelter_nodes AS (
+        SELECT t1.shelter_id AS shelter_id, t2.site_id AS site_id
+        FROM B t1 LEFT JOIN LATERAL (SELECT site.data->'site_id' AS site_id FROM site WHERE site.data->'properties'->>'type'='roadnode' ORDER BY ST_DistanceSphere(t1.geom, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry'))) LIMIT 1) t2 on true
+      ),
+      C AS (
+        SELECT src, dest, (unnest(roads)->>'distance')::INT AS distance
+        FROM gps_nodes AS src CROSS JOIN shelter_nodes AS dest
         CROSS JOIN lateral (MATCH (n: RoadNode), (m: RoadNode), path=DIJKSTRA((n)-[e:Road]->(m), e.distance)
-                            WHERE n.site_id = (SELECT gps_node.site_id FROM gps_node WHERE gps_node.site_id = src.site_id)
-                            AND m.site_id = (SELECT distinct(shelter_node.site_id)
-                            FROM shelter_node WHERE shelter_node.site_id = dest.site_id)
+                            WHERE n.site_id = (SELECT DISTINCT(gps_nodes.site_id) FROM gps_nodes WHERE gps_nodes.site_id = src.site_id)
+                            AND m.site_id = (SELECT DISTINCT(shelter_nodes.site_id)
+                            FROM shelter_nodes WHERE shelter_nodes.site_id = dest.site_id)
         RETURN n,m,edges(path) AS roads) AS graph
-	    )
-	    SELECT src, dest, SUM(distance) as total_cost
-	    FROM D
-	    GROUP BY src, dest;
+      )
+      SELECT src, dest, SUM(distance) as total_cost
+      FROM C
+      GROUP BY src, dest;
 **/
 
 
