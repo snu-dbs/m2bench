@@ -36,7 +36,6 @@ void T11(){
 //        LET X_longitude = eqk.longitude
 //        LET X_time = eqk.time
 //
-//
 //    LET A = (FOR g IN Gps
 //    FILTER GEO_DISTANCE([X_longitude, X_latitude], [g.longitude, g.latitude]) <= 10000 && g.time >= X_time && g.time <= DATE_ADD(X_time, "PT1H")
 //    RETURN {id: g.gps_id, lat: g.latitude, lon: g.longitude} )
@@ -78,7 +77,7 @@ void T11(){
 //                                  RETURN e.distance )
 //     RETURN {gps_id: src.gps_id, shelter_id: dst.shelter_id, cost: SUM(path)} )
 //
-//    FOR i IN E RETURN i
+//    RETURN length(E)
 
 }
 
@@ -107,10 +106,6 @@ void T11(){
  */
 void T12(){
 
-    //    db.T12_temp.drop()
-    //    db._create("T12_temp")
-
-    /* STEP 1 */
 //    LET Z1 = "2020-09-17T00:00:00.000Z"
 //    LET Z2 = "2020-09-17T01:00:00.000Z"
 //
@@ -134,9 +129,8 @@ void T12(){
 //
 //    FOR n IN Roadnode
 //        FILTER n.site_id == C[0].site_id
-//        INSERT {shelter_id: B[0].shelter_id, geom: B[0].shelter_site.geometry, closest_roadnode: n} INTO T12_temp
-
-    /* STEP 2 */
+//            RETURN {shelter_id: B[0].shelter_id, geom: B[0].shelter_site.geometry, closest_roadnode: n}
+//
 //    LET shelter = T12_temp[0]
 //
 //    LET D = (FOR s IN Site
@@ -156,18 +150,16 @@ void T12(){
 //                        RETURN {building_id: e.building_id, closest_roadnode: n})
 //
 //    LET F = (FOR b IN buildings
-//                LET path = ( FOR v, e IN OUTBOUND SHORTEST_PATH shelter.closest_roadnode TO b.closest_roadnode Road
-//                                RETURN e.distance)
+//                  LET path = (FOR v, e IN OUTBOUND SHORTEST_PATH shelter.closest_roadnode TO b.closest_roadnode Road
+//                                  OPTIONS {weightAttribute: 'distance'}
+//                                  RETURN e.distance )
 //                LET path_cost = SUM(path)
-//                //FILTER path_cost > 0
 //                SORT path_cost
 //                LIMIT 5
 //    RETURN {shelter_id: T12_temp[0].shelter_id, building_id: b.building_id, cost: path_cost})
 //
-//    FOR i IN F return i
+//    RETURN length(F)
 
-
-//    For t in T12_temp REMOVE t in T12_temp
 }
 
 
