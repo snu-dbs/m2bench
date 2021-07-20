@@ -28,7 +28,7 @@
     FROM eqk, site
     WHERE site.data->'properties'->>'type'='roadnode' AND ST_DistanceSphere(eqk.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) <= 5000
     )
-    SELECT subgraph
+    SELECT COUNT(subgraph)
     FROM roadnodes, (MATCH (n:roadnode)-[r:road]->(m:roadnode) RETURN n,r,m) AS subgraph
     WHERE subgraph.n->'site_id'=roadnodes.site_id;
 */
