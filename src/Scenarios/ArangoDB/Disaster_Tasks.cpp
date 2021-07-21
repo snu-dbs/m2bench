@@ -2,14 +2,13 @@
 // Created by mxmdb on 21. 5. 3..
 //
 
-
 /**
  * [Task 10] Road Network Filtering ([R, D, G]=> G)
  * For the earthquakes which occurred between time Z1 and Z2, find the road network subgraph within 5km from the earthquakes' location.
  *
  * A = SELECT n1, r, n2 AS subgraph FROM Earthquake, Site, RoadNode
  *     WHERE (n1:RoadNode) - [r:Road] -> (n2:RoadNode) AND ST_Distance(Site.geometry, Earthquake.coordinates) <= 5km
- *     AND Earthquake.time >= Z1 AND Earthquake.time <= Z2 AND RoadNode.site_id = Site.site_id //Graph
+ *     AND Earthquake.time >= Z1 AND Earthquake.time < Z2 AND RoadNode.site_id = Site.site_id //Graph
 */
 void T10(){
 
@@ -17,7 +16,7 @@ void T10(){
 //    LET Z2 = "2020-06-01T02:00:00.000Z"
 //
 //    LET A = (FOR e IN Earthquake
-//    FILTER e.time >= Z1  && e.time <= Z2
+//    FILTER e.time >= Z1  && e.time < Z2
 //    RETURN {eqk_id: e.earthquake_id, eqk_lat: e.latitude, eqk_lon: e.longitude} )
 //
 //    LET B = (FOR s IN Site FILTER s.properties.type == "roadnode"
@@ -44,7 +43,7 @@ void T10(){
   *  (GPS coordinates are limited by 1 hour and 10km from the X. Shelters are limited by 15km from the X.)
   *
   *  A = SELECT GPS.gps_id, ST_ClosestObject(Site, roadnode, GPS.coordinates) AS roadnode_id FROM GPS, Site, RoadNode
-  *      WHERE GPS.time >= X.time AND GPS.time <= X.time + 1 hour AND ST_Distance(GPS.coordinates, X.coordinates) <= 10km
+  *      WHERE GPS.time >= X.time AND GPS.time < X.time + 1 hour AND ST_Distance(GPS.coordinates, X.coordinates) <= 10km
   *      AND RoadNode.site_id = Site.site_id //Relational
   *
   *  B = SELECT t.shelter_id, ST_ClosestObject(Site, roadnode, ST_Centroid(t.geometry)) AS roadnode_id
@@ -62,7 +61,7 @@ void T11(){
 //        LET X_time = eqk.time
 //
 //    LET A = (FOR g IN Gps
-//    FILTER GEO_DISTANCE([X_longitude, X_latitude], [g.longitude, g.latitude]) <= 10000 && g.time >= X_time && g.time <= DATE_ADD(X_time, "PT1H")
+//    FILTER GEO_DISTANCE([X_longitude, X_latitude], [g.longitude, g.latitude]) <= 10000 && g.time >= X_time && g.time < DATE_ADD(X_time, "PT1H")
 //    RETURN {id: g.gps_id, lat: g.latitude, lon: g.longitude} )
 //
 //    LET B = (FOR a IN A
@@ -102,7 +101,9 @@ void T11(){
 //                                  RETURN e.distance )
 //     RETURN {gps_id: src.gps_id, shelter_id: dst.shelter_id, cost: SUM(path)} )
 //
-//    RETURN length(E)
+//    FOR doc IN E
+//	    COLLECT WITH COUNT INTO length
+//	    RETURN length
 
 }
 
@@ -114,7 +115,7 @@ void T11(){
  * A = SELECT Shelter.shelter_id, Site.geometry
  *     FROM Shelter, Site, (SELECT Shelter.shelter_id, COUNT(GPS.gps_id) AS cnt FROM Shelter, GPS, Site
  *                          WHERE ST_Distance(GPS.coordinates, ST_Centroid(Site.geometry)) <= 5km AND Site.site_id = Shelter.site_id
- *                          AND GPS.time >= Z1 AND GPS.time <= Z2 GROUP BY Shelter.id ORDER BY cnt DESC LIMIT 1) AS t
+ *                          AND GPS.time >= Z1 AND GPS.time < Z2 GROUP BY Shelter.id ORDER BY cnt DESC LIMIT 1) AS t
  *     WHERE Shelter.shelter_id = t.shelter_id AND Site.site_id = Shelter.site_id  //Relational
  *
  * B = SELECT A.shelter_id, ST_ClosestObject(Site, roadnode, ST_centroid(A.geometry)) AS roadnode_id
@@ -140,7 +141,7 @@ void T12(){
 //    RETURN {shelter_id: s.shelter_id, site: site})
 //
 //    LET B = (FOR a IN A
-//    FOR g IN (FOR g IN Gps FILTER g.time >= Z1  && g.time <= Z2 RETURN {gps_id: g.gps_id, lat: g.latitude, lon: g.longitude})
+//    FOR g IN (FOR g IN Gps FILTER g.time >= Z1  && g.time < Z2 RETURN {gps_id: g.gps_id, lat: g.latitude, lon: g.longitude})
 //    FILTER GEO_DISTANCE(a.site.geometry, [g.lon, g.lat]) <= 5000
 //    COLLECT shelter_id = a.shelter_id, shelter_site = a.site WITH COUNT into numGps
 //    SORT numGps DESC
