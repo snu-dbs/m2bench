@@ -13,24 +13,24 @@
 *
 * A = SELECT n1, r, n2 AS subgraph FROM Earthquake, Site, RoadNode
 *     WHERE (n1:RoadNode) - [r:Road] -> (n2:RoadNode) AND ST_Distance(Site.geometry, Earthquake.coordinates) <= 5km
-*     AND Earthquake.time >= Z1 AND Earthquake.time <= Z2 AND RoadNode.site_id = Site.site_id  //Graph
+*     AND Earthquake.time >= Z1 AND Earthquake.time < Z2 AND RoadNode.site_id = Site.site_id  //Graph
 
 
     SET graph_path = Road_network;
 
-    Explain Analyze WITH eqk AS (
+    WITH eqk AS (
             SELECT earthquake_id AS id, time, ST_MakePoint(ST_X(coordinates), ST_Y(coordinates)) AS geom
-    FROM earthquake
-    WHERE time >= '2020-06-01 00:00:00.000' AND time <= '2020-06-01 02:00:00.000'
+            FROM earthquake
+            WHERE time >= to_timestamp('2020-06-01 00:00:00' , 'YYYY-MM-DD HH24:MI:SS') AND time < to_timestamp('2020-06-01 02:00:00', 'YYYY-MM-DD HH24:MI:SS')
     ),
     roadnodes AS (
             SELECT eqk.id AS eqk_id, data->'site_id' AS site_id
-    FROM eqk, site
-    WHERE site.data->'properties'->>'type'='roadnode' AND ST_DistanceSphere(eqk.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) <= 5000
+            FROM eqk, site
+            WHERE site.data->'properties'->>'type'='roadnode' AND ST_DistanceSphere(eqk.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) <= 5000
     )
-    SELECT COUNT(subgraph)
-    FROM roadnodes, (MATCH (n:roadnode)-[r:road]->(m:roadnode) RETURN n,r,m) AS subgraph
-    WHERE subgraph.n->'site_id'=roadnodes.site_id;
+            SELECT COUNT(subgraph)
+            FROM roadnodes, (MATCH (n:roadnode)-[r:road]->(m:roadnode) RETURN n,r,m) AS subgraph
+            WHERE subgraph.n->'site_id'=roadnodes.site_id;
 */
 
 
@@ -40,7 +40,7 @@
   *  (GPS coordinates are limited by 1 hour and 10km from the X. Shelters are limited by 15km from the X.)
   *
   *  A = SELECT GPS.gps_id, ST_ClosestObject(Site, roadnode, GPS.coordinates) AS roadnode_id FROM GPS, Site, RoadNode
-  *      WHERE GPS.time >= X.time AND GPS.time <= X.time + 1 hour AND ST_Distance(GPS.coordinates, X.coordinates) <= 10km
+  *      WHERE GPS.time >= X.time AND GPS.time < X.time + 1 hour AND ST_Distance(GPS.coordinates, X.coordinates) <= 10km
   *      AND RoadNode.site_id = Site.site_id //Relational
   *
   *  B = SELECT t.shelter_id, ST_ClosestObject(Site, roadnode, ST_Centroid(t.geometry)) AS roadnode_id
@@ -56,7 +56,7 @@
     WITH A AS (
       SELECT gps.gps_id AS gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom
       FROM gps, eqk_x
-      WHERE gps.time >= eqk_X.time AND gps.time<=eqk_X.time + interval '1 hour'
+      WHERE gps.time >= eqk_X.time AND gps.time < eqk_X.time + interval '1 hour'
       AND ST_DistanceSphere(eqk_X.geom, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)))<=10000
       ),
       gps_nodes AS (
@@ -114,9 +114,9 @@
 
  SET graph_path = Road_network;
  WITH A AS (
-		SELECT gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom FROM gps
-		WHERE gps.time >= '2020-09-17 00:00:00.000' AND gps.time < '2020-09-17 00:01:00.000'
-	),
+        SELECT gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom FROM gps
+        WHERE gps.time >= to_timestamp('2020-09-17 00:00:00' , 'YYYY-MM-DD HH24:MI:SS') AND gps.time < to_timestamp('2020-09-17 01:00:00' , 'YYYY-MM-DD HH24:MI:SS')
+  ),
 	B AS (
 		SELECT shelter.shelter_id AS shelter_id, shelter.site_id AS site_id, COUNT(A.gps_id) AS numGps
 		FROM A, shelter, site
