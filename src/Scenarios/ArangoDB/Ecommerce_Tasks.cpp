@@ -288,7 +288,7 @@ void T2(){
  * 
  *      D: SELECT Brand.industry, COUNT(*) AS customer_count FROM C, Brand WHERE C.brand_id=Brand.brand_id GROUP BY Brand.industry // Relational
  *
- */
+ 
  
 void T3(){
 
@@ -328,8 +328,8 @@ Let D = (for c in C
                 collect industry = brand.industry with count into customer_count 
                 return{ industry: industry, customer_count: customer_count})
 
-return D
-}
+return length(D)
+) */
 
 /**
  *  [Task4] Customer Interests ([R, D, G]=>R).
@@ -349,13 +349,15 @@ return D
  *      @param industry
  *      @param N
  *      @param min_spent
- */
+ 
 
 void T4(){
     
+
 let param_industry = "Sports"
 let param_topN = 10
-let param_min_spent = 10000
+let param_amount = 10000
+
 Let A = (for brand in Brand
             filter brand.industry == param_industry
             for product in Product
@@ -363,16 +365,17 @@ Let A = (for brand in Brand
                 for order in Order
                     for order_line in order.order_line
                         filter product.product_id == order_line.product_id
+                        //filter product.product_id == "B005G2G2SQ"
                         collect cid = order.customer_id 
                         aggregate total_spent = sum(order_line.price)
-                        filter total_spent > param_min_spent
+                        filter total_spent > param_amount
                         for customer in Customer 
                         filter cid == customer.customer_id
                             return distinct {cpid: customer.person_id, total_spent: total_spent})
 
-Let B =(For person in Person
-            For a in A
-            Filter a.cpid == TO_NUMBER(person._key)
+Let B =(For a in A
+            For person in Person
+            Filter TO_NUMBER(person._key) == a.cpid
                 LET followers = LENGTH(FOR v IN 1..1 INBOUND person Follows RETURN 1)
                 sort followers Desc limit param_topN
                 Return  {person: person._key, followers: followers})
@@ -383,9 +386,9 @@ Let C = (for person in Person
             for v in 1..1 OUTBOUND person Interested_in
             return distinct v._id)
             
-return length(C)
+return (length(C))
     
-}
+} */
 
 /**
  * [Task5]. Filtering social network (R, D, G) => Graph
@@ -399,31 +402,33 @@ return length(C)
  *  B: SELECT p, r, node AS subGraph FROM A, SNS
  *      WHERE (p:Person) - [r] -> (node)
  *      AND SNS.p.person_id=A.person_id // Graph
- */
+ 
 
 void T5(){
 
-//Let param_product_id = "B007SYGLZO"
-//Let param_curdate = "2021-06-01"
-//Let param_olddate = "2020-06-01"
-//
-//Let A = (For order in Order
-//        For review in Review
-//        For customer in Customer
-//        Filter review.product_id == param_product_id
-//        Filter order.order_date <= param_curdate
-//        Filter order.order_date >= param_olddate
-//        Filter review.order_id == order.order_id
-//        Filter order.customer_id == customer.customer_id
-//        Filter customer.gender == "F"
-//Return {person_id : customer.person_id })
-//
-//
-//Let B = (For person in Person
-//        For a in A
-//        Filter a.person_id == TO_NUMBER(person._key)
-//For v, e in OUTBOUND person Follows, Interested_in
-//Return {person, v, e})
-//Return Length(B)
+Let param_product_id = "B007SYGLZO"
+Let param_curdate = "2021-06-01"
+Let param_olddate = "2020-06-01"
+
+Let A = (For order in Order 
+            For review in Review 
+                For customer in Customer 
+                    Filter review.product_id == param_product_id 
+                    Filter order.order_date <= param_curdate 
+                    Filter order.order_date >= param_olddate
+                    Filter review.order_id == order.order_id
+                    Filter order.customer_id == customer.customer_id 
+                    Filter customer.gender == "F" 
+                    Return {person_id : customer.person_id })
+
+
+Let B = (For person in Person
+            For a in A
+            Filter a.person_id == TO_NUMBER(person._key)
+                For v, e in OUTBOUND person Follows 
+                Return {person, v, e})
+                
+Return LENGTH(B)
 
 }
+*/
