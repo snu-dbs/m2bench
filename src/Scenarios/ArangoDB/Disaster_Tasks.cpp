@@ -185,19 +185,20 @@ void T12(){
  *
  * 
 [Query]
-FOR site IN Site
-    FILTER site.properties.type == 'building'
-    
-    FOR eq IN Earthquake
-	    FILTER eq.magnitude >= 4.5
-	    
-	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], site.geometry, "wgs84")
+LET A=(FOR eq IN Earthquake
+    FILTER eq.magnitude >= 4.5
+    FOR site IN Site
+	    FILTER site.properties.type == 'building'
+
+	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], site.geometry)
 	    FILTER dist <= 30000
 	    
 	    COLLECT description = site.properties.description
 	        WITH COUNT INTO cnt
 	    
-	    RETURN {description, cnt}
+	    RETURN {description, cnt})
+
+RETURN Length(A)
  */
 
 void T13(){
@@ -288,7 +289,7 @@ LET D = (
         }
 )
 
-RETURN D
+RETURN Length(D)
  */
 
 
@@ -395,7 +396,7 @@ LET C = (
         RETURN {v, e}
 )
 
-RETURN C
+RETURN Length(C)
  
  */
 
