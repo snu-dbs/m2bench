@@ -13,24 +13,24 @@
 *
 * A = SELECT n1, r, n2 AS subgraph FROM Earthquake, Site, RoadNode
 *     WHERE (n1:RoadNode) - [r:Road] -> (n2:RoadNode) AND ST_Distance(Site.geometry, Earthquake.coordinates) <= 5km
-*     AND Earthquake.time >= Z1 AND Earthquake.time <= Z2 AND RoadNode.site_id = Site.site_id  //Graph
+*     AND Earthquake.time >= Z1 AND Earthquake.time < Z2 AND RoadNode.site_id = Site.site_id  //Graph
 
 
     SET graph_path = Road_network;
 
-    Explain Analyze WITH eqk AS (
+    WITH eqk AS (
             SELECT earthquake_id AS id, time, ST_MakePoint(ST_X(coordinates), ST_Y(coordinates)) AS geom
-    FROM earthquake
-    WHERE time >= '2020-06-01 00:00:00.000' AND time <= '2020-06-01 02:00:00.000'
+            FROM earthquake
+            WHERE time >= to_timestamp('2020-06-01 00:00:00' , 'YYYY-MM-DD HH24:MI:SS') AND time < to_timestamp('2020-06-01 02:00:00', 'YYYY-MM-DD HH24:MI:SS')
     ),
     roadnodes AS (
             SELECT eqk.id AS eqk_id, data->'site_id' AS site_id
-    FROM eqk, site
-    WHERE site.data->'properties'->>'type'='roadnode' AND ST_DistanceSphere(eqk.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) <= 5000
+            FROM eqk, site
+            WHERE site.data->'properties'->>'type'='roadnode' AND ST_DistanceSphere(eqk.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) <= 5000
     )
-    SELECT subgraph
-    FROM roadnodes, (MATCH (n:roadnode)-[r:road]->(m:roadnode) RETURN n,r,m) AS subgraph
-    WHERE subgraph.n->'site_id'=roadnodes.site_id;
+            SELECT COUNT(subgraph)
+            FROM roadnodes, (MATCH (n:roadnode)-[r:road]->(m:roadnode) RETURN n,r,m) AS subgraph
+            WHERE subgraph.n->'site_id'=roadnodes.site_id;
 */
 
 
@@ -40,7 +40,7 @@
   *  (GPS coordinates are limited by 1 hour and 10km from the X. Shelters are limited by 15km from the X.)
   *
   *  A = SELECT GPS.gps_id, ST_ClosestObject(Site, roadnode, GPS.coordinates) AS roadnode_id FROM GPS, Site, RoadNode
-  *      WHERE GPS.time >= X.time AND GPS.time <= X.time + 1 hour AND ST_Distance(GPS.coordinates, X.coordinates) <= 10km
+  *      WHERE GPS.time >= X.time AND GPS.time < X.time + 1 hour AND ST_Distance(GPS.coordinates, X.coordinates) <= 10km
   *      AND RoadNode.site_id = Site.site_id //Relational
   *
   *  B = SELECT t.shelter_id, ST_ClosestObject(Site, roadnode, ST_Centroid(t.geometry)) AS roadnode_id
@@ -54,42 +54,36 @@
     SELECT time, ST_MakePoint(ST_X(coordinates), ST_Y(coordinates)) AS geom INTO TEMP TABLE eqk_x FROM earthquake WHERE earthquake_id=41862;
     SET graph_path = Road_network;
     WITH A AS (
-        SELECT filtered_gps.gps_id AS gps_id, site.data->'site_id' AS site_id, ST_DistanceSphere(filtered_gps.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) AS dist
-        FROM (SELECT gps.gps_id AS gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom
-              FROM gps, eqk_x WHERE gps.time >= eqk_X.time AND gps.time<=eqk_X.time + interval '1 hour'
-              AND ST_DistanceSphere(eqk_X.geom, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)))<=10000) AS filtered_gps, site
-        WHERE site.data->'properties'->>'type'='roadnode'
-	    ),
-	    gps_node AS (
-	    SELECT t1.gps_id, t1.site_id
-	    FROM A t1, (SELECT  gps_id, MIN(dist) as mindist FROM A GROUP BY gps_id) t2
-	    WHERE t1.gps_id = t2.gps_id AND t1.dist = t2.mindist
-	    ),
-	    B AS (
+      SELECT gps.gps_id AS gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom
+      FROM gps, eqk_x
+      WHERE gps.time >= eqk_X.time AND gps.time < eqk_X.time + interval '1 hour'
+      AND ST_DistanceSphere(eqk_X.geom, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)))<=10000
+      ),
+      gps_nodes AS (
+        SELECT t1.gps_id AS gps_id, t2.site_id AS site_id
+        FROM A t1 LEFT JOIN LATERAL (SELECT site.data->'site_id' AS site_id FROM site WHERE site.data->'properties'->>'type'='roadnode' ORDER BY ST_DistanceSphere(t1.geom, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry'))) LIMIT 1) t2 on true
+      ),
+      B AS (
         SELECT shelter.shelter_id AS shelter_id, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry')) AS geom
         FROM eqk_x, shelter, site
         WHERE shelter.site_id = (site.data->>'site_id')::int AND ST_DistanceSphere(eqk_x.geom, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry'))) <=15000
-	    ),
-	    C AS (
-        SELECT B.shelter_id AS shelter_id, site.data->'site_id' AS site_id, ST_DistanceSphere(B.geom, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry'))) AS dist
-        FROM B, site WHERE site.data->'properties'->>'type'='roadnode'
-        ),
-        shelter_node AS (
-        SELECT t1.shelter_id, t1.site_id
-        FROM C t1, (SELECT shelter_id, MIN(dist) as mindist FROM C GROUP BY shelter_id) t2
-        WHERE t1.shelter_id = t2.shelter_id AND t1.dist = t2.mindist
-	    ),
-	    D AS (
-        SELECT src, dest, (unnest(roads)->>'distance')::INT AS distance FROM gps_node AS src CROSS JOIN shelter_node AS dest
+      ),
+      shelter_nodes AS (
+        SELECT t1.shelter_id AS shelter_id, t2.site_id AS site_id
+        FROM B t1 LEFT JOIN LATERAL (SELECT site.data->'site_id' AS site_id FROM site WHERE site.data->'properties'->>'type'='roadnode' ORDER BY ST_DistanceSphere(t1.geom, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry'))) LIMIT 1) t2 on true
+      ),
+      C AS (
+        SELECT src, dest, (unnest(roads)->>'distance')::INT AS distance
+        FROM gps_nodes AS src CROSS JOIN shelter_nodes AS dest
         CROSS JOIN lateral (MATCH (n: RoadNode), (m: RoadNode), path=DIJKSTRA((n)-[e:Road]->(m), e.distance)
-                            WHERE n.site_id = (SELECT gps_node.site_id FROM gps_node WHERE gps_node.site_id = src.site_id)
-                            AND m.site_id = (SELECT distinct(shelter_node.site_id)
-                            FROM shelter_node WHERE shelter_node.site_id = dest.site_id)
+                            WHERE n.site_id = (SELECT DISTINCT(gps_nodes.site_id) FROM gps_nodes WHERE gps_nodes.site_id = src.site_id)
+                            AND m.site_id = (SELECT DISTINCT(shelter_nodes.site_id)
+                            FROM shelter_nodes WHERE shelter_nodes.site_id = dest.site_id)
         RETURN n,m,edges(path) AS roads) AS graph
-	    )
-	    SELECT src, dest, SUM(distance) as total_cost
-	    FROM D
-	    GROUP BY src, dest;
+      )
+      SELECT src, dest, SUM(distance) as total_cost
+      FROM C
+      GROUP BY src, dest;
 **/
 
 
@@ -120,9 +114,9 @@
 
  SET graph_path = Road_network;
  WITH A AS (
-		SELECT gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom FROM gps
-		WHERE gps.time >= '2020-09-17 00:00:00.000' AND gps.time < '2020-09-17 00:01:00.000'
-	),
+        SELECT gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom FROM gps
+        WHERE gps.time >= to_timestamp('2020-09-17 00:00:00' , 'YYYY-MM-DD HH24:MI:SS') AND gps.time < to_timestamp('2020-09-17 01:00:00' , 'YYYY-MM-DD HH24:MI:SS')
+  ),
 	B AS (
 		SELECT shelter.shelter_id AS shelter_id, shelter.site_id AS site_id, COUNT(A.gps_id) AS numGps
 		FROM A, shelter, site
@@ -328,6 +322,44 @@ DROP TABLE T15B;
  *          Site.properties.building = 'school' //Document
 
 
+\timing
+  With A as
+    (
+        Select  latitude, longitude, avg(pm10) as pm10
+        From finedust_idx
+        where  timestamp >= 3
+        and timestamp <= 4
+        group by latitude, longitude
+    )
+    , B as
+    (  select site_id, sum((coo->>0)::FLOAT)/count(site_id) as longitude, sum((coo->>1)::FLOAT)/count(site_id) as latitude
+        from
+                (
+                    select data->'site_id' as site_id, jsonb_array_elements(jsonb_array_elements(jsonb_array_elements(data->'geometry'->'coordinates'))) as coo
+                    from site
+                    where data->'properties'->>'type' = 'building' and data->'properties'->>'description'='school'
+                )
+               as centroid
+        group by site_id
+     )
+
+Select count(*) from
+        (
+    Select site_id, pm10
+    from A, B
+    where
+        34.01189870 <= B.latitude and B.latitude <= 34.91494826
+        and -118.3450100223 <= B.longitude
+        and B.longitude <= -118.23192603
+        and A.latitude  <= (B.latitude - 34.01189870) / 0.000172998
+        and  (B.latitude - 34.01189870) / 0.000172998  <= A.latitude +  1
+        and A.longitude  <= ( B.longitude - (-118.3450100223 )) / 0.000216636
+        and  (B.longitude - ( -118.3450100223)) / 0.000216636  <= A.longitude +  1
+        ) as res ;
+
+
+//// THE BELOW IS  DEPRECATED ///
+
 
     Explain Analyze With A as
     (
@@ -360,6 +392,7 @@ DROP TABLE T15B;
         and  B.longitude  <= A.longitude +  0.000216636
 
 
-
  */
+ 
+ 
 
