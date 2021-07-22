@@ -334,7 +334,7 @@ RETURN Length(D)
  LET CLON = -118.0614431
  LET CLAT = 34.068509
  
-  LET A = (
+  LET AB1 = (
     FOR cell IN Finedust_idx
         FILTER (Z1 <= cell.timestamp) AND (cell.timestamp <= Z2)
         LET win = (
@@ -355,10 +355,9 @@ RETURN Length(D)
         }
     
 )
-
  
- LET B = (
-    FOR cell IN A
+ LET AB = (
+    FOR cell IN AB1
         COLLECT latitude = cell.latitude, longitude = cell.longitude INTO g
         
         RETURN {
@@ -371,11 +370,11 @@ RETURN Length(D)
 
 
 LET Ct1 = (
-    RETURN MAX(FOR cell in B RETURN cell.pm10_avg)
+    RETURN MAX(FOR cell in AB RETURN cell.pm10_avg)
 )
 
 LET Ct2 = (
-    FOR cell IN B
+    FOR cell IN AB
         FILTER cell.pm10_avg == Ct1[0]
         RETURN cell
 )
