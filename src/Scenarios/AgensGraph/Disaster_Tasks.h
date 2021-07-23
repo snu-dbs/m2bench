@@ -174,10 +174,13 @@
  *
  * 
  * [Query]
- * 
+  
+  
+// TODO: pre centroid?
+
 SELECT Site.data->'properties'->'description' AS description, COUNT(*)
 FROM Earthquake, Site
-WHERE ST_DistanceSphere(ST_GeomFromGeoJSON(Site.data->>'geometry'), Earthquake.coordinates) <= 30000
+WHERE ST_DistanceSphere(ST_Centroid(ST_GeomFromGeoJSON(Site.data->>'geometry')), Earthquake.coordinates) <= 30000
         AND Site.data->'properties'->>'type' = 'building'
         AND Earthquake.magnitude >= 4.5
 GROUP BY Site.data->'properties'->'description';
@@ -211,6 +214,9 @@ GROUP BY Site.data->'properties'->'description';
  * 
  * 
  * [Query]
+
+// TODO: pre centroid?
+
 CREATE TEMP TABLE T14A (date integer, timestamp integer, latitude integer, longitude integer, pm10_avg double precision);
 
 INSERT INTO T14A
@@ -234,10 +240,11 @@ SELECT T14C.date, T14C.timestamp, (
     SELECT Site.data->>'site_id'
     FROM Site
     WHERE data->'properties'->>'type' = 'building'
-    ORDER BY ST_DistanceSpheroid(ST_Centroid(ST_GeomFromGeoJSON(Site.data->>'geometry')), T14C.coordinates, 'SPHEROID["WGS 84",6378137,298.257223563]') ASC
+    ORDER BY ST_DistanceSphere(ST_Centroid(ST_GeomFromGeoJSON(Site.data->>'geometry')), T14C.coordinates) ASC
     LIMIT 1
 ) AS site_id
-FROM T14C;
+FROM T14C
+ORDER BY T14C.date ASC;
 
 DROP TABLE T14A;
 DROP TABLE T14C;
@@ -289,7 +296,7 @@ WHERE n.site_id = (
         ORDER BY ST_DistanceSphere(ST_GeomFromGeoJSON(Site.data->>'geometry'), ST_Point(:CLON, :CLAT)) ASC
         LIMIT 1
     )
-AND m.site_id =  (
+  AND m.site_id =  (
         SELECT CAST(Site.data->>'site_id' AS INT)
         FROM Site
         WHERE Site.data->'properties'->>'type' = 'roadnode'
@@ -297,8 +304,9 @@ AND m.site_id =  (
             SELECT T15B.coordinates FROM T15B, (SELECT MAX(T15B.pm10_avg) as max_avg FROM T15B) as tc1 WHERE T15B.pm10_avg = tc1.max_avg LIMIT 1
         )::geometry) ASC
         LIMIT 1
-)
-RETURN path;
+  )
+RETURN path
+LIMIT 1;
 
 DROP TABLE T15A;
 DROP TABLE T15B;
