@@ -329,11 +329,11 @@ RETURN Length(D)
  * 
  * 
  * [Query]
- LET Z1 = 5
- LET Z2 = 10
- LET CLON = -118.0614431
- LET CLAT = 34.068509
- 
+LET Z1 = 5
+LET Z2 = 10
+LET CLON = -118.0614431
+LET CLAT = 34.068509
+
   LET AB1 = (
     FOR cell IN Finedust_idx
         FILTER (Z1 <= cell.timestamp) AND (cell.timestamp <= Z2)
@@ -361,59 +361,53 @@ RETURN Length(D)
         COLLECT latitude = cell.latitude, longitude = cell.longitude INTO g
         
         RETURN {
-            latitude: latitude,
-            longitude: longitude,
+			coordinates: [-118.34501002237936 + (longitude * 0.000216636), 34.011898718557454 + (latitude * 0.000172998)],
             pm10_avg : (SUM(g[*].cell.pm10_sum) / SUM(g[*].cell.pm10_count)) 
         }
     
  )
 
-
-LET Ct1 = (
-    RETURN MAX(FOR cell in AB RETURN cell.pm10_avg)
-)
-
-LET Ct2 = (
-    FOR cell IN AB
-        FILTER cell.pm10_avg == Ct1[0]
-        RETURN cell
-)
-
-LET Ct3src = (
-    FOR site IN Site
-        FILTER site.properties.type == 'roadnode'
-        SORT GEO_DISTANCE([CLON, CLAT], site.geometry) ASC
-        LIMIT 1
-        RETURN site
-)
-
-LET Ct4dst = (
-    FOR site IN Site
-        FILTER site.properties.type == 'roadnode'
-        SORT GEO_DISTANCE([-118.34501002237936 + (Ct2[0].longitude * 0.000216636), 34.011898718557454 + (Ct2[0].latitude * 0.000172998)], site.geometry) ASC
-        LIMIT 1
-        RETURN site
-)
-
-LET Ct5src = (
-    FOR node IN Roadnode
-        FILTER node.site_id == Ct3src[0].site_id
-        RETURN node
-)
-
-LET Ct6dst = (
-    FOR node IN Roadnode
-        FILTER node.site_id == Ct4dst[0].site_id
-        RETURN node
-)
-
 LET C = (
-    FOR v, e IN OUTBOUND SHORTEST_PATH Ct5src[0] TO Ct6dst[0] GRAPH 'Road_Network' OPTIONS {weightAttribute: 'distance'}
+	FOR cell IN AB
+		SORT cell.pm10_avg DESC
+		
+		LET s1 = (
+			FOR site IN Site
+    	        FILTER site.properties.type == 'roadnode'
+        	    SORT GEO_DISTANCE([CLON, CLAT], site.geometry) ASC
+                LIMIT 1
+                RETURN site
+		)
+		LET src = (
+			FOR node IN Roadnode
+				FILTER s1[0].site_id == node.site_id
+				LIMIT 1
+				RETURN node
+		)
+		LET s2 = (
+			FOR site IN Site
+    	        FILTER site.properties.type == 'roadnode'
+    	        SORT GEO_DISTANCE([cell.coordinates[0], cell.coordinates[1]], site.geometry) ASC
+    	        LIMIT 1
+                RETURN site
+		)
+		LET dst = (
+			FOR node IN Roadnode
+				FILTER s2[0].site_id == node.site_id
+				LIMIT 1
+				RETURN node
+		)
+		
+		LET path = (
+			FOR v, e IN OUTBOUND SHORTEST_PATH src[0] TO dst[0] GRAPH 'Road_Network' OPTIONS {weightAttribute: 'distance'}
         RETURN {v, e}
+		)
+		
+		LIMIT 1
+		RETURN path
 )
 
 RETURN Length(C)
- 
  */
 
 /**
