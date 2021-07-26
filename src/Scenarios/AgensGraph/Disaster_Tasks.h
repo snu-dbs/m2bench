@@ -153,7 +153,7 @@
  SELECT t1.building_id AS building_id, t2.site_id AS site_id INTO TEMPORARY TABLE building_nodes
  FROM C t1 LEFT JOIN LATERAL (
           SELECT (Site.data->>'site_id')::INT AS site_id FROM site
-          WHERE site.data->'properties'->>'type'='roadnode' ORDER BY ST_DistanceSphere(t1.geom, ST_GeomFromGeoJSON(site.data->>'geometry'))
+          WHERE site.data->'properties'->>'type'='roadnode' ORDER BY ST_DistanceSphere(t1.centroid, ST_GeomFromGeoJSON(site.data->>'geometry'))
           LIMIT 1) t2 on true;
  CREATE INDEX on building_nodes (site_id);
 
