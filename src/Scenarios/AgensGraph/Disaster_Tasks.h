@@ -124,7 +124,7 @@
  SET graph_path = Road_network;
 
  SELECT (Site.data->>'site_id')::INT AS site_id, ST_Centroid(ST_GeomFromGeoJSON(Site.data->>'geometry')) AS centroid INTO TEMPORARY TABLE site_buildings
- FROM Shelter, Site
+ FROM Site
  WHERE Site.data->'properties'->>'type' = 'building';
  CREATE INDEX on site_buildings(site_id);
 
