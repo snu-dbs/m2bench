@@ -50,24 +50,12 @@ void T6(){
  * @param patient_id
  */
 void T7(){
-//select distinct patient_id from Diagnosis
-//let $set = (traverse both('Is_a') from (select from Disease where disease_id in (select disease_id from Diagnosis where patient_id = 9)) MAXDEPTH 2 STRATEGY BREADTH_FIRST)
-//where disease_id in $set.disease_id and patient_id != 9
-//
-//select distinct patient_id from Diagnosis
-//let $set = (traverse both('Is_a') from (select from Disease
-//                                        let $set2=(select disease_id from Diagnosis where patient_id = 9) where disease_id in $set2) MAXDEPTH 2 STRATEGY BREADTH_FIRST)
-//where disease_id in $set.disease_id and patient_id != 9
-//
-//select distinct patient_id from Diagnosis where patient_id != 9 and disease_id in
-//(select distinct disease_id from (traverse both('Is_a') from (select from Disease where disease_id in
-//                                                              (select disease_id from Diagnosis where patient_id = 9)) MAXDEPTH 2 STRATEGY BREADTH_FIRST))
-//
-//select distinct patient_id from Diagnosis where patient_id != 9 and disease_id in
-//(select distinct disease_id from (traverse both('Is_a') from (select from Disease where disease_id in
-//                                                              (select disease_id from Diagnosis where patient_id = 9)) MAXDEPTH 2 STRATEGY BREADTH_FIRST)
-//where disease_id not in (select disease_id from Diagnosis where patient_id = 9))
-
+//select gender, count(gender) from Patient
+//where patient_id in (select distinct patient_id from Diagnosis where patient_id != 9 and disease_id in
+//(select distinct disease_id from (traverse in('Is_a') from (select from Disease where disease_id in
+//(select disease_id from (traverse out('Is_a') from (select from Disease where disease_id in
+//                                                              (select disease_id from Diagnosis where patient_id = 9)) MAXDEPTH 1)))
+//MAXDEPTH 1)) and disease_id not in (select disease_id from Diagnosis where patient_id = 9)) GROUP BY gender
 }
 
 /**
@@ -86,6 +74,10 @@ void T7(){
  * @param patient_id
  */
 void T8(){
+// drop class drug_temp unsafe
+// drop class target_temp unsafe
+// drop class has_bond unsafe
+
 //create class drug_temp extends v
 //CREATE PROPERTY drug_temp.drug_id INTEGER
 //create index drug_id ON drug_temp (drug_id) UNIQUE
@@ -96,36 +88,33 @@ void T8(){
 //create index target_id ON target_temp (target_id) UNIQUE
 //insert into target_temp from select distinct targets.id as target_id, targets.name as target_name from (SELECT targets FRom Drug unwind targets) where targets.id is not null
 //
-//create class drug_e extends v
-//CREATE PROPERTY drug_e.drug_id INTEGER
-//create index drug_e.drug_id ON drug_e (drug_id) NOTUNIQUE
-//insert into drug_e from select drug_id from (SELECT drug_id, targets FROM Drug unwind targets) where targets.id is not null
-//CREATE LINK drug TYPE LINK FROM drug_e.drug_id TO drug_temp.drug_id;
-//
-//create class target_e extends v
-//CREATE PROPERTY target_e.target_id String
-//create index target_e.target_id ON target_e (target_id) NOTUNIQUE
-//insert into target_e from select targets.id as target_id from (SELECT drug_id, targets FROM Drug unwind targets) where targets.id is not null
-//CREATE LINK target TYPE LINK FROM target_e.target_id TO target_temp.target_id;
-//
 //create class has_bond extends e
-//create edge has_bond from (select drug from drug_e) to (select target from target_e)
-//select $A.drug, $B.target let $A = (select drug from drug_e), $B = (select target from target_e)
-
 //
-//SELECT drug_id, drug_name FROM Drug
-//select distinct targets.id as target_id, targets.name as target_name from (SELECT targets FRom Drug unwind targets) where targets.id is not null
-//select drug_id, targets.id as target_id from (SELECT drug_id, targets FROM Drug unwind targets) where targets.id is not null
-
+//################ batch (80sec)
+//
+//LET $edge = select drug_id, targets.id as target_id from (SELECT drug_id, targets FROM Drug unwind targets) where targets.id is not null;
+//LET $i = 0;
+//
+//while($i<$edge.size())
+//{
+//	create edge has_bond from (select from drug_temp where drug_id = $edge.drug_id[$i]) to (select from target_temp where target_id = $edge.target_id[$i]);
+//	LET $i = $i + 1;
+//}
+//###############
+//
+//(10sec)
+//select $ORIENT_DEFAULT_ALIAS_0.drug_name as drug1, drug_dst.drug_name as drug2, count(*) as common_target from
+//(MATCH {class: drug_temp, where: (drug_id in (select distinct drug_id from Prescription where patient_id = 9))}.out("has_bond").in("has_bond")
+//         {as: drug_dst} return $paths) where $ORIENT_DEFAULT_ALIAS_0 != drug_dst group by drug1, drug2 order by common_target desc
 }
 
 /**
  *  [Task9] Drug similarity (R,D=>A)
  *  Find similar drugs for a given patient X's prescribed drug
  *
- *  A: SELECT drug_id as drug, adverse_effect.title as adverse_effect, 1 as is_adverse_effect
+ *  A: SELECT drug_id as drug, adverse_effect_list.adverse_effect_name as adverse_effect, 1 as is_adverse_effect
  *          FROM Drug
- *          UNNEST adverse_effects_list as adverse_effect  //table
+ *          UNNEST adverse_effect_list //table
  *
  *  B: A.toArray  -> (<is_adverse_effect>[drug, adverse_effect]) //array
  *  C: Cosine_similarity(B) -> (<similarity coefficient>[drug1, drug2]) //array
@@ -133,5 +122,45 @@ void T8(){
  *
  */
 void T9(){
+//create class drug_matrix1
+//CREATE PROPERTY drug_matrix1.drug String
+//CREATE PROPERTY drug_matrix1.adverse_effect String
+//create index drug_matrix1.drug ON drug_matrix1 (drug) NOTUNIQUE
+//create index drug_matrix1.adverse_effect ON drug_matrix1 (adverse_effect) NOTUNIQUE
+
+// insert into drug_matrix1 from select distinct drug_id as drug, adverse_effect_list.adverse_effect_name as adverse_effect, 1 as is_adverse_effect
+// from (SELECT drug_id, adverse_effect_list FROM Drug unwind adverse_effect_list)
+// where adverse_effect_list.adverse_effect_name is not null
+//
+//create class drug_matrix2
+//CREATE PROPERTY drug_matrix2.drug String
+//CREATE PROPERTY drug_matrix2.adverse_effect String
+//create index drug_matrix2.drug ON drug_matrix2 (drug) NOTUNIQUE
+//create index drug_matrix2.adverse_effect ON drug_matrix2 (adverse_effect) NOTUNIQUE
+
+// insert into drug_matrix2 from select distinct drug_id as drug, adverse_effect_list.adverse_effect_name as adverse_effect, 1 as is_adverse_effect
+// from (SELECT drug_id, adverse_effect_list FROM Drug unwind adverse_effect_list)
+// where adverse_effect_list.adverse_effect_name is not null
+//
+//CREATE LINK drug TYPE LINK FROM drug_matrix1.drug TO drug_matrix2.drug;
+//CREATE LINK adverse_effect TYPE LINK FROM drug_matrix1.adverse_effect TO drug_matrix2.adverse_effect;
+
+//
+//create class similarity1
+//CREATE PROPERTY similarity1.drug1 String
+//CREATE PROPERTY similarity1.drug2 String
+//create index similarity1.drug1 ON similarity1 (drug1) NOTUNIQUE
+//create index similarity1.drug2 ON similarity1 (drug2) NOTUNIQUE
+//
+// insert into similarity1 as select a.drug as drug1, b.drug as drug2, sum(a.is_adverse_effect*b.is_adverse_effect)
+// from drug_matrix as a, (select from drug_matrix) as b
+// where a.adverse_effect in b.adverse_effect group by drug1, drug2
+
+//select a.drug as drug1, $temp.drug as drug2, sum(a.is_adverse_effect*$temp.is_adverse_effect)
+//from drug_matrix as a, LET $temp = (select from drug_matrix)
+//where a.adverse_effect in $temp.adverse_effect group by drug1, drug2
+
+//########################### Stop implementation (needs link creation between intermediate results)
+
 
 }
