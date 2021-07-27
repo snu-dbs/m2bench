@@ -144,7 +144,7 @@ int main() {
     //    timer(T3, curdate3);
     //}
     //else if (argc == 2 && strcmp( argv[1],"T4") == 0){
-    //    timer(T4,10000,10);
+    timer(T4,10000,10);
     //}
     //else if (argc == 2 && strcmp( argv[1],"T5") == 0){
     //    timer(T5,pid, curdate);
