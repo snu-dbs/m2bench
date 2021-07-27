@@ -309,7 +309,7 @@ Let B = (For person in Person
             For a in A
             Filter a.person_id == TO_NUMBER(person._key)
                 For v, e in 2..2 INBOUND person Follows 
-                Return distinct v)
+                Return v)
                 
 
 Let C = (For b in B
