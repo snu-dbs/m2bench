@@ -108,7 +108,7 @@ int main() {
 
 //    string T12_ts1 = "2020-09-17 00:00:00";
 //    string T12_ts2 = "2020-09-17 01:00:00";
-    timer(T2);
+//    timer(T2);
 
 //    if(argc == 2 && strcmp( argv[1],"T1") == 0){
 //        timer(T1, curdate);
