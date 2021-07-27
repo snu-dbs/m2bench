@@ -1,6 +1,40 @@
 //
 // Created by mxmdb on 21. 5. 3..
 //
+/**
+ *
+ * [Task6] Drug Interaction (R,D=>R)
+ *  Find drugs that has known interaction with the prescribed drugs for a give patient
+ *
+ *      A: Select distinct(drug_id) as drug_id
+ *          From Prescription
+ * *        Where patient_id = @param
+
+*      B: Select drug_interaction.interaction_drug.name
+ *          From Drug, A
+ *          Unnest Drug.drug_interaction_list as drug_interaction
+ *          Where A.drug_id == Drug.drug_id
+ *          Group by drug_interaction.interaction_drug.name
+ *
+ *
+ *      @param patient_id
+ */
+
+void T6(){
+
+//    select count(*)
+//    from
+//    (select distinct(drug_name)
+//    from
+//            (
+//                    select drug_interaction.interaction_drug.drug_name as drug_name from
+//    (select drug.drug_interaction_list as drug_interaction from Prescription where patient_id =9
+//    unwind drug_interaction)
+//    )
+//    )
+
+
+}
 
 /**
  * [Task 7] Group of patients with similar disease (RxG=>R)
