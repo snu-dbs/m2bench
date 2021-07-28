@@ -17,21 +17,18 @@
 
 
     SET graph_path = Road_network;
-    WITH eqk AS (
-            SELECT earthquake_id AS id, time, ST_MakePoint(ST_X(coordinates), ST_Y(coordinates)) AS geom
-            FROM earthquake
-            WHERE time >= to_timestamp('2020-06-01 00:00:00' , 'YYYY-MM-DD HH24:MI:SS') AND time < to_timestamp('2020-06-01 02:00:00', 'YYYY-MM-DD HH24:MI:SS')
-    ),
-    roadnodes AS (
-            SELECT eqk.id AS eqk_id, data->'site_id' AS site_id
-            FROM eqk, site
-            WHERE site.data->'properties'->>'type'='roadnode' AND ST_DistanceSphere(eqk.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) <= 5000
-    )
+
     SELECT COUNT(*) FROM (
 	    SELECT subgraph
-    	FROM roadnodes, (MATCH (n:roadnode)-[r:road]->(m:roadnode) RETURN n,r,m) AS subgraph
+    	FROM (SELECT eqk.id AS eqk_id, data->'site_id' AS site_id
+    	      FROM (SELECT earthquake_id AS id, time, ST_MakePoint(ST_X(coordinates), ST_Y(coordinates)) AS geom
+    	            FROM earthquake
+                    WHERE time >= to_timestamp('2020-06-01 00:00:00' , 'YYYY-MM-DD HH24:MI:SS') AND time < to_timestamp('2020-06-01 02:00:00', 'YYYY-MM-DD HH24:MI:SS')
+                    ) AS eqk, site
+              WHERE site.data->'properties'->>'type'='roadnode' AND ST_DistanceSphere(eqk.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) <= 5000
+              ) AS roadnodes, (MATCH (n:roadnode)-[r:road]->(m:roadnode) RETURN n,r,m) AS subgraph
     	WHERE subgraph.n->'site_id'=roadnodes.site_id
-    	) as res;
+    	) as A;
 */
 
 
@@ -53,18 +50,19 @@
 
 
     SET graph_path = Road_network;
-    WITH eqk_x AS (
-        SELECT time, ST_MakePoint(ST_X(coordinates), ST_Y(coordinates)) AS geom
-        FROM earthquake WHERE earthquake_id=41862
-        ),
-      A AS (
+
+    SELECT time, ST_MakePoint(ST_X(coordinates), ST_Y(coordinates)) AS geom
+    INTO TEMPORARY TABLE eqk_x
+    FROM earthquake WHERE earthquake_id=41862;
+
+    WITH  A AS (
         SELECT gps.gps_id AS gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom
         FROM gps, eqk_x
         WHERE gps.time >= eqk_X.time AND gps.time < eqk_X.time + interval '1 hour'
         AND ST_DistanceSphere(eqk_X.geom, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)))<=10000
       ),
       gps_nodes AS (
-        SELECT t1.gps_id AS gps_id, t2.site_id AS site_id
+        SELECT t1.gps_id AS gps_id, t2.site_id AS roadnode_id
         FROM A t1 LEFT JOIN LATERAL
             (SELECT (site.data->>'site_id')::int AS site_id FROM site WHERE site.data->'properties'->>'type'='roadnode'
             ORDER BY ST_DistanceSphere(t1.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) LIMIT 1) t2 on true
@@ -75,24 +73,22 @@
         WHERE shelter.site_id = (site.data->>'site_id')::int AND ST_DistanceSphere(eqk_x.geom, ST_Centroid(ST_GeomFromGeoJSON(site.data->>'geometry'))) <=15000
       ),
       shelter_nodes AS (
-        SELECT t1.shelter_id AS shelter_id, t2.site_id AS site_id
+        SELECT t1.shelter_id AS shelter_id, t2.site_id AS roadnode_id
         FROM B t1 LEFT JOIN LATERAL
             (SELECT (site.data->>'site_id')::int AS site_id FROM site WHERE site.data->'properties'->>'type'='roadnode'
             ORDER BY ST_DistanceSphere(t1.geom, ST_GeomFromGeoJSON(site.data->>'geometry')) LIMIT 1) t2 on true
-      ),
-      C AS (
-        SELECT src.gps_id AS src, dest.shelter_id AS dest, (unnest(roads)->>'distance')::INT AS distance
-        FROM gps_nodes AS src CROSS JOIN shelter_nodes AS dest
-        CROSS JOIN lateral (MATCH (n: RoadNode), (m: RoadNode), path=DIJKSTRA((n)-[e:Road]->(m), e.distance)
-                            WHERE n.site_id = (SELECT DISTINCT(gps_nodes.site_id) FROM gps_nodes WHERE gps_nodes.site_id = src.site_id)
-                            AND m.site_id = (SELECT DISTINCT(shelter_nodes.site_id)
-                            FROM shelter_nodes WHERE shelter_nodes.site_id = dest.site_id)
-        RETURN n,m,edges(path) AS roads) AS graph
       )
       SELECT COUNT(*) FROM (
-      SELECT src, dest, SUM(distance) as total_cost
-      FROM C
-      GROUP BY src, dest) as res;
+        SELECT src, dest, SUM(distance) as total_cost
+        FROM (SELECT src.gps_id AS src, dest.shelter_id AS dest, (unnest(roads)->>'distance')::INT AS distance
+              FROM gps_nodes AS src CROSS JOIN shelter_nodes AS dest
+              CROSS JOIN lateral (MATCH (n: RoadNode), (m: RoadNode), path=DIJKSTRA((n)-[e:Road]->(m), e.distance)
+                                  WHERE n.site_id = (SELECT DISTINCT(gps_nodes.roadnode_id) FROM gps_nodes WHERE gps_nodes.roadnode_id = src.roadnode_id)
+                                  AND m.site_id = (SELECT DISTINCT(shelter_nodes.roadnode_id) FROM shelter_nodes WHERE shelter_nodes.roadnode_id = dest.roadnode_id)
+                                  RETURN n,m,edges(path) AS roads) AS graph
+             ) AS gps_shelter_pair
+      GROUP BY src, dest
+      ) as C;
 **/
 
 
@@ -121,57 +117,57 @@
  *     ORDER BY cost LIMIT 5  //Relational
 
 
- SET graph_path = Road_network;
+     SET graph_path = Road_network;
 
- SELECT (Site.data->>'site_id')::INT AS site_id, ST_Centroid(ST_GeomFromGeoJSON(Site.data->>'geometry')) AS centroid INTO TEMPORARY TABLE site_buildings
- FROM Site
- WHERE Site.data->'properties'->>'type' = 'building';
- CREATE INDEX on site_buildings(site_id);
+     SELECT (Site.data->>'site_id')::INT AS site_id, ST_Centroid(ST_GeomFromGeoJSON(Site.data->>'geometry')) AS centroid, Site.data->'properties'->>'description' AS description
+     INTO TEMPORARY TABLE site_buildings FROM Site
+     WHERE Site.data->'properties'->>'type' = 'building';
+     //CREATE INDEX on site_buildings(site_id);
 
- WITH A AS (
-    SELECT gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom FROM gps
-    WHERE gps.time >= to_timestamp('2020-09-17 00:00:00' , 'YYYY-MM-DD HH24:MI:SS') AND gps.time < to_timestamp('2020-09-17 01:00:00' , 'YYYY-MM-DD HH24:MI:SS')
-  ),
-   B AS (
-   SELECT shelter.shelter_id, site_buildings.centroid, COUNT(A.gps_id) AS numGps
-   FROM A, shelter, site_buildings
-   WHERE site_buildings.site_id = shelter.site_id AND ST_DistanceSphere(site_buildings.centroid, A.geom)<=5000
-   GROUP BY shelter.shelter_id, site_buildings.centroid
-   ORDER BY numGps DESC
-   LIMIT 1
- )
- SELECT B.shelter_id as shelter_id, B.centroid as shelter_geom, (Site.data->>'site_id')::INT AS site_id INTO TEMPORARY TABLE shelter_node
- FROM B, site
- WHERE site.data->'properties'->>'type'='roadnode'
- ORDER BY ST_DistanceSphere(B.centroid, ST_GeomFromGeoJSON(site.data->>'geometry'))
- LIMIT 1;
+     WITH A AS (
+       SELECT shelter.shelter_id, site_buildings.centroid, COUNT(filtered_gps.gps_id) AS numGps
+       FROM shelter, site_buildings, (SELECT gps_id, ST_MakePoint(ST_X(gps.coordinates), ST_Y(gps.coordinates)) AS geom FROM gps
+                                      WHERE gps.time >= to_timestamp('2020-09-17 00:00:00' , 'YYYY-MM-DD HH24:MI:SS') AND gps.time < to_timestamp('2020-09-17 01:00:00' , 'YYYY-MM-DD HH24:MI:SS')) AS filtered_gps
+       WHERE site_buildings.site_id = shelter.site_id AND site_buildings.description='hospital' AND ST_DistanceSphere(site_buildings.centroid, filtered_gps.geom)<=5000
+       GROUP BY shelter.shelter_id, site_buildings.centroid
+       ORDER BY numGps DESC
+       LIMIT 1
+     ),
+     B AS (
+       SELECT A.shelter_id as shelter_id, A.centroid as shelter_geom, (Site.data->>'site_id')::INT AS roadnode_id
+       FROM A, site
+       WHERE site.data->'properties'->>'type'='roadnode'
+       ORDER BY ST_DistanceSphere(A.centroid, ST_GeomFromGeoJSON(site.data->>'geometry'))
+       LIMIT 1
+     )
+     SELECT * INTO TEMPORARY TABLE shelter_node FROM B;
 
- WITH C AS (
-  SELECT site_buildings.site_id AS building_id, site_buildings.centroid
-  FROM shelter_node, site_buildings WHERE ST_DistanceSphere(site_buildings.centroid, shelter_node.shelter_geom)<=1000
-  )
- SELECT t1.building_id AS building_id, t2.site_id AS site_id INTO TEMPORARY TABLE building_nodes
- FROM C t1 LEFT JOIN LATERAL (
-          SELECT (Site.data->>'site_id')::INT AS site_id FROM site
-          WHERE site.data->'properties'->>'type'='roadnode' ORDER BY ST_DistanceSphere(t1.centroid, ST_GeomFromGeoJSON(site.data->>'geometry'))
-          LIMIT 1) t2 on true;
- CREATE INDEX on building_nodes (site_id);
+     WITH filtered_building AS (
+      SELECT site_buildings.site_id AS building_id, site_buildings.centroid
+      FROM shelter_node, site_buildings WHERE site_buildings.description = 'school' AND ST_DistanceSphere(site_buildings.centroid, shelter_node.shelter_geom)<=1000
+      ),
+      C AS (
+      SELECT t1.building_id AS building_id, t2.site_id AS roadnode_id
+      FROM filtered_building t1 LEFT JOIN LATERAL (SELECT (Site.data->>'site_id')::INT AS site_id FROM site
+                                                   WHERE site.data->'properties'->>'type'='roadnode'
+                                                   ORDER BY ST_DistanceSphere(t1.centroid, ST_GeomFromGeoJSON(site.data->>'geometry')) LIMIT 1) t2 on true
+      )
+      SELECT * INTO TEMPORARY TABLE building_nodes FROM C;
+      //CREATE INDEX on building_nodes (roadnode_id);
 
- WITH D AS (
-  SELECT src, dest.building_id AS dest, (unnest(e)->>'distance')::INT AS cost
-  FROM shelter_node as src
-  CROSS JOIN building_nodes as dest
-  CROSS JOIN LATERAL  (MATCH (n: RoadNode), (m: RoadNode), path=DIJKSTRA((n)-[e:Road]->(m), e.distance)
-             WHERE n.site_id = (select distinct(shelter_node.site_id) from shelter_node where shelter_node.site_id = src.site_id )
-             AND m.site_id = (select distinct(building_nodes.site_id) from building_nodes where building_nodes.site_id = dest.site_id)
-             RETURN n,m, edges(path) AS e) AS graph
-  )
- SELECT COUNT(*) FROM (
-   SELECT dest FROM D
-   GROUP BY dest
-   ORDER BY SUM(cost)
-   LIMIT 5
-  ) as res;
+      SELECT COUNT(*) FROM (
+        SELECT dest
+        FROM (SELECT src, dest.building_id AS dest, (unnest(e)->>'distance')::INT AS distance
+              FROM shelter_node as src CROSS JOIN building_nodes as dest
+              CROSS JOIN LATERAL (MATCH (n: RoadNode), (m: RoadNode), path=DIJKSTRA((n)-[e:Road]->(m), e.distance)
+                                 WHERE n.site_id = (select distinct(shelter_node.roadnode_id) from shelter_node where shelter_node.roadnode_id = src.roadnode_id)
+                                 AND m.site_id = (select distinct(building_nodes.roadnode_id) from building_nodes where building_nodes.roadnode_id = dest.roadnode_id)
+                                 RETURN n,m, edges(path) AS e) AS graph
+              ) AS shelter_building_pair
+        GROUP BY dest
+        ORDER BY SUM(distance), dest
+        LIMIT 5
+      ) as D;
 
  */
 
