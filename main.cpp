@@ -139,7 +139,7 @@ void scalingData(int SF){
 
 int main(int argc, char *argv[]) {
 
-    scalingData(2);
+//    scalingData(2);
 
 
 //    cout << "TEST" << endl;
