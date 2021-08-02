@@ -45,7 +45,7 @@ public:
                 }
             }
         }
-        if( temp != "") answer.push_back(temp);
+        answer.push_back(temp);
 
         return answer;
     }
@@ -68,9 +68,9 @@ public:
             string value = val.value();
             types[key] = value;
         }
-        for( auto val :  types ){
-            cout << val.first << "\t" << val.second << endl;
-        }
+//        for( auto val :  types ){
+//            cout << val.first << "\t" << val.second << endl;
+//        }
     }
 
     string genValue(string type , int sf, int SF,  string value)
@@ -91,6 +91,10 @@ public:
         }
             // category
         else if( type== "category" )
+        {
+            return value;
+        }
+        else if( type== "category_int" )
         {
             return value;
         }
@@ -135,6 +139,24 @@ public:
                 return rand_date;
             }
         }
+        else if(type == "date(YYYY-MM-DD HH:MM:SS)" ){
+
+            int a, b, c, d, e, f;
+            char rand_date[20];
+            sscanf(value.c_str(), "%d-%d-%d %d:%d:%d", &a, &b, &c, &d, &e, &f);
+            if( b == 2 ){
+                sprintf(rand_date, "%d-%02d-%02d %02d:%02d:%02d", a, b, rand()%28+1, rand()%24, rand()%60, rand()%60);
+                return rand_date;
+            }
+            else if( b%2 == 1){
+                sprintf(rand_date, "%d-%02d-%02d %02d:%02d:%02d", a, b, rand()%31+1, rand()%24, rand()%60, rand()%60);
+                return rand_date;
+            }
+            else{
+                sprintf(rand_date, "%d-%02d-%02d %02d:%02d:%02d", a, b, rand()%30+1, rand()%24, rand()%60, rand()%60);
+                return rand_date;
+            }
+        }
             // custom field
         else if(type== "email" ) {
             string id = "abcdefghij";
@@ -147,7 +169,7 @@ public:
             if ( val % 3 == 2 ) return (id + "@naver.com");
         }
         else{
-            cout << "NOT SUPPORTED:" << type <<":"<< value<< endl;
+            cout << "NOT SUPPORTED TYPE:" << type <<":"<< value<< endl;
             return "";
         }
     }
@@ -157,6 +179,7 @@ public:
         if( j.is_number_integer() ) return to_string(j.get<int>());
         if( j.is_number_float() ) return to_string(j.get<float>());
         if( j.is_string()) return j.get<string>();
+
     }
 
     void scaleTable(string filename, int SF, string separater=","){
@@ -190,12 +213,13 @@ public:
             else{
                 auto values =  split(line,separater[0]);
                 for ( int sf = 0 ; sf < SF ; sf++) {
-                    for ( int i =  0 ; i < values.size(); i++) {
+                    for ( int i =  0 ; i < types.size(); i++) {
 
-                        string genval = genValue(types[ordered_attrs[i]], sf,  SF, values[i]);
-
-                        outfile.write(genval.c_str(), genval.size());
-
+                        if( values[i] != "")
+                        {
+                            string genval = genValue(types[ordered_attrs[i]], sf,  SF, values[i]);
+                            outfile.write(genval.c_str(), genval.size());
+                        }
                         if( i != values.size()-1){
                             outfile.write(separater.c_str(),1);
                         }
@@ -235,21 +259,55 @@ public:
                 for (auto type : types){
                     auto attrs = split(type.first,'.');
                     if( attrs.size() == 1){
-                        string gval = genValue(type.second, sf, SF, getValue(x[attrs[0]]));
-                        x[attrs[0]] = gval;
-                    }
-                    else if (attrs.size() == 2){
-                        if( x[attrs[0]].is_array()){
-                            vector<json> vec;
-                            for (auto elem :  x[attrs[0]]){
-                                elem[attrs[1]] = genValue(type.second, sf, SF, getValue(elem[attrs[1]]));
-                                vec.push_back(elem);
+                        if (  x.contains(attrs[0])) {
+                            string gval = genValue(type.second, sf, SF, getValue(x[attrs[0]]));
+                            if (type.second.find("int") != std::string::npos) {
+                                x[attrs[0]] = atoll(gval.c_str());
+                            } else if (type.second.find("double") != std::string::npos) {
+                                x[attrs[0]] = atof(gval.c_str());
+                            } else {
+                                x[attrs[0]] = gval;
                             }
-                            x[attrs[0]] =vec;
                         }
-                        else{
 
-                            x[attrs[0]][attrs[1]] = genValue(type.second, sf, SF, getValue(x[attrs[0]][attrs[1]]));
+//                        if  (x[attrs[0]].is_null())    {std::cout << "is null\n";}
+//                        if  (x[attrs[0]].is_boolean()) {std::cout << "is bool\n";}
+//                        if  (x[attrs[0]].is_number())  {std::cout << "is numb\n";}
+//                        if  (x[attrs[0]].is_object())  {std::cout << "is obj\n";}
+//                        if (x[attrs[0]].is_array())   {std::cout << "is array\n";}
+//                        if (x[attrs[0]].is_string())  {std::cout << "is string\n";}
+                    }
+                    else if (attrs.size() == 2) {
+                        if (x.contains(attrs[0])) {
+                            if (x[attrs[0]].is_array()) {
+                                vector<json> vec;
+                                for (auto elem :  x[attrs[0]]) {
+
+                                    if (elem.contains(attrs[1])) {
+                                        string gval = genValue(type.second, sf, SF, getValue(elem[attrs[1]]));
+                                        if (type.second.find("int") != std::string::npos) {
+                                            elem[attrs[1]] = atoll(gval.c_str());
+                                        } else if (type.second.find("double") != std::string::npos) {
+                                            elem[attrs[1]] = atof(gval.c_str());
+                                        } else {
+                                            elem[attrs[1]] = gval;
+                                        }
+                                        vec.push_back(elem);
+                                    }
+                                }
+                                x[attrs[0]] = vec;
+                            } else {
+                                if (x.contains(attrs[0]) && x[attrs[0]].contains(attrs[1])) {
+                                    string gval = genValue(type.second, sf, SF, getValue(x[attrs[0]][attrs[1]]));
+                                    if (type.second.find("int") != std::string::npos) {
+                                        x[attrs[0]][attrs[1]] = atoll(gval.c_str());
+                                    } else if (type.second.find("double") != std::string::npos) {
+                                        x[attrs[0]][attrs[1]] = atof(gval.c_str());
+                                    } else {
+                                        x[attrs[0]][attrs[1]] = gval;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -259,6 +317,82 @@ public:
         outfile.flush();
     }
 
+
+    void AdjustProductAndOrder(string ProductFilePath, string OrderFilePath){
+
+        std::ifstream inputfile(ProductFilePath);
+        if(inputfile.fail()){
+            return  ;
+        }
+        string line = "";
+        int nline = 0 ;
+        int id_pos = 0 ;
+        int title_pos = 0 ;
+        int price_pos = 0 ;
+
+        map<string, string> id2title;
+        map<string, double> id2price;
+
+        while (std::getline(inputfile, line))
+        {
+            if ( nline == 0){
+                auto headers =  split(line, ',');
+                int iter = 0;
+                for ( auto header : headers ){
+                    if (header == "product_id" ) {
+                        id_pos = iter;
+                    }
+                    if (header == "title" ) {
+                        title_pos = iter;
+                    }
+                    if( header == "price")  {
+                        price_pos = iter;
+                    }
+                    iter++;
+                }
+            }
+            else {
+                auto values = split(line, ',');
+                id2title[values[id_pos]] = values[title_pos];
+                id2price[values[id_pos]] = atof(values[price_pos].c_str());
+            }
+            nline++;
+        }
+
+
+        std::ifstream inputfile2(OrderFilePath);
+        if(inputfile2.fail()){
+            return  ;
+        }
+
+        line = "";
+        auto outfile = ofstream(split(OrderFilePath, '.')[0]+"_modified.json");
+
+        while (std::getline(inputfile2, line))
+        {
+            json doc;
+            stringstream stream;
+            stream.str(line);
+            stream >> doc;
+            json x = doc;
+
+            double total_price = 0;
+
+            vector<json> vec;
+            for (auto elem :  x["order_line"]){
+                elem["price"] = id2price[elem["product_id"]];
+                elem["title"] = id2title[elem["product_id"]];
+                vec.push_back(elem);
+                total_price += elem["price"].get<double>();
+            }
+            x["order_line"] =vec;
+            x["total_price"] = total_price;
+             outfile<<  x << endl;
+        }
+
+        outfile.flush();
+
+    }
 
     DataScaler(){
 
