@@ -1,0 +1,3 @@
+python finedust.py SF
+
+ex) python finedust.py 1
