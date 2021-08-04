@@ -1,0 +1,8 @@
+{
+        "patient_id" : "pk_int",
+        "patient_name" : "string",
+        "gender" : "category",
+	"date_of_birth" : "date(YYYY-MM-DD HH:MM:SS)",
+	"date_of_death" : "date(YYYY-MM-DD HH:MM:SS)"
+}
+
