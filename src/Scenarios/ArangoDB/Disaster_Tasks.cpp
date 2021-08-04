@@ -193,21 +193,14 @@ void T12(){
  *
  * For the earthquakes of which magnitude is greater than 4.5, find the building statistics.
  * The buildings are limited by 30km from the earthquake location. (Relational, Document) -> Document
- *
- * A =  SELECT Site.properties.description, COUNT(*) 
- *      FROM Earthquake, Site WHERE ST_Distance(Site.geometry, Earthquake.coordinates) <= 30km 
- *          AND Site.properties.type = 'building' 
- *          AND Earthquake.magnitude >= 4.5 
- *      GROUP BY Site.properties.description // Document
- *
  * 
 [Query]
 LET A=(FOR eq IN Earthquake
     FILTER eq.magnitude >= 4.5
-    FOR site IN Site
+    FOR site IN Site_centroid
 	    FILTER site.properties.type == 'building'
 
-	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], site.geometry)
+	    LET dist = GEO_DISTANCE([eq.longitude, eq.latitude], site.centroid)
 	    FILTER dist <= 30000
 	    
 	    COLLECT description = site.properties.description
@@ -218,32 +211,12 @@ LET A=(FOR eq IN Earthquake
 RETURN Length(A)
  */
 
-void T13(){
-
 /* 
  * [Task 14] Sources of Fine Dust.
  *
  * Analyze fine dust hotspot by date between time Z1 and Z2.
  * Print the nearest building with time of the hotspot.
  * Use window aggregation with a size of 5. (Document, Array) -> Document
- *
- * A =  SELECT date, timestamp, latitude, longitude, AVG(pm10) AS pm10_avg 
- *      FROM FineDust 
- *      WHERE timestamp >= Z1 
- *          AND timestamp <= Z2 
- *      WINDOW 1, 5, 5 // Array
- * B =  REDIMENSION(A, <pm10_avg: float>[date=0:*, timestamp=0:*, latitude=0:*, longitude=0:*]) // Array
- * C =  SELECT t1.date, t1.timestamp, (t1.latitude, t1.longitude) AS coordinates 
- *      FROM B AS t1, (
- *          SELECT date, MAX(pm10_avg) AS pm10_max 
- *          FROM B GROUP BY date
- *      ) AS t2 
- *      WHERE t1.pm10_avg = t2.pm10_max 
- *          AND t1.date = t2.date // Array 
- * D =  SELECT C.date, C.timestamp, ST_ClosestObject(Site, building, C.coordinates) AS site_id 
- *      FROM C, Site 
- *      ORDER BY C.date ASC // Document
- * 
  * 
  [Query]
  LET Z1 = 5
@@ -290,9 +263,9 @@ LET C = (
 LET D = (
     FOR c IN C
         LET NEAR = ( 
-            FOR site IN Site
+            FOR site IN Site_centroid
                 FILTER site.properties.type == 'building'
-                SORT GEO_DISTANCE([-118.34501002237936 + (c.longitude * 0.000216636), 34.011898718557454 + (c.latitude * 0.000172998)], site.geometry) ASC
+                SORT GEO_DISTANCE([-118.34501002237936 + (c.longitude * 0.000216636), 34.011898718557454 + (c.latitude * 0.000172998)], site.centroid) ASC
                 LIMIT 1
                 RETURN site
         )
@@ -316,18 +289,6 @@ RETURN Length(D)
  * Recommend the route from the current coordinates by analyzing the hotspot between time Z1 and Z2.
  * Use window aggregation with a size of 5. (Graph, Document, Array) -> Relational
  *
- * A =  SELECT (latitude, longitude) AS coordinates, AVG(pm10) AS pm10_avg 
- *      FROM FineDust 
- *      WHERE timestamp >= Z1 
- *          AND timestamp <= Z2 
- *      WINDOW *, 5, 5 // Array
- * B =  SELECT ShortestPath(RoadNode, startNode: ST_ClosestObject(Site, roadnode, current_coordinates), endNode: ST_ClosestObject(Site, roadnode, A.coordinates)) 
- *      FROM A, RoadNode, Site 
- *      WHERE Site.site_id = RoadNode.site_id 
- *      ORDER BY A.pm10_avg DESC
- *      LIMIT 1 // Relational
- * 
- * 
  * [Query]
 LET Z1 = 5
 LET Z2 = 10
@@ -404,10 +365,10 @@ LET C = (
 		)
 		
 		LIMIT 1
-		RETURN path
+		RETURN [path] 
 )
 
-RETURN Length(C)
+RETURN Length(C[0])
  */
 
 /**
