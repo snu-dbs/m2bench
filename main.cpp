@@ -208,36 +208,6 @@ int main(int argc, char *argv[]) {
 //    long ts = 1600182000+10800*3.5;
 //    timer(T16, ts);
 
-<<<<<<< HEAD
-//    string curdate3 = "2018-07-07";//"2021-12-25";
-//    string pid = "B007SYGLZO";
-//    string curdate = "2021-06-01";
-//    if(argc == 2 && strcmp( argv[1],"T3") == 0){
-//        timer(T3, curdate3);
-//    }
-//    else if (argc == 2 && strcmp( argv[1],"T4") == 0){
-//    timer(T4,10000,10);
-//    }
-//    else if (argc == 2 && strcmp( argv[1],"T5") == 0){
-//        timer(T5,pid, curdate);
-//    }
-//    //timer(T3,curdate3);
-=======
-    //string curdate3 = "2018-07-07";//"2021-12-25";
-    //string pid = "B007SYGLZO";
-    //string curdate = "2021-06-01";
-    //if(argc == 2 && strcmp( argv[1],"T3") == 0){
-    //    timer(T3, curdate3);
-    //}
-    //else if (argc == 2 && strcmp( argv[1],"T4") == 0){
-//    timer(T4,10000,10);
-    //}
-    //else if (argc == 2 && strcmp( argv[1],"T5") == 0){
-    //    timer(T5,pid, curdate);
-    //}
-    //timer(T3,curdate3);
->>>>>>> e9426e831660e6a6629a1b7b8a806ebfd55b506a
-
       return 0;
 }
 
