@@ -11,7 +11,7 @@
 #include "src/Example/scidb.h"
 #include <string>
 #include <Generator/DataScaler.h>
-
+#include <string.h>
 using json = nlohmann::json;         // for convenience
 using namespace std;
 using std::chrono::high_resolution_clock;
@@ -69,78 +69,175 @@ void timer( void (*f)()){
 
 }
 
-void tasks(){
-    /* M2Bench */
+
+void scalingData(int SF){
+    cout << "Scale Customer ..." << endl;
+    auto ScalingCustomer = DataScaler();
+    ScalingCustomer.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/customer_schema.json");
+    ScalingCustomer.scaleTable("/home/mxmdb/m2bench/data/ecommerce/table/Customer.csv", SF, "|");
+    cout << "Done ..." << endl;
+
+    cout << "Scale Product ..." << endl;
+    auto ScalingProduct = DataScaler();
+    ScalingProduct.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/product_schema.json");
+    ScalingProduct.scaleTable("/home/mxmdb/m2bench/data/ecommerce/table/Product.csv", SF, ",");
+    cout << "Done ..." << endl;
+
+    cout << "Scale Order ..." << endl;
+
+    string order_path = "/home/mxmdb/m2bench/data/ecommerce/json/order.json";
+    auto ScalingOrder = DataScaler();
+    ScalingOrder.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/order_schema.json");
+    ScalingOrder.scaleJson(order_path, SF);
+    cout << "Done ..." << endl;
+
+    cout << "Adjust Product and Order" << endl;
+    auto order_res = ScalingOrder.split(order_path, '.')[0]+"_SF"+to_string(SF)+".json";
+    auto order_res_modified = ScalingOrder.split(order_path, '.')[0]+"_SF"+to_string(SF)+"_modified.json";
+
+    auto Adjusting = DataScaler();
+    Adjusting.AdjustProductAndOrder("/home/mxmdb/m2bench/data/ecommerce/table/Product_SF"+to_string(SF)+".csv",
+                                    order_res);
+
+    cout << "Replace ..." << endl;
+    system(("mv "+order_res_modified+" "+order_res).c_str());
+    cout << "Done ..." << endl;
+
+
+
+
+    cout << "Scale Review ..." << endl;
+
+    auto ScalingReview = DataScaler();
+    ScalingReview.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/review_schema.json");
+    ScalingReview.scaleJson("/home/mxmdb/m2bench/data/ecommerce/json/review.json", SF);
+    cout << "Done ..." << endl;
+
+    cout << "Scale Patient ..." << endl;
+
+    auto ScalingPatient = DataScaler();
+    ScalingPatient.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/patient_schema.json");
+    ScalingPatient.scaleTable("/home/mxmdb/m2bench/data/healthcare/table/Patient.csv", SF, ",");
+    cout << "Done ..." << endl;
+
+    cout << "Scale Prescription ..." << endl;
+
+    auto ScalingPrescription = DataScaler();
+    ScalingPrescription.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/prescription_schema.json");
+    ScalingPrescription.scaleTable("/home/mxmdb/m2bench/data/healthcare/table/Prescrlsiption.csv", SF, ",");
+    cout << "Done ..." << endl;
+
+    cout << "Scale Diagnosis ..." << endl;
+    auto ScalingDiagnosis = DataScaler();
+    ScalingDiagnosis.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/diagnosis_schema.json");
+    ScalingDiagnosis.scaleTable("/home/mxmdb/m2bench/data/healthcare/table/Diagnosis.csv", SF, ",");
+
+
+
+
+}
+
+int main(int argc, char *argv[]) {
+
+//    scalingData(2);
+
+
+//    cout << "TEST" << endl;
 //    string curdate = "2021-06-01";
-    //    T4();
+//       timer(T2);
 
-//    timer(T2);
+//        timer(T1, curdate);
 
 
-//    string curdate = "2018-07-07";//"2021-12-25";
-//    timer(T3, curdate);
-
-//    timer(T14, 8, 15);
-    // cout << to_string(distance_haversine(34.022451596557452547, -118.26615451837935211, 34.022079977777786,  -118.26600173333334)) << endl;
-
-    // timer(T15, 0, 1, 34.1186023, -118.3007336);
-//    timer(T13);
-
-//    string pid = "B007SYGLZO";
-//    string curdate = "2021-06-01";
-//    timer(T5,pid, curdate);
-
-//     timer(T6, 9);
-
-//    timer(T8,9);
-
-//    timer(T9);
-
-    string ts1 = "2020-06-01 00:00:00";
-    string ts2 = "2020-06-01 02:00:00";
-    timer(T10,ts1,ts2);
+//    string T10_ts1 = "2020-06-01 00:00:00";
+//    string T10_ts2 = "2020-06-01 02:00:00";
+//    timer(T10, T10_ts1, T10_ts2);
 
 //    int earthquake_X = 41862;
 //    timer(T11, earthquake_X);
 
-//    string ts1 = "2020-09-17 00:00:00";
-//    string ts2 = "2020-09-17 01:00:00";
-//    timer(T12,ts1,ts2);
+//    string T12_ts1 = "2020-09-17 00:00:00";
+//    string T12_ts2 = "2020-09-17 01:00:00";
+//    timer(T12,T12_ts1,T12_ts2);
 
+//    if(argc == 2 && strcmp( argv[1],"T10") == 0){
+//        cout<<"T10 start"<<endl;
+//        timer(T10, T10_ts1, T10_ts2);
+//    }
+//    else if (argc == 2 && strcmp( argv[1],"T11") == 0){
+//        cout<<"T11 start"<<endl;
+//        timer(T11, earthquake_X);
+//    }
+//    else if (argc == 2 && strcmp( argv[1],"T12") == 0){
+//        cout<<"T12 start"<<endl;
+//        timer(T12,T12_ts1,T12_ts2);
+//    }
 
-    // long ts = 1600182000+10800*3.5;
-    // timer(T16,ts);
-    // timer(T13);
+//    else timer(T11, earthquake_X);
 
-
-//     timer(T14, 0, 60);
-
-//    string pid = "B007SYGLZO";
-//    string curdate = "2021-06-01";
-//    timer(T5,pid, curdate);
-
-//    coo_finedust();
-}
-
-void scalingTable(){
-    //    auto ds = DataScaler();
-    //    ds.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/review_schema.json");
-    //    ds.scaleJson("/home/mxmdb/m2bench/data/ecommerce/json/review.json", 2);
-}
-
-int main() {
-//    cout << "TEST" << endl;
-//    string curdate = "2021-06-01";
+//    string T12_ts1 = "2020-09-17 00:00:00";
+//    string T12_ts2 = "2020-09-17 01:00:00";
+//            timer(T12,T12_ts1,T12_ts2);
 //    timer(T2);
 
-    tasks();
-    return 0;
 
+//    if(argc == 2 && strcmp( argv[1],"T1") == 0){
+//        timer(T1, curdate);
+//    }
+//    else if (argc == 2 && strcmp( argv[1],"T2") == 0){
+//        timer(T2);
+//    }
+//    else if (argc == 2 && strcmp( argv[1],"T6") == 0){
+//        timer(T6, 9);
+//    }
+//    else if (argc == 2 && strcmp( argv[1],"T16") == 0){
+//        timer(T16, ts);
+//    }
+    //timer(T6, 9);
+    //
+     // if(argc == 2 && strcmp( argv[1],"T7") == 0){
+     //     timer(T7, 9);
+     // }
+     // else if (argc == 2 && strcmp( argv[1],"T8") == 0){
+     //     timer(T8, 9);
+     // }
+     // else if (argc == 2 && strcmp( argv[1],"T9") == 0){
+     //     timer(T9, 9);
+     // }
+//         timer(T8,9);
+//    long ts = 1600182000+10800*3.5;
+//    timer(T16, ts);
 
-//    auto ds = DataScaler();
-//    ds.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/review_schema.json");
-//    ds.scaleJson("/home/mxmdb/m2bench/data/ecommerce/json/review.json", 2);
-//    return 0;
+<<<<<<< HEAD
+//    string curdate3 = "2018-07-07";//"2021-12-25";
+//    string pid = "B007SYGLZO";
+//    string curdate = "2021-06-01";
+//    if(argc == 2 && strcmp( argv[1],"T3") == 0){
+//        timer(T3, curdate3);
+//    }
+//    else if (argc == 2 && strcmp( argv[1],"T4") == 0){
+//    timer(T4,10000,10);
+//    }
+//    else if (argc == 2 && strcmp( argv[1],"T5") == 0){
+//        timer(T5,pid, curdate);
+//    }
+//    //timer(T3,curdate3);
+=======
+    //string curdate3 = "2018-07-07";//"2021-12-25";
+    //string pid = "B007SYGLZO";
+    //string curdate = "2021-06-01";
+    //if(argc == 2 && strcmp( argv[1],"T3") == 0){
+    //    timer(T3, curdate3);
+    //}
+    //else if (argc == 2 && strcmp( argv[1],"T4") == 0){
+//    timer(T4,10000,10);
+    //}
+    //else if (argc == 2 && strcmp( argv[1],"T5") == 0){
+    //    timer(T5,pid, curdate);
+    //}
+    //timer(T3,curdate3);
+>>>>>>> e9426e831660e6a6629a1b7b8a806ebfd55b506a
 
+      return 0;
 }
 

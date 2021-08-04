@@ -1,0 +1,10 @@
+{
+	"customer_id" : "pk_string",
+	"person_id" : "fk_int_sf",
+	"gender" : "category",
+	"date_of_birth" : "date(YYYY-MM-DD)",
+	"zipcode" : "int",
+	"city" : "category",
+	"county" : "category",
+	"state" : "category"
+}

@@ -1,0 +1,7 @@
+{
+        "patient_id" : "fk_int_sf",
+        "drug_id" : "fk_int",
+	"start_date" : "date(YYYY-MM-DD HH:MM:SS)",
+	"end_date" : "date(YYYY-MM-DD HH:MM:SS)"
+}
+

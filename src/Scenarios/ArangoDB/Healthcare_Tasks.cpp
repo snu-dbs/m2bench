@@ -2,7 +2,6 @@
 // Created by mxmdb on 21. 5. 3..
 //
 
-
 /**
  *
  * [Task6] Drug Interaction (R,D=>R)
@@ -12,11 +11,11 @@
  *          From Prescription
  * *        Where patient_id = @param
 
- *      B: Select interaction_drug.name
+*      B: Select drug_interaction.interaction_drug.name
  *          From Drug, A
- *          Unnest Drug.drug_interaction_list as interaction_drug
+ *          Unnest Drug.drug_interaction_list as drug_interaction
  *          Where A.drug_id == Drug.drug_id
- *          Group by interaction_drug.name
+ *          Group by drug_interaction.interaction_drug.name
  *
  *
  *      @param patient_id
