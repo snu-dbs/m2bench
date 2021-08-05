@@ -291,43 +291,35 @@ void T2(){
  
  
 void T3(){
+Let param_date = "2018-07-07" 
 
-Let param_date = "2018-07-07"
-
-Let A = (for order in Order
-            Filter order.order_date == param_date
-            Collect customer_id = order.customer_id
-            Aggregate order_price = Sum(order.total_price)
-            Sort order_price Desc
-            Limit 1 
-            For customer in Customer
-                Filter customer.customer_id == customer_id
-                Return {person_id: customer.person_id, customer: customer.customer_id})
-
-
-Let B = (For person in Person
-            For a in A
-            Filter a.person_id == TO_NUMBER(person._key)
-                For v, e in 2..2 INBOUND person Follows 
-                Return v)
-                
-
-Let C = (For b in B
-            for customer in Customer 
-                Filter TO_NUMBER(b._key) == customer.person_id
-                For order in Order
-                    Filter customer.customer_id == order.customer_id 
-                    for order_line in order.order_line
-                        For product in Product 
-                            Filter product.product_id == order_line.product_id
-                            Return{cid: order.customer_id, pid: order_line.product_id, brand_id: product.brand_id})
-
-Let D = (for c in C
-            for brand in Brand
-                filter c.brand_id == brand.brand_id
-                collect industry = brand.industry with count into customer_count 
-                return{ industry: industry, customer_count: customer_count})
-
+Let A = (for order in Order 
+	        Filter order.order_date == param_date 
+	            Collect customer_id = order.customer_id 
+	            Aggregate order_price = Sum(order.total_price) 
+	            Sort order_price Desc Limit 1 
+	            For customer in Customer 
+	                Filter customer.customer_id == customer_id 
+	                    Return {person_id: customer.person_id, customer: customer.customer_id}) 
+Let B = (For person in Person 
+	        For a in A Filter  
+	        TO_STRING(a.person_id) == person._key 
+	            For v, e in 2..2 INBOUND person Follows 
+	            Return v) 
+Let C = (For b in B 
+	           for customer in Customer 
+	                Filter TO_NUMBER(b._key) == customer.person_id 
+	                    For order in Order 
+	                        Filter customer.customer_id == order.customer_id 
+	                            for order_line in order.order_line 
+	                                For product in Product 
+	                                    Filter product.product_id == order_line.product_id 
+	                                        Return{cid: order.customer_id, pid: order_line.product_id, brand_id: product.brand_id}) 
+Let D = (for c in C 
+        	for brand in Brand 
+	            filter c.brand_id == brand.brand_id 
+	                collect industry = brand.industry with count into customer_count  
+	                    return{ industry: industry, customer_count: customer_count}) 
 return length(D)
 ) */
 
@@ -354,7 +346,7 @@ return length(D)
 void T4(){
     
 
-let param_industry = "Sports"
+let param_industry = "Leisure"
 let param_topN = 10
 let param_amount = 10000
 
@@ -363,26 +355,26 @@ Let A = (for brand in Brand
             for product in Product
                 filter brand.brand_id == product.brand_id
                 for order in Order
-                    for order_line in order.order_line
-                        filter product.product_id == order_line.product_id
-                        //filter product.product_id == "B005G2G2SQ"
-                        collect cid = order.customer_id 
-                        aggregate total_spent = sum(order_line.price)
-                        filter total_spent > param_amount
-                        for customer in Customer 
-                        filter cid == customer.customer_id
-                            return distinct {cpid: customer.person_id, total_spent: total_spent})
+                    filter product.product_id in order.order_line[*].product_id 
+                        for order_line in order.order_line
+                            filter product.product_id == order_line.product_id
+                                collect cid = order.customer_id 
+                                aggregate total_spent = sum(order_line.price)
+                                filter total_spent > param_amount
+                                    for customer in Customer 
+                                        filter cid == customer.customer_id
+                                            return distinct {cpid: customer.person_id, total_spent: total_spent})
 
 Let B =(For a in A
             For person in Person
-            Filter TO_NUMBER(person._key) == a.cpid
+            Filter person._key == TO_STRING(a.cpid)
                 LET followers = LENGTH(FOR v IN 1..1 INBOUND person Follows RETURN 1)
                 sort followers Desc limit param_topN
                 Return  {person: person._key, followers: followers})
 
 Let C = (for person in Person
          for b in B
-            filter TO_NUMBER(b.person) == TO_NUMBER(person._key)
+            filter b.person == person._key
             for v in 1..1 OUTBOUND person Interested_in
             return distinct v._id)
             
@@ -424,7 +416,7 @@ Let A = (For order in Order
 
 Let B = (For person in Person
             For a in A
-            Filter a.person_id == TO_NUMBER(person._key)
+            Filter TO_STRING(a.person_id) == person._key
                 For v, e in OUTBOUND person Follows 
                 Return {person, v, e})
                 
