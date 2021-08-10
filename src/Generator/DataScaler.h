@@ -121,6 +121,7 @@ public:
 
             return value;
         }
+        // custom field
         else if(type == "date(YYYY-MM-DD)" ){
 
             int a, b, c;
@@ -157,7 +158,25 @@ public:
                 return rand_date;
             }
         }
-            // custom field
+        else if(type == "date(DD/MM/YYYY/HH:MM:SS)"){
+
+            int a, b, c, d, e, f;
+            char rand_date[20];
+            sscanf(value.c_str(), "%d/%d/%d/%d:%d:%d", &a, &b, &c, &d, &e, &f);
+            if( b == 2 ){
+                sprintf(rand_date, "%02d/%02d/%d/%02d:%02d:%02d", rand()%28+1, b, c, rand()%24, rand()%60, rand()%60);
+                return rand_date;
+            }
+            else if( b%2 == 1){
+                sprintf(rand_date, "%02d/%02d/%d/%02d:%02d:%02d", rand()%31+1, b, c, rand()%24, rand()%60, rand()%60);
+                return rand_date;
+            }
+            else{
+                sprintf(rand_date, "%02d/%02d/%d/%02d:%02d:%02d", rand()%30+1, b, c, rand()%24, rand()%60, rand()%60);
+                return rand_date;
+            }
+
+        }
         else if(type== "email" ) {
             string id = "abcdefghij";
             for (int i = 0; i < 10; i++) {
@@ -227,6 +246,72 @@ public:
                             outfile.write("\n", 1);
                         }
                         outfile.flush();
+                    }
+                }
+            }
+            nline++;
+        }
+        outfile.flush();
+    }
+
+    void scaleBipartiteEdge(string filename, int SF, string separater=","){
+
+        std::ifstream inputfile(filename);
+        if(inputfile.fail()){
+            return  ;
+        }
+        string line = "";
+        int nline = 0 ;
+
+        auto outfile = ofstream(split(filename, '.')[0]+"_SF"+to_string(SF)+".csv");
+
+        while (std::getline(inputfile, line))
+        {
+            if ( nline == 0){
+                auto headers =  split(line, separater[0]);
+                int iter = 0;
+                for ( auto header : headers ){
+                    ordered_attrs.push_back(header);
+                    outfile.write(header.c_str(),header.size());
+                    if( iter != headers.size()-1){
+                        outfile.write(separater.c_str(),1);
+                    }
+                    else{
+                        outfile.write("\n", 1);
+                    }
+                    iter++;
+                }
+            }
+            else{
+                auto values =  split(line,separater[0]);
+                for ( int sf_dest = 0 ; sf_dest < SF  ; sf_dest++ ) {
+                    for (int sf_source = 0; sf_source < SF; sf_source++) {
+                        for (int i = 0; i < types.size(); i++) {
+
+                            if (i == 0) { //SOURCE
+                                if (values[i] != "") {
+                                    string genval = genValue(types[ordered_attrs[i]], sf_source, SF, values[i]);
+                                    outfile.write(genval.c_str(), genval.size());
+                                }
+                            } else if (i == 1) { //DESTINATIOn
+                                if (values[i] != "") {
+                                    string genval = genValue(types[ordered_attrs[i]], sf_dest, SF, values[i]);
+                                    outfile.write(genval.c_str(), genval.size());
+                                }
+                            } else {
+                                if (values[i] != "") {
+                                    string genval = genValue(types[ordered_attrs[i]], sf_source, SF, values[i]);
+                                    outfile.write(genval.c_str(), genval.size());
+                                }
+                            }
+
+                            if (i != values.size() - 1) {
+                                outfile.write(separater.c_str(), 1);
+                            } else {
+                                outfile.write("\n", 1);
+                            }
+                            outfile.flush();
+                        }
                     }
                 }
             }
