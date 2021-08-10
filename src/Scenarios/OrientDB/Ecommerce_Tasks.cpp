@@ -96,24 +96,26 @@ void T2(){}
 
 
 /**
- *  [Task3] Product Purchase Propensities ([R, D, G]=>R).
- *  Given a certain special day, find the customer who spent the highest amount of money in orders, 
- *  and analyze the purchase propensities of people within 3-hop relationships.
+ [Task4] Customer Interests ([R, D, G]=>R).
+ *  Find the interests of top-N famous customers who made more than a certain amount of orders in a given product category.
  *
- *      A: SELECT cid, SUM(total_price) AS order_price FROM Order
- *         WHERE  order_date = 2021/12/25
- *         GROUP BY cid ORDER BY order_price DESC LIMIT 1 // Document
+ *      A: SELECT DISTINCT Order.cid AS cid , SUM(Order.Order_line.price) as total_spent
+ *         FROM Product, Order, Brand UNNEST Order.order_line
+ *         WHERE Product.pid=Order.order_line.pid AND Brand.brand_id=Product.brand_id AND Brand.industry = @param
+ *         GROUP BY cid
+ *         HAVING total_spent > @param// Document
  *
- *      B: SELECT SNS.p2.person_id AS 2hop_cid FROM A, SNS
- *         WHERE (p1:Person) - [r:FOLLOWS*2] - > (p2:Person) AND SNS.p2.person_id=A.cid // Relational
- * 
- *      C: SELECT Order.cid AS cid, Order.order_line.pid AS pid, Product.brand_id AS brand_id FROM  B, Order, Product
- *         UNNEST Order.order_line WHERE Order.cid=B.2hop_cid AND Product.pid=Order.order_line.pid // Document
- * 
- *      D: SELECT Brand.industry, COUNT(*) AS customer_count FROM C, Brand WHERE C.brand_id=Brand.brand_id GROUP BY Brand.industry // Relational
+ *      B: SELECT SNS.influencer.person_id AS person_id, COUNT(SNS.n) AS followers FROM A, SNS
+ *         WHERE (n:Person)  - [r:FOLLOWS] - > (influencer:Person) AND SNS.influencer.person_id=A.cid ORDER BY followers DESC LIMIT N = @param // Relational
+ *
+ *      C: SELECT SNS.t.tid FROM B, SNS  WHERE (p:Person)  - [r:HAS_INTEREST] - > (t:Tag) AND SNS.p.person_id=B.person_id // Relational
+ *
+ *      @param industry
+ *      @param N
+ *      @param min_spent
 
-
-void T3(){
+*/
+void T4(){
     
 select count(tag_id)
 from (select distinct tag_id as tag_id 
@@ -143,7 +145,7 @@ unwind tag_id))
     
 }
 
-*/
+
 
 /**
  * [Task5]. Filtering social network (R, D, G) => Graph
@@ -157,7 +159,7 @@ unwind tag_id))
  *  B: SELECT p, r, node AS subGraph FROM A, SNS
  *      WHERE (p:Person) - [r] -> (node)
  *      AND SNS.p.person_id=A.person_id // Graph
-
+*/
 void T5(){
     
 select expand(out('Follows')) 
@@ -167,11 +169,12 @@ from Customer
 Where gender = "F"
 and customer_id in (Select customer_id 
                    from Order
-                   where order_date > "2020-06-21"
-                   and order_date<"2021-06-21"
-                   and order_id in (select order_id
+                   where order_id in (select order_id
                                    from Review 
-                                   where product_id = "B007SYGLZO")))    
+                                   where product_id = "B007SYGLZO")
+                   and  order_date > "2020-06-21"
+                   and order_date<"2021-06-21"
+                                  ))
+        
     
 }
-*/
