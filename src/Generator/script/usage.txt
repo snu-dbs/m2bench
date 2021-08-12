@@ -1,3 +1,9 @@
+[Ecommerce]
+1. Download TPC-DS dataset and Unibench dataset (SF=1)
+2.
+3.
+
+[Disater]
 python finedust.py SF
 
 ex) python finedust.py 1
