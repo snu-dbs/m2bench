@@ -125,15 +125,11 @@
 
     SET graph_path = Road_network;
 
-    WITH filtered_gps AS (
-        SELECT gps_id, coordinates FROM gps
-        WHERE gps.time >= to_timestamp('2020-09-17 00:00:00', 'YYYY-MM-DD HH24:MI:SS') AND gps.time < to_timestamp('2020-09-17 01:00:00' , 'YYYY-MM-DD HH24:MI:SS')
-        ),
-        A AS (
-        SELECT shelter.shelter_id, ST_GeomFromGeoJSON(site_centroid.data->>'centroid') AS centroid, COUNT(filtered_gps.gps_id) AS numGps
-        FROM shelter, site_centroid, filtered_gps
-        WHERE (site_centroid.data->>'site_id')::int = shelter.site_id AND site_centroid.data->'properties'->>'type'='building' AND site_centroid.data->'properties'->>'description'='hospital'
-        AND ST_DWithin(ST_GeomFromGeoJSON(site_centroid.data->>'centroid')::geography, filtered_gps.coordinates::geography, 5000, false)
+    WITH A AS (
+        SELECT shelter.shelter_id, ST_GeomFromGeoJSON(site_centroid.data->>'centroid') AS centroid, COUNT(gps.gps_id) AS numGps
+        FROM shelter, site_centroid, gps
+        WHERE gps.time >= to_timestamp('2020-09-17 00:00:00', 'YYYY-MM-DD HH24:MI:SS') AND gps.time < to_timestamp('2020-09-17 01:00:00' , 'YYYY-MM-DD HH24:MI:SS') AND (site_centroid.data->>'site_id')::int = shelter.site_id AND site_centroid.data->'properties'->>'type'='building' AND site_centroid.data->'properties'->>'description'='hospital'
+        AND ST_DWithin(ST_GeomFromGeoJSON(site_centroid.data->>'centroid')::geography, gps.coordinates::geography, 5000, false)
         GROUP BY shelter.shelter_id, ST_GeomFromGeoJSON(site_centroid.data->>'centroid')
         ORDER BY numGps DESC
         LIMIT 1
