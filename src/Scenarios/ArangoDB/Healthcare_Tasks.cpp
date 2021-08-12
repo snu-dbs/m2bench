@@ -62,22 +62,18 @@ void T7(){
 
     //Let A = (For diagnosis in Diagnosis
     //Filter diagnosis.patient_id == 9
-    //Return {disease_id: diagnosis.disease_id})
+    //Return diagnosis.disease_id)
     //
     //Let B = (For a in A
     //For disease in Disease_network_nodes
-    //FILTER a.disease_id == TO_NUMBER(disease._key)
+    //FILTER TO_STRING(a) == disease._key
     //For v1, e1 in 1..1 OUTBOUND disease Disease_network_edges
     //For v2, e2 in 1..1 INBOUND v1 Disease_network_edges
     //RETURN DISTINCT {disease_id: TO_NUMBER(v2._key)})
     //
-    //LET T = (For diagnosis in Diagnosis
-    //Filter diagnosis.patient_id == 9
-    //Return diagnosis.disease_id)
-    //
     //Let C = (For diagnosis in Diagnosis
     //For b in B
-    //Filter diagnosis.disease_id == b.disease_id and diagnosis.patient_id != 9 and b.disease_id not in T
+    //Filter diagnosis.disease_id == b.disease_id and diagnosis.patient_id != 9 and b.disease_id not in A
     //RETURN distinct {patient_id: diagnosis.patient_id})
     //
     //For p in Patient
@@ -107,49 +103,45 @@ void T7(){
  */
 
 void T8(){
-    /*
-     * db.drug_temp.drop()
-     * db.target_temp.drop()
-     * db.has_bond.drop()
-     *
-     * db._create("drug_temp")
-     * db._create("target_temp")
-     * db._createEdgeCollection("has_bond")
-     *
-    */
-    /// //For drug in Drug
-    ////INSERT {_key:TO_STRING(drug.drug_id), drug_name:drug.drug_name} INTO drug_temp
+
+ //db.drug_temp.drop()
+ //db.target_temp.drop()
+ //db.has_bond.drop()
+
+ //db._create("drug_temp")
+ //db._create("target_temp")
+ //db._createEdgeCollection("has_bond")
+
+    //For drug in Drug
+    //INSERT {_key:TO_STRING(drug.drug_id), drug_name:drug.drug_name} INTO drug_temp
     //
-    ////Let B = (For drug in Drug
-    ////For target in drug.targets
-    ////RETURN DISTINCT {target_id: target.id, target_name: target.name})
-    ////For b in B
-    ////INSERT {_key: TO_STRING(b.target_id), target_name:b.target_name} INTO target_temp
+    //Let B = (For drug in Drug
+    //For target in drug.targets
+    //RETURN DISTINCT {target_id: target.id, target_name: target.name})
+    //For b in B
+    //INSERT {_key: TO_STRING(b.target_id), target_name:b.target_name} INTO target_temp
     //
-    ////For drug in Drug
-    ////For target in drug.targets
-    ////For dt in drug_temp
-    ////For tt in target_temp
-    ////FILTER dt._key == TO_STRING(drug.drug_id) and tt._key == TO_STRING(target.id)
-    ////INSERT {_from: dt._id, _to: tt._id} INTO has_bond
+    //For drug in Drug
+    //For target in drug.targets
+    //For dt in drug_temp
+    //For tt in target_temp
+    //FILTER dt._key == TO_STRING(drug.drug_id) and tt._key == TO_STRING(target.id)
+    //INSERT {_from: dt._id, _to: tt._id} INTO has_bond
     //
     //LET T = (For p in Prescription
     //FILTER p.patient_id == 9
     //RETURN DISTINCT {drug_id: p.drug_id})
     //
     //For drug in drug_temp
-    //For target in target_temp
     //For p in T
-    //FILTER p.drug_id == TO_NUMBER(drug._key)
+    //FILTER TO_STRING(p.drug_id) == drug._key
     //For v1,e1 in 1..1 Any drug has_bond
-    //FILTER target._key == v1._key
-    //For v2,e2 in 1..1 Any target has_bond
+    //For v2,e2 in 1..1 Any v1 has_bond
     //FILTER drug._key != v2._key
     //COLLECT drug1=drug.drug_name, drug2=v2.drug_name
     //aggregate common_target = LENGTH(1)
     //sort common_target desc
     //RETURN {drug1, drug2, common_target}
-    //
 }
 
 /**

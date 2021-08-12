@@ -50,12 +50,11 @@ void T6(){
  * @param patient_id
  */
 void T7(){
-//select gender, count(gender) from Patient
+//select count(*) from (select gender, count(gender) from Patient
 //where patient_id in (select distinct patient_id from Diagnosis where patient_id != 9 and disease_id in
-//(select distinct disease_id from (traverse in('Is_a') from (select from Disease where disease_id in
-//(select disease_id from (traverse out('Is_a') from (select from Disease where disease_id in
-//                                                              (select disease_id from Diagnosis where patient_id = 9)) MAXDEPTH 1)))
-//MAXDEPTH 1)) and disease_id not in (select disease_id from Diagnosis where patient_id = 9)) GROUP BY gender
+//(select distinct disease_id from (traverse in('Is_a') from
+//(select @rid from (traverse out('Is_a') from (select disease from Diagnosis where patient_id = 9) MAXDEPTH 1))
+//MAXDEPTH 1)) and disease_id not in (select disease_id from Diagnosis where patient_id = 9)) GROUP BY gender)
 }
 
 /**
@@ -74,9 +73,9 @@ void T7(){
  * @param patient_id
  */
 void T8(){
-// drop class drug_temp unsafe
-// drop class target_temp unsafe
-// drop class has_bond unsafe
+//drop class drug_temp unsafe
+//drop class target_temp unsafe
+//drop class has_bond unsafe
 
 //create class drug_temp extends v
 //CREATE PROPERTY drug_temp.drug_id INTEGER
@@ -90,22 +89,19 @@ void T8(){
 //
 //create class has_bond extends e
 //
-//################ batch (80sec)
-//
+//script sql
+//begin
 //LET $edge = select drug_id, targets.id as target_id from (SELECT drug_id, targets FROM Drug unwind targets) where targets.id is not null;
 //LET $i = 0;
+//while($i<$edge.size()){
+//create edge has_bond from (select from drug_temp where drug_id = $edge.drug_id[$i]) to (select from target_temp where target_id = $edge.target_id[$i]);
+//LET $i = $i + 1;}
+//commit;
+//end
 //
-//while($i<$edge.size())
-//{
-//	create edge has_bond from (select from drug_temp where drug_id = $edge.drug_id[$i]) to (select from target_temp where target_id = $edge.target_id[$i]);
-//	LET $i = $i + 1;
-//}
-//###############
-//
-//(10sec)
-//select $ORIENT_DEFAULT_ALIAS_0.drug_name as drug1, drug_dst.drug_name as drug2, count(*) as common_target from
+//select count(*) from (select $ORIENT_DEFAULT_ALIAS_0.drug_name as drug1, drug_dst.drug_name as drug2, count(*) as common_target from
 //(MATCH {class: drug_temp, where: (drug_id in (select distinct drug_id from Prescription where patient_id = 9))}.out("has_bond").in("has_bond")
-//         {as: drug_dst} return $paths) where $ORIENT_DEFAULT_ALIAS_0 != drug_dst group by drug1, drug2 order by common_target desc
+//         {as: drug_dst} return $paths) where $ORIENT_DEFAULT_ALIAS_0 != drug_dst group by drug1, drug2 order by common_target desc)
 }
 
 /**
