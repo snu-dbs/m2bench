@@ -1,7 +1,16 @@
 [Ecommerce]
-1. Download TPC-DS dataset and Unibench dataset (SF=1)
-2.
-3.
+M2bench Ecommerce datasets are generated based on TPC-DS and Unibench datasets.
+Please download TPC_DS datasets (SF=1) and Unibench dataset (SF=1).
+
+*Requirements
+    python package: "pip3 install randomtimestamp" (Version 2.1)
+
+*Usage
+    "python3 Ecommerce/main.py [arg1] [arg2]"
+    (arg1: directory_path_to_tpcds_datasets,  arg2: directory_path_to_Unibench_datasets)
+
+    ex) python3 main.py /home/user/Documents/tpc-ds-3.0.1/v3.1.0rc2/datas/ /home/user/Documents/Unibench_sf1/
+
 
 [Disater]
 python finedust.py SF
