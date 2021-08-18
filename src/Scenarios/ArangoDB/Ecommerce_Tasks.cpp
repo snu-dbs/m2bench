@@ -402,15 +402,20 @@ Let param_product_id = "B007SYGLZO"
 Let param_curdate = "2021-06-01"
 Let param_olddate = "2020-06-01"
 
-Let A = (For order in Order 
-            For review in Review 
+
+Let A = (
+        For review in Review 
+            Filter review.product_id == param_product_id 
+
+            For order in Order 
+                Filter review.order_id == order.order_id
+                Filter order.order_date <= param_curdate 
+                Filter order.order_date >= param_olddate
+
                 For customer in Customer 
-                    Filter review.product_id == param_product_id 
-                    Filter order.order_date <= param_curdate 
-                    Filter order.order_date >= param_olddate
-                    Filter review.order_id == order.order_id
-                    Filter order.customer_id == customer.customer_id 
                     Filter customer.gender == "F" 
+                    Filter order.customer_id == customer.customer_id 
+
                     Return {person_id : customer.person_id })
 
 
