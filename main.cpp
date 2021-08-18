@@ -91,11 +91,11 @@ void scalingData(int SF){
 //    ScalingOrder.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/order_schema.json");
 //    ScalingOrder.scaleJson(order_path, SF);
 //    cout << "Done ..." << endl;
-//
+////
 //    cout << "Adjust Product and Order" << endl;
 //    auto order_res = ScalingOrder.split(order_path, '.')[0]+"_SF"+to_string(SF)+".json";
 //    auto order_res_modified = ScalingOrder.split(order_path, '.')[0]+"_SF"+to_string(SF)+"_modified.json";
-//
+////
 //    auto Adjusting = DataScaler();
 //    Adjusting.AdjustProductAndOrder("/home/mxmdb/m2bench/data/ecommerce/table/Product_SF"+to_string(SF)+".csv",
 //                                    order_res);
@@ -124,20 +124,25 @@ void scalingData(int SF){
 //
 //    auto ScalingPrescription = DataScaler();
 //    ScalingPrescription.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/prescription_schema.json");
-//    ScalingPrescription.scaleTable("/home/mxmdb/m2bench/data/healthcare/table/Prescrlsiption.csv", SF, ",");
+//    ScalingPrescription.scaleTable("/home/mxmdb/m2bench/data/healthcare/table/Prescription.csv", SF, ",");
 //    cout << "Done ..." << endl;
 //
 //    cout << "Scale Diagnosis ..." << endl;
 //    auto ScalingDiagnosis = DataScaler();
 //    ScalingDiagnosis.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/diagnosis_schema.json");
 //    ScalingDiagnosis.scaleTable("/home/mxmdb/m2bench/data/healthcare/table/Diagnosis.csv", SF, ",");
+//    //
+//    cout << "Scale Person ..." << endl;
 //
+//    auto ScalingPerson = DataScaler();
+//    ScalingPerson.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/person_schema.json");
+//    ScalingPerson.scaleTable("/home/mxmdb/m2bench/data/ecommerce/property_graph/person_node.csv", SF, "|");
+//    cout << "Done ..." << endl;
 
-
-    cout << "Scale InterestedIn ..." << endl;
-    auto ScalingInterestedIn = DataScaler();
-    ScalingInterestedIn.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/interested_schema.json");
-    ScalingInterestedIn.scaleBipartiteEdge("/home/mxmdb/m2bench/data/ecommerce/property_graph/person_interestedIn_tag.csv", SF, ",");
+//    cout << "Scale InterestedIn ..." << endl;
+//    auto ScalingInterestedIn = DataScaler();
+//    ScalingInterestedIn.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/interested_schema.json");
+//    ScalingInterestedIn.scaleBipartiteEdge("/home/mxmdb/m2bench/data/ecommerce/property_graph/person_interestedIn_tag.csv", SF, ",");
 }
 
 int main(int argc, char *argv[]) {

@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <cstdlib>
 #include <iomanip>
-
+#include <boost/algorithm/string.hpp>
 using json = nlohmann::json;
 using namespace std;
 class DataScaler {
@@ -131,7 +131,7 @@ public:
                 return rand_date;
             }
             else if( b%2 == 1){
-                sprintf(rand_date, "%d-%02d-%02d", a, b, rand()%31+1);
+                sprintf(rand_date, "%d-%02d-%02d", a, b, rand()%30+1);
                 return rand_date;
             }
             else{
@@ -149,7 +149,7 @@ public:
                 return rand_date;
             }
             else if( b%2 == 1){
-                sprintf(rand_date, "%d-%02d-%02d %02d:%02d:%02d", a, b, rand()%31+1, rand()%24, rand()%60, rand()%60);
+                sprintf(rand_date, "%d-%02d-%02d %02d:%02d:%02d", a, b, rand()%30+1, rand()%24, rand()%60, rand()%60);
                 return rand_date;
             }
             else{
@@ -167,7 +167,7 @@ public:
                 return rand_date;
             }
             else if( b%2 == 1){
-                sprintf(rand_date, "%02d/%02d/%d/%02d:%02d:%02d", rand()%31+1, b, c, rand()%24, rand()%60, rand()%60);
+                sprintf(rand_date, "%02d/%02d/%d/%02d:%02d:%02d", rand()%30+1, b, c, rand()%24, rand()%60, rand()%60);
                 return rand_date;
             }
             else{
@@ -468,7 +468,11 @@ public:
             vector<json> vec;
             for (auto elem :  x["order_line"]){
                 elem["price"] = id2price[elem["product_id"]];
-                elem["title"] = id2title[elem["product_id"]];
+
+                auto titlem = id2title[elem["product_id"]];
+                boost::erase_all(titlem, "\"");
+
+                elem["title"] = titlem;
                 vec.push_back(elem);
                 total_price += elem["price"].get<double>();
             }
