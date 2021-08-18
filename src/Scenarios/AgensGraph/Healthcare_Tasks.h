@@ -60,16 +60,21 @@
  *
  *
  *
-   SET graph_path = disease_network;
+SET graph_path = disease_network;
 
-   SELECT gender, count(gender) from Patient,
-   (SELECT distinct diagnosis.patient_id from diagnosis,
-   (MATCH (d1:disease)-[:is_a]->(d2:disease)<-[:is_a]-(d3:disease)
-   WHERE d1.disease_id in (select to_jsonb(disease_id) from diagnosis where patient_id = 9)
-   RETURN distinct d3.disease_id) as B
-   WHERE to_jsonb(diagnosis.disease_id) = B.disease_id AND diagnosis.patient_id != 9
-   AND diagnosis.disease_id not in (select disease_id from diagnosis where patient_id = 9)) as C
-   WHERE Patient.patient_id = C.patient_id GROUP BY gender;
+WITH
+A as (select disease_id as disease_id from diagnosis where patient_id = 9),
+
+B as (SELECT distinct(d3->'disease_id')::text::bigint as disease_id from
+	(MATCH (d1:disease)-[:is_a]->(d2:disease)<-[:is_a]-(d3:disease)
+	where   d1.disease_id in (Select to_jsonb(disease_id) from A)
+	RETURN   d3 ) as temp),
+C as (Select distinct(patient_id) as patient_id from diagnosis, B
+	WHERE diagnosis.disease_id = B.disease_id AND diagnosis.patient_id != 9
+	 and B.disease_id not in (select * from A)
+
+	)
+SELECT gender, count(gender) FROM patient, C WHERE patient.patient_id = C.patient_id GROUP BY gender;
  *
  */
 
@@ -115,12 +120,12 @@
     AND m.target_id=(source).target_id
     CREATE (n)-[r:has_bond]->(m);
 
-    SELECT drug1, drug2, count(*) as common_target from
+    select count(*) from (SELECT drug1, drug2, count(*) as common_target from
     (MATCH (d1:drug_t)-[:has_bond]-(t:target_t)-[:has_bond]-(d2:drug_t)
     WHERE d1.drug_id in (select distinct(to_jsonb(drug_id)) from Prescription where patient_id = 9)
     RETURN d1.drug_name as drug1, d2.drug_name as drug2) as B
     Group By drug1, drug2
-    Order By common_target DESC;
+    Order By common_target DESC) as res;
  */
 
 /**
@@ -181,7 +186,10 @@ group by drug_1, drug_2);
 CREATE INDEX on drug_similarity (drug_1);
 CREATE INDEX on drug_similarity (drug_2);
 
+select count(*) from
+ (
 WITH A as (SELECT distinct(drug_id) as drug from Prescription where patient_id = 9)
-SELECT drug_1, drug_2, val  from drug_similarity, A where drug_similarity.drug_1 = to_jsonb(A.drug);
+SELECT drug_1, drug_2, val  from drug_similarity, A where drug_similarity.drug_1 = to_jsonb(A.drug)
+ ) as res
  */
 
