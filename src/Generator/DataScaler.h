@@ -52,7 +52,6 @@ public:
 
 
 
-
     void readSchema(string filename){
 
         std::ifstream inputfile(filename);
@@ -217,7 +216,7 @@ public:
             if ( nline == 0){
                 auto headers =  split(line, separater[0]);
                 int iter = 0;
-                for ( auto header : headers ){
+                for ( auto header: headers ){
                     ordered_attrs.push_back(header);
                     outfile.write(header.c_str(),header.size());
                     if( iter != headers.size()-1){
@@ -271,7 +270,10 @@ public:
                 auto headers =  split(line, separater[0]);
                 int iter = 0;
                 for ( auto header : headers ){
+
+
                     ordered_attrs.push_back(header);
+
                     outfile.write(header.c_str(),header.size());
                     if( iter != headers.size()-1){
                         outfile.write(separater.c_str(),1);

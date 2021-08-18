@@ -76,6 +76,7 @@ add_executable(m2bench_ao main.cpp
         src/Scenarios/PolyglotDB/Ecommerce_Tasks.h
         src/Scenarios/PolyglotDB/Healthcare_Tasks.h
         src/Scenarios/PolyglotDB/Disaster_Tasks.h
+        src/Scenarios/PolyglotDB/Latency_Check.h
 
         src/Cursor.cpp
         src/Connection/ArangoConnection.cpp
@@ -87,7 +88,12 @@ add_executable(m2bench_ao main.cpp
 
         src/CurlHelper.cpp
         include/CurlHelper.h
-        src/Scenarios/AgensGraph/Ecommerce_Tasks.h src/Scenarios/AgensGraph/Healthcare_Tasks.h src/Scenarios/AgensGraph/Disaster_Tasks.h src/Generator/DataScaler.cpp src/Generator/DataScaler.h)
+        src/Scenarios/AgensGraph/Ecommerce_Tasks.h
+        src/Scenarios/AgensGraph/Healthcare_Tasks.h
+        src/Scenarios/AgensGraph/Disaster_Tasks.h
+        src/Generator/DataScaler.cpp
+        src/Generator/DataScaler.h
+        )
 
 target_link_libraries(m2bench_ao PRIVATE cpr::cpr)
 target_link_libraries(m2bench_ao PRIVATE nlohmann_json::nlohmann_json)
