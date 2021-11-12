@@ -1,10 +1,15 @@
-# Prerequsite
+# M2Bench: A Benchmark for Analytics in Multi-Model Databases 
 
+## The detailed explanation file
 
-Install cmake >= 3.11.x 
+See `m2bench.md`.
 
+## Install
 
-Install neo4j client using following github
+### Prerequsite
+
+- Install cmake >= 3.11.x 
+- Install neo4j client using following github
 ```
 $ sudo apt-get install -y libedit-dev
 $ sudo apt-get install cypher-lint libcypher-parser-dev
@@ -20,9 +25,7 @@ $ make clean check  # Remove  "-Wno-error=stringop-truncation -Wno-unknown-warni
 $ sudo make install
 ```
 
-
-
-Install mysql connector
+- Install mysql connector
 ```
 download apt repository : https://dev.mysql.com/downloads/repo/apt/
 $ sudo dpkg -i ....deb
@@ -30,29 +33,19 @@ $ sudo apt update
 $ sudo apt install libmysqlcppconn-dev
 ```
 
-Install mongocxx connector
+- Install mongocxx connector
 
 ```
 http://mongocxx.org/mongocxx-v3/installation/
 ```
 
 
-
-# M2Bench
+### Build M2Bench
 
 ```
-
 mkdir build
-
 cd build
-
 cmake ..
-
 make
-
 ./m2bench
-
 ```
-
-
-
