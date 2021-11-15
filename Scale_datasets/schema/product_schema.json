@@ -1,6 +1,0 @@
-{
-	"product_id" : "pk_string",
-	"title" : "string",
-	"price" : "double",
-	"brand_id" : "fk_string"
-}

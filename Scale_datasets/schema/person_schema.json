@@ -1,9 +1,0 @@
-{
-	"person_id" : "pk_int",
-	"gender" : "category",
-	"date_of_birth" : "date(YYYY-MM-DD)",
-	"firstname" : "string",
-	"lastname" : "string",
-	"nationality" : "category",
-	"email" : "email"
-}
