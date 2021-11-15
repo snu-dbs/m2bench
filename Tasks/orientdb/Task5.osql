@@ -1,0 +1,1 @@
+select count(*) from (select expand(out('Follows')) from Person where person_id in (select person_id from Customer Where gender = "F" and customer_id in (Select customer_id from Order where order_id in (select order_id from Review where product_id = "B007SYGLZO") and order_date >='2020-06-01' and order_date<='2021-06-01')))
