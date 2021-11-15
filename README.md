@@ -6,23 +6,22 @@
 
 ## How to Run M2Bench
 - Generate datasets of M2Bench following the instructions in the `Datasets` folder.
-- Choose DBMS X [agensgraph|arangodb|orientdb|polyglot]. 
-- Load the datasets into DBMS following the instructions in the `Impl/X/load_datasets' folder.  
-- Run tasks of M2Bench following the instruction in the 'Imp/X/run_tasks' folder.  
-- All tasks in M2Bench is explained in the 'Tasks' folder. 
+- Choose DBMS X `[agensgraph|arangodb|orientdb|polyglot]`. 
+- Load the datasets into DBMS X following the instructions in the `Impl/X/load_datasets` folder.  
+- Run tasks of M2Bench following the instruction in the `Imp/X/run_tasks` folder.  
+- All tasks in M2Bench are explained in the 'Tasks' folder. 
 
+## Directory Overview
 ```
-[Directory Description]
-
 m2bench
-├── Datasets                #How to generate the datasets of m2bench from the realworld datasets.
+├── Datasets                #How to generate the datasets of M2Bench from the realworld datasets.
 │   ├── ecommerce
 │   ├── healthcare
 │   ├── disaster
 │   └── README.md
-├── Tasks                   #Description of  all tasks of m2bench
+├── Tasks                   #Description of all tasks of M2Bench
 |   └── alltasks.md
-├── Impl                    #Implementation of all tasks on various DBMSs
+├── Impl                    #Implementation of tasks of M2Bench on various DBMSs
 │   ├── agensgraph  
 │   │   ├── load_datasets   #How to load datasets into DBMS
 │   │   └── run_tasks       #How to run tasks
