@@ -15,24 +15,24 @@
 [Directory Description]
 
 m2bench
-├── Datasets  [How to generate the datasets of m2bench from the realworld datasets.]
+├── Datasets  #How to generate the datasets of m2bench from the realworld datasets.
 │   ├── ecommerce
 │   ├── healthcare
 │   ├── disaster
 │   └── README.md
-├── Tasks  [Description of  all tasks of m2bench]
+├── Tasks  #Description of  all tasks of m2bench
 |   └── alltasks.md
-├── Impl  [Implementation of all tasks on various DBMSs]
+├── Impl  #Implementation of all tasks on various DBMSs
 │   ├── agensgraph  
-│   │   ├── load_datasets [How to load datasets into DBMS]
-│   │   └── run_tasks [How to run tasks]
+│   │   ├── load_datasets #How to load datasets into DBMS
+│   │   └── run_tasks #How to run tasks
 │   ├── arangodb
 │   │   ├── load_datasets 
 │   │   └── run_tasks
 │   ├── orientdb
 │   │   ├── load_datasets 
 │   │   └── run_tasks
-│   └── polyglot [polyglot persistence]
+│   └── polyglot #polyglot persistence
 │       ├── load_datasets
 │       └── run_tasks
 ├── README.md
