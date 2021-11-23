@@ -1,0 +1,6 @@
+{
+	"order_id" : "fk_string_sf",
+	"product_id" : "fk_string_sf", 
+	"rating" : "category_int" ,
+	"feedback" : "category" 
+}

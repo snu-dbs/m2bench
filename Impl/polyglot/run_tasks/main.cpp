@@ -143,83 +143,60 @@ void scalingData(int SF){
 //    auto ScalingInterestedIn = DataScaler();
 //    ScalingInterestedIn.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/interested_schema.json");
 //    ScalingInterestedIn.scaleBipartiteEdge("/home/mxmdb/m2bench/data/ecommerce/property_graph/person_interestedIn_tag.csv", SF, ",");
+
+
+//    scalingData(2);
+//    scalingData(5);
+//    scalingData(10);
 }
 
 int main(int argc, char *argv[]) {
 
-    scalingData(2);
-    scalingData(5);
-    scalingData(10);
-//    cout << "Scale InterestedIn ..." << endl;
-//    auto ScalingInterestedIn = DataScaler();
-//    ScalingInterestedIn.readSchema("/home/mxmdb/CLionProjects/m2bench_ao/schema/interested_schema.json");
-//    ScalingInterestedIn.scaleBipartiteEdge("/home/mxmdb/m2bench/data/ecommerce/property_graph/person_interestedIn_tag.csv", 5 , ",");
-//    scalingData(2);
+
+    cout << "POLYGLOT TEST" << endl;
+    string curdate = "2021-06-01";
+    timer(T1, curdate);
+
+    timer(T2);
+
+    string curdate3 = "2018-07-07";
+    timer(T3, curdate3);
+
+    timer(T4,10000,10);
+
+    string pid = "B007SYGLZO";
+    timer(T5,pid, curdate);
 
 
-//    Measure_MYSQL_Latency(1);
 
-//    cout << "TEST" << endl;
-//    string curdate = "2021-06-01";
-////       timer(T2);
-//
-//        timer(T1, curdate);
+    int patient_id = 9
+    timer(T6, patient_id);
 
-//    string T10_ts1 = "2020-06-01 00:00:00";
-//    string T10_ts2 = "2020-06-01 02:00:00";
-//    timer(T10, T10_ts1, T10_ts2);
+    timer(T7, patient_id);
 
-//    int earthquake_X = 41862;
-//    timer(T11, earthquake_X);
+    timer(T8, patient_id);
 
-   // string T12_ts1 = "2020-09-17 00:00:00";
-   // string T12_ts2 = "2020-09-17 01:00:00";
-   // timer(T12,T12_ts1,T12_ts2);
+    timer(T9, patient_id);
 
 
-    //    if(argc == 2 && strcmp( argv[1],"T1") == 0){
-    //        timer(T1, curdate);
-    //    }
-    //    else if (argc == 2 && strcmp( argv[1],"T2") == 0){
-    //        timer(T2);
-    //    }
-    //    else if (argc == 2 && strcmp( argv[1],"T6") == 0){
-    //        timer(T6, 9);
-    //    }
-    //    else if (argc == 2 && strcmp( argv[1],"T16") == 0){
-    //        timer(T16, ts);
-    //    }
-    //timer(T6, 9);
-    //
-    // if(argc == 2 && strcmp( argv[1],"T7") == 0){
-    //     timer(T7, 9);
-    // }
-    // else if (argc == 2 && strcmp( argv[1],"T8") == 0){
-    //     timer(T8, 9);
-    // }
-    // else if (argc == 2 && strcmp( argv[1],"T9") == 0){
-    //     timer(T9, 9);
-    // }
-    //             timer(T8,9);
-    // long ts = 1600182000+10800*3.5;
-    // timer(T16, ts);
+
+    string T10_ts1 = "2020-06-01 00:00:00";
+    string T10_ts2 = "2020-06-01 02:00:00";
+    timer(T10, T10_ts1, T10_ts2);
+
+    int earthquake_X = 41862;
+    timer(T11, earthquake_X);
 
 
-    //  string curdate3 = "2018-07-07";//"2021-12-25";
-    //string pid = "B007SYGLZO";
-    //string curdate = "2021-06-01";
-    //if(argc == 2 && strcmp( argv[1],"T3") == 0){
-    //      timer(T3, curdate3);
-    //}
-    //else if (argc == 2 && strcmp( argv[1],"T4") == 0){
-    //    timer(T4,10000,10);
-    //}
-    //else if (argc == 2 && strcmp( argv[1],"T5") == 0){
-    //        timer(T5,pid, curdate);
-    //}
-    //timer(T3,curdate3);
+    string T12_ts1 = "2020-09-17 00:00:00";
+    string T12_ts2 = "2020-09-17 01:00:00";
+    timer(T12,T12_ts1,T12_ts2);
 
 
-      return 0;
+
+    long ts = 1600182000+10800*3.5;
+    timer(T16, ts);
+
+    return 0;
 }
 

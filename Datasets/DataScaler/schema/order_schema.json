@@ -1,0 +1,8 @@
+{
+	"order_id" : "pk_string",
+	"order_date" : "category",
+	"customer_id" : "fk_string_sf",
+	"total_price" : "double",
+	"order_line.product_id": "fk_string_sf", 
+	"order_line.price":  "double" 
+}

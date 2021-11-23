@@ -1,6 +1,6 @@
-[Ecommerce]
+## How to generate Ecommerce datasets
 M2bench Ecommerce datasets are generated based on TPC-DS and Unibench datasets.
-Please download TPC_DS datasets (SF=1) and Unibench dataset (SF=1).
+Please download TPC\_DS datasets (SF=1) and Unibench dataset (SF=1).
 
 *Requirements
     python packages: "pip3 install randomtimestamp"
@@ -13,8 +13,31 @@ Please download TPC_DS datasets (SF=1) and Unibench dataset (SF=1).
     ex) python3 main.py /home/user/Documents/tpc-ds-3.0.1/v3.1.0rc2/datas/ /home/user/Documents/Unibench_sf1/
 
 
+## How to generate Healthcare datasets 
 
-[Disater]
+Step1. Please download following datasets.
+
+1. MIMIC II Clinical Dataset
+2. SNOMED Terminology
+3. Drugbank (drug json data)
+
+Step2. Run python3 Healthcare/main.py [arg1][arg2][arg3][arg4]
+        (arg1: directory path to drugrugbank json dataset
+        arg2: file path to SNOMED Concept description file from Snapshot library (e.g: Snapshot/Terminology/ Description_Snapshot.txt) 
+        arg3: file path to SNOMED Concept relationship file from Snapshot library (e.g: Snapshot/Terminology/ Relationship_Snapshot.txt) 
+        arg4: directory path to MIMIC II dataset* )
+        
+* Caution:  Do not forget to extract the files in the MIMIC II dataset directory before usage. 
+            Make sure the dataset directory names does not contain characters such as : "()". 
+            Keep in mind that arg1, arg4 are directory paths and arg2, arg3 are file paths.
+         
+* Requirements:  
+    python pandas package: "pip3 install pandas"
+    python names package: "pip3 install names"
+    python glob package: "pip3 install glob3"
+
+
+## How to generate Disater datasets 
 
 * Data Source
     1.Earthquake: United States Geological Survey (USGS)
@@ -51,25 +74,4 @@ Please download TPC_DS datasets (SF=1) and Unibench dataset (SF=1).
     python sklearn package: "pip3 install scikit-learn"
     python jsons package: "pip3 install jsons"
 
-[Healthcare]
 
-Step1. Please download following datasets.
-
-1. MIMIC II Clinical Dataset
-2. SNOMED Terminology
-3. Drugbank (drug json data)
-
-Step2. Run python3 Healthcare/main.py [arg1][arg2][arg3][arg4]
-        (arg1: directory path to drugrugbank json dataset
-        arg2: file path to SNOMED Concept description file from Snapshot library (e.g: Snapshot/Terminology/ Description_Snapshot.txt) 
-        arg3: file path to SNOMED Concept relationship file from Snapshot library (e.g: Snapshot/Terminology/ Relationship_Snapshot.txt) 
-        arg4: directory path to MIMIC II dataset* )
-        
-* Caution:  Do not forget to extract the files in the MIMIC II dataset directory before usage. 
-            Make sure the dataset directory names does not contain characters such as : "()". 
-            Keep in mind that arg1, arg4 are directory paths and arg2, arg3 are file paths.
-         
-* Requirements:  
-    python pandas package: "pip3 install pandas"
-    python names package: "pip3 install names"
-    python glob package: "pip3 install glob3"
