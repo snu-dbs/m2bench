@@ -3,7 +3,18 @@ from geopy.distance import distance
 import pandas as pd
 import sys
 
-filelist = os.listdir('./real_dataset')
+
+#print 'Number of arguments:', len(sys.argv), 'arguments.'
+#print 'Argument List:', str(sys.argv)
+
+
+if len(sys.argv) != 3 :
+    print "Run: python finedust.py [ScaleFactor]  [path_to_finedust_raw_dataset]"
+    print "ex) python finedust.py 2 ~/m2bench/Datasets/raw_datasets/finedust_dataset/"
+    exit(0); 
+
+path2finedust = str(sys.argv[2])
+filelist = os.listdir(path2finedust)
 
 measure_spot = (34.057076, -118.290731) # place where the lidar h/w installed (the center of the circle area)
 distance_per_point = 28.8 / 1000 # 28.8 meters
@@ -29,7 +40,7 @@ i = 0
 prev = None
 for file in filelist:
     if file.endswith('.csv'):
-        df = pd.read_csv('./real_dataset/'+file)
+        df = pd.read_csv(path2finedust+file)
         df['latitude'] = lat
         df['longitude'] = lon
         df = df.dropna(axis=0)
