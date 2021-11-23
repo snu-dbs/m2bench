@@ -1,7 +1,7 @@
-##How to generate Datasets
+## How to generate Datasets
 - Follow instructions in the Generator folder
 
-##How to scale Datasets
+## How to scale Datasets
 - Follow instructions in the DataScaler folder
 
 
