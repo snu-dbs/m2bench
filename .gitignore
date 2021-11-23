@@ -1,3 +1,7 @@
 cmake-build-debug
 .idea
 build
+Impl/polyglot/run_tasks/cmake-build-debug
+Impl/polyglot/run_tasks/build
+Impl/polyglot/run_tasks/.idea
+Datasets/raw_datasets/*
