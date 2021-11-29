@@ -3,13 +3,16 @@ import pandas as pd
 import json
 
 def site_gen(data_dirpath, outdir):
+    os.system('cp Disaster/osmconf.ini .')
 
-    os.system("ogr2ogr -f GeoJSON california-points.geojson " + data_dirpath + "california.osm points")
-    os.system("ogr2ogr -f GeoJSON california-multipolygons.geojson " + data_dirpath + "california.osm multipolygons")
+    os.system("ogr2ogr -f 'GeoJSON' california-points.geojson " + data_dirpath + "california-latest.osm points")
+    os.system("ogr2ogr -f 'GeoJSON' california-multipolygons.geojson " + data_dirpath + "california-latest.osm multipolygons")
 
-    os.system("./site_convert.sh")
+    os.system('rm osmconf.ini')
 
-    df = pd.read_csv(outdir+'original_roadnode.csv')
+    os.system("./Disaster/site_convert.sh")
+
+    df = pd.read_csv(outdir+'/../property_graph/original_roadnode.csv')
 
     with open('Roadnode.json', 'w') as json_file:
         for idx, row in df.iterrows():
@@ -35,6 +38,8 @@ def site_gen(data_dirpath, outdir):
             site_id = 0
             for line in site_file:
                 properties = dict()
+                line = line.strip()
+                line = line[:-1] if line[-1] == ',' else line
                 site_json = json.loads(line)
                 site_json['site_id'] = site_id
                 site_id += 1
@@ -70,4 +75,4 @@ def site_gen(data_dirpath, outdir):
                 json_file.write('\n')
 
     os.system("rm site2.json site.json Roadnode.json")
-    os.system("rm "+outdir+"original_roadnode.csv")
+    os.system("rm "+outdir+"/../property_graph/original_roadnode.csv")
