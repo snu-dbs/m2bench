@@ -27,3 +27,6 @@ arangoimp --overwrite true --file "$DATASET_PATH/disaster/property_graph/Road.cs
 
 arangoimp --overwrite true --file "$DATASET_PATH/disaster/array/finedust_idx.csv" --type csv --collection "Finedust_idx" --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --threads 4 --server.database Disaster
 
+
+arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD --javascript.execute  create_index.js
+

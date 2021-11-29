@@ -30,4 +30,4 @@ arangoimp --overwrite true --file "$DATASET_PATH/ecommerce/property_graph/person
 
 arangoimp --overwrite true --file "$DATASET_PATH/ecommerce/property_graph/person_interestedIn_tag.csv" --type csv --translate "person_id=_from" --translate "tag_id=_to" --translate "created_time=created_date" --collection "Interested_in" --from-collection-prefix Person --to-collection-prefix Shopping_Hashtag --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --create-collection-type edge --threads 4 --server.database Ecommerce
 
-
+arangosh --server.database "Ecommerce" --server.username $USERNAME --server.password $PASSWORD --javascript.execute  create_index.js
