@@ -48,7 +48,7 @@ def convert_shelter(outdir):
     mydict = {}
 
     #print("1. Read Site.json and Extract coordinates")
-    with open(outdir+"Site.json", 'r') as site_file:
+    with open(outdir+"/../json/Site.json", 'r') as site_file:
         id = 0
         i = 0
         for line in site_file:

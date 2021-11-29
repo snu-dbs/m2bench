@@ -1,11 +1,12 @@
 import os
 import csv
-import random
-from datetime import datetime, timedelta
+from datetime import datetime
 from randomtimestamp import randomtimestamp
 import pandas as pd
-from pandas import DataFrame
+from pathlib import Path
 
+
+# Mapping Table needed for mapping customers to person nodes
 mapping_table= {
     4145:0,
     5296:1,
@@ -9959,26 +9960,30 @@ mapping_table= {
 }
 func = lambda x: mapping_table.get(x, x)
 
-def edge_generator(unibench_dirpath):
-    sns_dirpath = "SocialNetwork/"
 
-    ## person_follows_person edge generator
-    follows_edge = pd.read_csv(unibench_dirpath + sns_dirpath + "person_knows_person_0_0.csv", sep="|")
-    follows_edge.rename(columns= {"from": "_from", "to": "_to", "creationDate": "created_time"}, inplace=True)
+def edge_generator(unibench_dir_path, outdir_path):
+    sns_dir_path = "SocialNetwork/"
+
+    ## generate person_follows_person edge 
+    follows_edge = pd.read_csv(unibench_dir_path + sns_dir_path + "person_knows_person_0_0.csv", sep="|")
+    follows_edge.columns.values[0] = "_from"
+    follows_edge.columns.values[1] = "_to"
+    follows_edge.columns.values[2] = "created_time"
 
     follows_edge['_from'] = follows_edge._from.map(func)
     follows_edge['_to'] = follows_edge._to.map(func)
-    follows_edge.to_csv('person_follows_person.csv', index=False, sep='|')
+    follows_edge.to_csv(Path(outdir_path+"property_graph/") / "person_follows_person.csv", index=False, sep='|')
 
 
-    ## person_interestedIn_tag edge generator
-    interestedIn_edge = pd.read_csv(unibench_dirpath + sns_dirpath + "person_hasInterest_tag_0_0.csv", sep="|")
-    interestedIn_edge.rename(columns= {"Person.id": "person_id", "Tag.id": "tag_id"}, inplace=True)
+    ## generate person_interestedIn_tag edge
+    interestedIn_edge = pd.read_csv(unibench_dir_path + sns_dir_path + "person_hasInterest_tag_0_0.csv", sep="|")
+    interestedIn_edge.columns.values[0] = "person_id"
+    interestedIn_edge.columns.values[1] = "tag_id"
 
     interestedIn_edge['person_id'] = interestedIn_edge.person_id.map(func)
     interestedIn_edge['tag_id'] = interestedIn_edge['tag_id'] % 300
     interestedIn_edge['created_time'] = ''
-    interestedIn_edge.to_csv('temp.csv', index=False, sep=',')
+    interestedIn_edge.to_csv("temp.csv", index=False, sep=',')
 
     start = datetime(2010, 1, 1, 0, 0, 0)
     end = datetime(2020, 12, 31, 0, 0, 0)
@@ -9987,13 +9992,13 @@ def edge_generator(unibench_dirpath):
         reader = csv.reader(temp_file, delimiter=",")
         header = next(reader,None)
 
-        with open("person_interestedIn_tag.csv", "w+") as output_file:
+        with open(Path(outdir_path+"property_graph/") / "person_interestedIn_tag.csv", "w+") as output_file:
             writer = csv.writer(output_file, delimiter=",")
             writer.writerow(header)
 
             for row in reader:
-                timestamp = str(randomtimestamp(start=start, end=end, pattern="%d-%m-%Y %H:%M:%S"))
-                new_row = [row[0], row[1], timestamp]
+                timestamp = randomtimestamp(start=start, end=end)
+                new_row = [row[0], row[1], timestamp.strftime("%d/%m/%Y/%H:%M:%S")]
                 data.append(new_row)
 
             for new_row in data:

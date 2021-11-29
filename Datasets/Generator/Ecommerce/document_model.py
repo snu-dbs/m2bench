@@ -2,12 +2,13 @@ import os
 import json
 import csv
 import random
+from pathlib import Path
 
 
-def order_generator(unibench_dirpath):
-    order_dirpath = "Order/"
+def order_generator(unibench_dirpath, outdir_path):
+    order_dir_path = "Order/"
 
-    f = open('Customer.csv','r')
+    f = open(Path(outdir_path+"table/")/'Customer.csv','r')
     rdr = csv.reader(f, delimiter='|')
     cid=[]
     for line in rdr:
@@ -15,7 +16,7 @@ def order_generator(unibench_dirpath):
     cid.pop(0)
 
     pid=[]
-    json_file = unibench_dirpath + order_dirpath +"Order.json"
+    json_file = unibench_dirpath + order_dir_path +"Order.json"
     with open(json_file) as pid_for_json:
         for line in pid_for_json:
             json_decoded=json.loads(line)
@@ -43,8 +44,8 @@ def order_generator(unibench_dirpath):
 
             data.append(json_decoded)
 
-    file="Order.json"
-    with open(file, 'w') as file:
+    order_file= Path(outdir_path+"json/") / "order.json"
+    with open(order_file, 'w') as file:
         for d in data:
             orderline = d['order_line']
             for o in orderline:
@@ -57,13 +58,15 @@ def order_generator(unibench_dirpath):
             json.dump(d, file)
             file.write("\n")
 
-def review_generator():
+
+def review_generator(outdir_path):
     outputfile = "oid_pid.csv"
     f = open(outputfile, 'w')
     csvwriter = csv.writer(f)
 
     data=[]
-    with open("Order.json") as file:
+    order_file= Path(outdir_path+"json/") / "order.json"
+    with open(order_file) as file:
         for line in file:
             data.append(json.loads(line))
 
@@ -79,7 +82,8 @@ def review_generator():
     feedback1 = ["I like it. My friend bought it, too.", "The product arrived very fast and I'm very satified with the overall quality of it.", "Exceptional value for money. Comfortable. Easty to use."]
     feedback2 = ["The product isn't bad but... I don't think I will recommend others.", "I wish the design would come in various colors.", "Hmmm, I've used it less than a month and so far so good."]
     feedback3 = ["To be honest, it's a huge waste of money.", "Within a week it is broken... I want to get a refund!", "Rubbish.. I should have read other reviews first before buying this."]
-    jsonfile = open('Review.json', 'w')
+    
+    jsonfile = open(Path(outdir_path+"json/") / "review.json", 'w')
     with open("oid_pid.csv") as oid_pid:
         rdr = csv.reader(oid_pid)
         file_header = next(rdr, None)

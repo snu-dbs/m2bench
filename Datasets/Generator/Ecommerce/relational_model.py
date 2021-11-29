@@ -1,25 +1,30 @@
-import csv
 import pandas as pd
+from pathlib import Path
+
+pd.set_option('mode.chained_assignment',  None)
 
 
-def product_generator(unibench_dirpath):
-    product_dirpath = "Product/"
+def product_generator(unibench_dir_path, outdir_path):
+    product_dir_path = "Product/"
 
-    product = pd.read_csv(unibench_dirpath + product_dirpath + "Product.csv", encoding='ISO-8859-1', sep=",")
-    product.drop(['imgUrl', 'productId'], axis=1, inplace=True)
-    product.rename(columns= {"asin": "product_id", "brand": "brand_id"}, inplace=True)
-    product.to_csv('Product.csv', header=True, index=False, sep=',')
+    product = pd.read_csv(unibench_dir_path + product_dir_path + "Product.csv", encoding='ISO-8859-1', sep=",")
+    product.columns.values[0] = "product_id"
+    product.columns.values[1] = "title"
+    product.columns.values[5] = "brand_id"
+    product.to_csv(Path(outdir_path+"table/") / "Product.csv", header=True, columns=['product_id', 'title', 'price', 'brand_id'], index=False, sep=',')
 
 
-def brand_generator(unibench_dirpath):
-    brand_dirpath = "Vendor/"
+def brand_generator(unibench_dir_path, outdir_path):
+    brand_dir_path = "Vendor/"
 
-    brand = pd.read_csv(unibench_dirpath + brand_dirpath + "Vendor.csv", encoding='ISO-8859-1', sep=",")
-    brand.rename(columns= {"id": "name", "Country": "country", "Industry": "industry"}, inplace=True)
+    brand = pd.read_csv(unibench_dir_path + brand_dir_path + "Vendor.csv", encoding='utf-8', sep=",")
+    brand.columns.values[0] = "name"
+    brand.columns.values[1] = "country"
+    brand.columns.values[2] = "industry"
 
     brand = brand.reset_index()
     brand['brand_id'] = brand.index
     brand['industry'].loc[: int(len(brand)/3)] = 'Amateur Sports'
     brand['industry'].loc[int(len(brand)/3)+1 : int(len(brand)/3)*2+1] = 'Activewear'
     brand['industry'].loc[int(len(brand)/3)*2+2:] = 'Leisure'
-    brand.to_csv('Brand.csv', header=True, columns=['brand_id', 'name', 'country', 'industry'], index=False, sep=',')
+    brand.to_csv(Path(outdir_path+"table/") / "Brand.csv", header=True, columns=['brand_id', 'name', 'country', 'industry'], index=False, sep=',')

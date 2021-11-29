@@ -16,7 +16,7 @@ def roadnetwork_gen(data_dirpath, outdir):
     df1['latitude'] /= 1000000
     df1['longitude'] /= 1000000
 
-    with open("ca.json", 'r') as json_file: # only consider CA
+    with open(data_dirpath + "/ca.json", 'r') as json_file: # only consider CA
         json_data = json.load(json_file)
 
     ca_list = json_data['loc']['coordinates']
@@ -67,7 +67,7 @@ def roadnetwork_gen(data_dirpath, outdir):
             to1.append(row['to'])
             distance.append(row['distance'])
 
-    edge = pd.DataFrame({'from':from1,'to':to1,'distance':distance})
+    edge = pd.DataFrame({'_from':from1,'_to':to1,'distance':distance})
     edge.to_csv(outdir+'Road.csv',index=False) #edge
 
     os.system("rm co.csv gr.csv")

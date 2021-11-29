@@ -52,7 +52,7 @@ def finedust_gen(data_dirpath, outdir):
 
     result['pm10'] = result['pm10'].map(lambda x: '{:.2f}'.format(x))
     result['pm2.5'] = result['pm2.5'].map(lambda x: '{:.2f}'.format(x))
-    result.to_csv(outdir+'Finedust.csv',index=False)
+    result.to_csv(outdir+'Finedust.csv',index=False, header=False)
 
 def finedust_idx_gen(data_dirpath, outdir):
 
@@ -108,4 +108,4 @@ def finedust_idx_gen(data_dirpath, outdir):
     result.loc[:, 'timestamp'] = result['timestamp'].apply(int)
     result.loc[:, 'latitude'] = result['latitude'].apply(int)
     result.loc[:, 'longitude'] = result['longitude'].apply(int)
-    result.to_csv(outdir+'Finedust_idx.csv', index=False)
+    result.to_csv(outdir+'Finedust_idx.csv', index=False, header=False)
