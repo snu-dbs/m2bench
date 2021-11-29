@@ -1,5 +1,3 @@
-{
-        "person_id" : "pk_int",
-        "tag_id" : "fk_int_sf",
-        "created_time" : "date(DD/MM/YYYY/HH:MM:SS)"
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:84b8638af185aa88f06bf73f0ffd568fe99f3d1494e2abca0d57310476a934bf
+size 121

@@ -1,6 +1,3 @@
-{
-	"order_id" : "fk_string_sf",
-	"product_id" : "fk_string_sf", 
-	"rating" : "category_int" ,
-	"feedback" : "category" 
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:9b13801e132e1e0e479d70aa96f0db76c33870baeadb8e3ef030434c63e5c2d6
+size 122
