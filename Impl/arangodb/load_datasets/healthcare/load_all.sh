@@ -1,4 +1,4 @@
-DATASET_PATH=
+DATASET_PATH= 
 USERNAME=
 PASSWORD=
 
@@ -22,4 +22,6 @@ arangoimp --overwrite true --file "$DATASET_PATH/healthcare/json/drug.json" --ba
 arangoimp --overwrite true --file "$DATASET_PATH/healthcare/property_graph/Disease_network_nodes.csv" --type csv --translate "disease_id=_key" --collection "Disease_network_nodes" --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --threads 4 --server.database Healthcare
 
 arangoimp --overwrite true --file "$DATASET_PATH/healthcare/property_graph/Disease_network_edges.csv" --type csv --translate "source_id=_from" --translate "destination_id=_to" --collection "Disease_network_edges" --from-collection-prefix Disease_network_nodes --to-collection-prefix Disease_network_nodes --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --create-collection-type edge --threads 4 --server.database Healthcare
+
+arangosh --server.database Healthcare --server.username $USERNAME --server.password $PASSWORD --javascript.execute  create_index.js
 
