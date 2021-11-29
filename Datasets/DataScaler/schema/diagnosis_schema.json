@@ -1,5 +1,3 @@
-{
-        "patient_id" : "fk_int_sf",
-        "disease_id" : "fk_int"
-}
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:1c3e90f7fa96bcdbe80239f2094cfd6daba694a1e586e0ffbb7474fe90d08284
+size 73

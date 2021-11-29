@@ -1,6 +1,3 @@
-{
-	"product_id" : "pk_string",
-	"title" : "string",
-	"price" : "double",
-	"brand_id" : "fk_string"
-}
+version https://git-lfs.github.com/spec/v1
+oid sha256:4adb12c319d9a526153a3aee8cd72256a84980dcaf69f1649067493af345a916
+size 101

@@ -1,8 +1,3 @@
-{
-        "patient_id" : "pk_int",
-        "patient_name" : "string",
-        "gender" : "category",
-	"date_of_birth" : "date(YYYY-MM-DD HH:MM:SS)",
-	"date_of_death" : "date(YYYY-MM-DD HH:MM:SS)"
-}
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:af83a24e554abefcdb1a729d8fbd0c3f0f9d2a84fbbdc009070ef22531c1d421
+size 199

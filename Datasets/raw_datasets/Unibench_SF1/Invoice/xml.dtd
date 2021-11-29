@@ -1,0 +1,45 @@
+<?xml encoding="UTF-8"?>
+
+<!ELEMENT Invoice (OrderId,PersonId,OrderDate,TotalPrice,Orderline+)>
+<!ATTLIST Invoice
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT OrderId (#PCDATA)>
+<!ATTLIST OrderId
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT PersonId (#PCDATA)>
+<!ATTLIST PersonId
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT OrderDate (#PCDATA)>
+<!ATTLIST OrderDate
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT TotalPrice (#PCDATA)>
+<!ATTLIST TotalPrice
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT Orderline (productId,asin,title,price,brand)>
+<!ATTLIST Orderline
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT productId (#PCDATA)>
+<!ATTLIST productId
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT asin (#PCDATA)>
+<!ATTLIST asin
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT title (#PCDATA)>
+<!ATTLIST title
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT price (#PCDATA)>
+<!ATTLIST price
+  xmlns CDATA #FIXED ''>
+
+<!ELEMENT brand (#PCDATA)>
+<!ATTLIST brand
+  xmlns CDATA #FIXED ''>
