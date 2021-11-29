@@ -1,0 +1,11 @@
+JSON
+- Order: order_id  // UNIQUE
+
+Graph
+- Person: person_id. // UNIQUE
+- HashTag: tag_id // UNIQUE
+
+Relational
+- Customer: customer_id // UNIQUE
+- Product: product_id // UNIQUE
+- Brand: brand_id // UNIQUE
