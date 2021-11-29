@@ -10,16 +10,22 @@ def main(argv):
     tpcds_dir_path = argv[0]
     unibench_dir_path = argv[1]
 
-    outdir_path = '../../ecommerce/'
-    if os.path.exists(outdir_path):
-        os.system("rm -rf " + outdir_path)
-
-    os.mkdir(outdir_path)
-    subdirs=["/array", "/json", "/property_graph", "/table"]
+    ## directory check
+    outdir_path = '../../ecommerce'
+    subdirs=["/array", "/json", "/table"]
     for i in subdirs:
+        if os.path.exists(outdir_path+i):
+            os.system("rm -rf " + outdir_path+i)
         os.mkdir(outdir_path+i)
 
+    if os.path.exists(outdir_path+"/property_graph"):
+        for file in os.scandir(outdir_path+"/property_graph"):
+            fname, ext = os.path.splitext(file)
+            if "../../ecommerce/property_graph/hashtag" not in fname:
+                os.remove(file)
 
+
+    # data generation
     print("------ Ecommerce Data Generator ------")
     print("Generating Customer and Person_node data...")
     customer_and_person.generator(tpcds_dir_path, outdir_path)
