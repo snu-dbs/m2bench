@@ -1,9 +1,3 @@
-# M2Bench: A Benchmark for Analytics in Multi-Model Databases 
-
-## The detailed explanation file
-
-See `m2bench.md`.
-
 ## Install
 
 ### Prerequsite
