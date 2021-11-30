@@ -12,7 +12,7 @@
 
 ## How to Run M2Bench
 - Generate datasets of M2Bench following the instructions in the `Datasets` folder.
-- Choose DBMS X `[agensgraph|arangodb|orientdb|polyglot]`. ** /* We are now uploading and arranging the codes  */**
+- Choose DBMS X `[agensgraph|arangodb|orientdb|polyglot]`. **  We are now uploading and arranging the codes  **
 - Load the datasets into DBMS X following the instructions in the `Impl/X/load_datasets` folder.  
 - Run tasks of M2Bench following the instruction in the `Imp/X/run_tasks` folder.  
 
