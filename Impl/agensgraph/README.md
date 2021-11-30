@@ -3,13 +3,11 @@
 
 ## Install AgensGraph 
 - https://bitnine.net/documentations/quick-guide-2-0.html#installation
-- We have tested the version 2.2 AgensGraph
+- We have tested version 2.2 AgensGraph
 
 ## LOAD Dataset into AgensGraph 
-- Go to `load_dataset` folder
-- For each scenario folder, we provided create and load scripts. 
-- Modify each dataset path in each script.
-- Run load_ecommerce
+- Go to `load_dataset/[ecommerce|healthcare|disaster]` folder
+- Run following scripts to load datasets in each scenario: `load_ecommerce.sh`, `load_healthcare.sh`, `load_disaster.sh`
 
 ## Run M2Bench Tasks
 - Go to `run_tasks` folder 
