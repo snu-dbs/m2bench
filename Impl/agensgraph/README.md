@@ -9,7 +9,7 @@
 - Go to `load_dataset/[ecommerce|healthcare|disaster]` folder.
 - open following scripts : `load_ecommerce.sh`, `load_healthcare.sh`, `load_disaster.sh`
 - set DATASET_PATH field as the **absolute path** to the m2bench datasets. ex) `DATASET_PATH=/home/userX/m2bench/Datasets`
-- Run the scripts. ex) `./load_ecommerce.sh`
+- Run the scripts. ex) `./load_ecommerce.sh` `./load_healthcare.sh` `./load_disaster.sh`
 
 
 ## Run M2Bench Tasks
