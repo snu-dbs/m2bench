@@ -3,7 +3,7 @@
 
 ## Install ArangoDB 
 - https://www.arangodb.com/docs/stable/getting-started-installation.html
-- We have tested **ArangoDB v 3.7 **
+- We have tested the version 3.7 ArangoDB 
 
 ## LOAD Dataset into ArangoDB 
 - Go to `load_dataset` folder
