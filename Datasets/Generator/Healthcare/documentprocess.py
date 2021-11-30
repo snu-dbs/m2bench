@@ -7,13 +7,12 @@ def document_process():
      print("----- DOCUMENT DATA ARRANGEMENT STARTED -----")
      drug_data = pd.read_json("merged_drug.json")
      drug_df = pd.DataFrame(drug_data)
-     drug_df['drugbank_id'].str.replace("DB",'', regex=True).astype(int)
      drug_df.rename(columns = {'drugbank_id' : 'drug_id'}, inplace = True)
      drug_df.rename(columns = {'name' : 'drug_name'}, inplace = True)
      drug_df.rename(columns = {'structured_adverse_effects' : 'adverse_effect_list'}, inplace = True)
      drug_df.rename(columns = {'structured_drug_interactions' : 'drug_interaction_list'}, inplace = True)
      
-     #drug_df['drug_id']=drug_df['drug_id'].str.replace("DB",'', regex=True).astype(int)
+     drug_df['drug_id']=drug_df['drug_id'].str.replace("DB",'', regex=True).astype(int)
      drug_df_seed = drug_df[['drug_id', 'drug_name','targets','adverse_effect_list','drug_interaction_list' ]]
 
      drugIdName = drug_df[['drug_id','drug_name']].to_csv(r'drugs.csv',index=False)  # making drug_id, drug_name file for Prescription table data
@@ -71,7 +70,7 @@ def document_process():
 
      #print("----TARGET DONE-----")
 
-     drug_json = drug_df_seed.to_json('drug.json', orient="records" ,lines=True) 
+     drug_json = drug_df_seed.to_json('../../healthcare/json/drug.json', orient="records" ,lines=True) 
 
      print("----- drug.json DONE -----")
      print("----- DOCUMENT DATA ARRANGEMENT DONE -----")
