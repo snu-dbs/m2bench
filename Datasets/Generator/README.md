@@ -70,11 +70,14 @@ $ python3 main.py ../../raw_datasets/tpcds_data/ ../../raw_datasets/Unibench_SF1
 
 
 #### Usage: 
-- Run "python3 Healthcare/main.py [arg1][arg2][arg3][arg4]"
-        (arg1: directory path to drugrugbank json dataset
-        arg2: file path to SNOMED Concept description file from Snapshot library (e.g: SnomedCT_xxx/Snapshot/Terminology/ Description_Snapshot_xxx.txt) 
-        arg3: file path to SNOMED Concept relationship file from Snapshot library (e.g: SnomedCT_xxx/Snapshot/Terminology/ Relationship_Snapshot_xxx.txt) 
-        arg4: directory path to MIMIC III dataset)
+
+```bash
+$ python3 Healthcare/main.py [arg1][arg2][arg3][arg4]
+```
+- arg1: directory path to drugrugbank json dataset
+- arg2: file path to SNOMED Concept description file from Snapshot library (e.g: SnomedCT_xxx/Snapshot/Terminology/ Description_Snapshot_xxx.txt) 
+- arg3: file path to SNOMED Concept relationship file from Snapshot library (e.g: SnomedCT_xxx/Snapshot/Terminology/ Relationship_Snapshot_xxx.txt) 
+- arg4: directory path to MIMIC III dataset)
 
 
 #### Caution:  Do not forget to extract the downloaded files before usage. 
