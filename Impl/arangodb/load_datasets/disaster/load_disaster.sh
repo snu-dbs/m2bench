@@ -1,6 +1,6 @@
-DATASET_PATH=
-USERNAME=
-PASSWORD= 
+DATASET_PATH=$1
+USERNAME=$2
+PASSWORD=$3
 
 
 
@@ -25,8 +25,8 @@ arangoimp --overwrite true --file "$DATASET_PATH/disaster/property_graph/Road.cs
 
 #LOAD ARRAY
 
-arangoimp --overwrite true --file "$DATASET_PATH/disaster/array/finedust_idx.csv" --type csv --collection "Finedust_idx" --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --threads 4 --server.database Disaster
+arangoimp --overwrite true --file "$DATASET_PATH/disaster/array/Finedust_idx.csv" --type csv --collection "Finedust_idx" --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --threads 4 --server.database Disaster
 
 
-arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD --javascript.execute  create_index.js
+arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD --javascript.execute  $DATASET_PATH/../Impl/arangodb/load_datasets/disaster/create_index.js
 
