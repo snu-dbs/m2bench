@@ -40,7 +40,8 @@ Perform the product recommendation based on the past customer ratings.
 A = SELECT customer_id, product_id, rating
     FROM Review, "Order"
     WHERE Review.order_id="Order".order_id
-    B, C = A.toArray(
+    
+B, C = A.toArray(
            dim1: customer_id, 
            dim2: product_id, 
            val: avg(rating)).Factorization
@@ -196,7 +197,9 @@ C = SELECT target_id, target_name  AS target node
 D = SELECT drug_target_edge(drug node, target node) AS edge 
     FROM drug
 
-E = Drug.toGraph (Source : B as Drug , Dest: C as Target,  Edge : D as has_bond ) //graph
+E = Drug.toGraph (Src: B as Drug, 
+                  Dest: C as Target,
+                  Edge : D as has_bond ) //graph
 
 F = SELECT d2.drug_name, count(t) AS common_target 
     FROM  (MATCH (d1: Drug) - [has_bond] - (t: Target) -[has_bond]-  (d2: Drug) 
@@ -212,21 +215,27 @@ F = SELECT d2.drug_name, count(t) AS common_target
 Find similar drugs for a given patient's prescribed drug. (Relational x Document → Array)
 
 ```SQL
-A = SELECT UNIQUE drug_id 
+A = SELECT DISTINCT (drug_id)
     FROM Patient 
-    WHERE patient_id="" //table
+    WHERE patient_id="X" //table
 
-B = SELECT UNIQUE adverse_effect_list.adverse_effect_name 
-    FROM Drug UNNEST adverse_effect_list
 
-C = SELECT drug_id, is_adverse_effect_of_drug(B, Drug.adverse_effect_list ) as X 
-    FROM Drug //table
+B = SELECT drug_id, adverse_effect_list.adverse_effect_name as adverse_effect_name
+    FROM Drug 
+    UNNEST adverse_effect_list
+   
+           
 
-D = B.toArray  -> (<X>[drug_id, adverse_effect_name]) //array
-E = Cosine_similarity(B) -> (<similarity coefficient>[drug_id1, drug_id2]) //array
-F = SELECT * 
-    FROM E 
-    WHERE drug_id1 == A //array
+C = A.toArray(
+      dim1: drug_id, 
+      dim2: adverse_effect_name, 
+      val: 1)
+      
+D = C.cosine_similarity // it produces |drug_id1| x |drug_id2| similarity matrix 
+
+E = SELECT * 
+    FROM D 
+    WHERE drug_id1 in A //array
 ```
 
 
@@ -237,12 +246,15 @@ F = SELECT *
 For the earthquakes which occurred between time Z1 and Z2, find the road network subgraph within 5km from the earthquakes' location.
 
 ```SQL
+
 A = SELECT n1, r, n2 AS subgraph 
-    FROM Earthquake, Site, RoadNode 
-    WHERE (n1:RoadNode) - [r:Road] -> (n2:RoadNode) 
-           AND ST_Distance(Site.geometry, Earthquake.coordinates) <= 5km 
-           AND Earthquake.time >= Z1 AND Earthquake.time < Z2 
-           AND RoadNode.site_id = Site.site_id
+    FROM Earthquake, Site,
+         ( MATCH (n1:RoadNode) - [r:Road] -> (n2:RoadNode) 
+           RETURN n1, r, n2 )
+    WHERE ST_Distance(Site.geometry, Earthquake.coordinates) <= 5km 
+          AND Earthquake.time >= Z1 AND Earthquake.time < Z2 
+          AND n1.site_id = Site.site_id 
+          OR n2.site_id = Site.site_id
 ```
 
 
