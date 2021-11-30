@@ -10,7 +10,7 @@
 ## Workloads (= Tasks)
 - All tasks in M2Bench are explained in the `Tasks` folder. 
 
-## How to Run M2Bench *In progress (We are now arranging and uploading the codes )
+## How to Run M2Bench *In progress (We are now arranging and uploading the codes. )
 - Generate datasets of M2Bench following the instructions in the `Datasets` folder.
 - Choose DBMS X `[agensgraph|arangodb|orientdb|polyglot]`. 
 - Load the datasets into DBMS X following the instructions in the `Impl/X/load_datasets` folder.  
