@@ -3,8 +3,8 @@
     (
         Select  latitude, longitude, avg(pm10) as pm10
         From finedust_idx
-        where  timestamp >= 30 /* SF1= 3*/
-        and timestamp <= 40 /* SF1 = 4*/
+        where  timestamp >= 3 /* SF1= 3*/
+        and timestamp <= 4 /* SF1 = 4*/
         group by latitude, longitude
     )
     , B as

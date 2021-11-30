@@ -5,7 +5,7 @@ res2 = db._query("for a in drug_matrix for b in drug_matrix filter a.adverse_eff
 res3 = db._query("for s in similarity1 filter s.drug1 == s.drug2 INSERT {drug1: s.drug1, drug2: s.drug2, val: 1/sqrt(s.val)} INTO inv_norm").getExtra();
 res4 = db._query("for a in similarity1 for b in inv_norm filter a.drug2 == b.drug1 collect row=a.drug1, col=b.drug2 aggregate res = sum(a.val*b.val) INSERT {drug1: row, drug2: col, val: res} INTO similarity2").getExtra()
 res5 = db._query("for a in similarity2 for b in inv_norm filter a.drug1 == b.drug1 collect row=a.drug2, col=b.drug2 aggregate res = sum(a.val*b.val) INSERT {drug1: row, drug2: col, val: res} INTO drug_similarity").getExtra()
-res6 = db._query("Let A=(for p in Prescription filter p.patient_id == 18 return DISTINCT {drug: p.drug_id}) LET R =(for a in A for ds in drug_similarity filter ds.drug1 == a.drug return ds) RETURN length(R)")
+res6 = db._query("Let A=(for p in Prescription filter p.patient_id == 9 return DISTINCT {drug: p.drug_id}) LET R =(for a in A for ds in drug_similarity filter ds.drug1 == a.drug return ds) RETURN length(R)")
 
 res7 = res6.getExtra()
 

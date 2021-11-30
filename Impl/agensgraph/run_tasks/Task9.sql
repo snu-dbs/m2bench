@@ -43,6 +43,6 @@ CREATE INDEX on drug_similarity (drug_2);
 
 select count(*) from
 (
-WITH A as (SELECT distinct(drug_id) as drug from Prescription where patient_id = 18)
+WITH A as (SELECT distinct(drug_id) as drug from Prescription where patient_id = 9)
 SELECT drug_1, drug_2, val  from drug_similarity, A where drug_similarity.drug_1 = to_jsonb(A.drug)
 ) as res

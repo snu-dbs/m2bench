@@ -1,6 +1,7 @@
 USERNAME=
 PASSWORD=
 
+
 echo "T1 ==============="
 time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task1.js  
 echo "T1 finished ======"
@@ -30,29 +31,29 @@ echo
 echo
 
 echo "T5 ==============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task5.js
+time arangosh --server.database Healthcare --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task5.js
 echo "T5 finished ======"
 
 echo
 echo
 
 echo "T6 ==============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task6.js
+time arangosh --server.database Healthcare --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task6.js
 echo "T6 finished ======"
 
 echo
 echo
 
 echo "T7 ===============" 
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task7.js
+time arangosh --server.database Healthcare --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task7.js
 echo "T7 finished ======" 
 
 echo
 echo
 
 echo "T8 ==============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task8_1.js
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task8_1.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task8_1.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task8_1.js
 echo "T8 finished ======"
 
 echo
@@ -60,8 +61,8 @@ echo
 
 
 echo "T9 ==============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task9_1.js
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task9_2.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task9_1.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task9_2.js
 echo "T9 finished ======"
 
 echo
@@ -69,7 +70,7 @@ echo
 
 
 echo "T10 =============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task10.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task10.js
 echo "T10 finished ====="
 
 
@@ -78,8 +79,8 @@ echo
 
 
 echo "T11 =============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task11_1.js
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task11_2.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task11_1.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task11_2.js
 echo "T11 finished ====="
 
 
@@ -88,7 +89,7 @@ echo
 
 
 echo "T12 =============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task12.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task12.js
 echo "T12 finished =====" 
 
 
@@ -97,28 +98,28 @@ echo
 
 
 echo "T13 =============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task13.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task13.js
 echo "T13 finished =====" 
 
 echo
 echo
 
 echo "T14 =============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task14.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task14.js
 echo "T14 finished =====" 
 
 echo
 echo
 
 echo "T15 =============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task15.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task15.js
 echo "T15 finished ====="
 
 echo
 echo
 
 echo "T16 =============="
-time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task16.js
+time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task16.js
 echo "T16 finished ====="
 
 echo

@@ -2,7 +2,7 @@
  SET graph_path = social_network;
  With A as (select Customer.person_id
  		From "order", Review, Customer
- 		where Review.data->>'product_id' = 'B007SYGLZO0' and Review.data->>'order_id' =  "order".data->> 'order_id' 
+ 		where Review.data->>'product_id' = 'B007SYGLZO' and Review.data->>'order_id' =  "order".data->> 'order_id' 
  		and "order".data->>'order_date' <= '2021-06-01' and "order".data->>'order_date' >= '2020-06-01'
  		and "order".data->> 'customer_id' = Customer.customer_id and Customer.gender = 'F')
  

@@ -3,7 +3,7 @@
 With A as (
           Select distinct(drug_id) as drug_id
           From Prescription
-          Where patient_id = 18  
+          Where patient_id = 9 
         )
 
         Select count(*)
