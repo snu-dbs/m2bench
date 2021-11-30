@@ -38,16 +38,16 @@ Perform the product recommendation based on the past customer ratings.
 
 ```SQL
 A = SELECT customer_id, product_id, rating
-        FROM Review, "Order"
-        WHERE Review.order_id="Order".order_id
+           FROM Review, "Order"
+           WHERE Review.order_id="Order".order_id
 
 B, C = A.toArray(
-                dim1: customer_id, 
-                dim2: product_id, 
-                val: rating)
-        .Factorization
+                    dim1: customer_id, 
+                    dim2: product_id, 
+                    val: avg(rating))
+                .Factorization
 
-D = MatMul(B, C)
+D = MatMul(B,C)
 ```
 
 #### T3. Purchase Propensities
@@ -143,16 +143,26 @@ Find patients suffering from a similar disease with a given patient. ( Relationa
 
 ```SQL
 A = SELECT disease_id 
-        FROM Diagnosis 
-        WHERE patient_id = "X" // table
+           FROM Diagnosis 
+           WHERE patient_id = "X" 
+           
+B = SELECT distinct(d3.disease_id)
+           FROM A,
+           (MATCH (d1: Disease)-[:is_a]->(d2: Disease)
+                    <-[:is_a]-(d3: Disease) 
+            RETURN d1, d2, d3)
+           WHERE  A.disease_id = d1 
 
-B = SELECT d2.disease_id 
-        FROM Disease Network 
-        WHERE (d1: Disease, disease_id=A) - [:is_a*2] -> (d2: Disease)  // table
-
-C = SELECT patient_id 
-        FROM Patient, Diagnosis 
-        WHERE diagnosis .disease_id == B.disease_id  // table
+C = SELECT distinct(patient_id) 
+           FROM B, Diagnosis 
+           WHERE Diagnosis.disease_id ==  B.disease_id  
+             and Diagnosis.patient_id != "X"
+             and B.disease_id not in A
+            
+D = SELECT gender, count(gender) 
+           From Patient, C
+           WHERE Patient.patient_id = C.patient_id  
+           GROUP BY gender
 ```
 
 
@@ -315,20 +325,19 @@ D = SELECT C.date, C.timestamp, ST_ClosestObject(Site, building, C.coordinates) 
 Given timestamps Z1 and Z2 and current coordinates, find the shortest path from the current coordinates to a hotspot of the finedust between Z1 and Z2. To find the hotspot, use window aggregation with a size of 5. (Graph, Document, Array) → Relational
 
 ```SQL
-A = SELECT latitude, longitude, SUM(pm10) as pm10_sum, COUNT(pm10) as pm10_count 
-        FROM FineDust 
-        WHERE timestamp >= Z1 AND timestamp <= Z2 
-        GROUP BY latitude, longitude // Array
-
-B = SELECT (latitude, longitude) AS coordinates, SUM(pm10_sum) / SUM(pm10_count) as pm10_avg 
-        FROM A 
-        WINDOW 1, 5, 5 // Array
-
-C = SELECT ShortestPath(RoadNode, startNode: ST_ClosestObject(Site, roadnode, current_coordinates), endNode: ST_ClosestObject(Site, roadnode, B.coordinates)) 
-        FROM B, RoadNode, Site 
+Q1. A = SELECT (latitude, longitude) AS coo, 
+                       AVG(pm10) AS pm10_avg 
+                        OVER WINDOW (*, 5, 5)
+                        FROM FineDust 
+                        WHERE timestamp >= Z1 AND timestamp <= Z2
+           
+Q2. B = SELECT ShortestPath(
+                Graph: RoadNetwork, 
+                StartNode: ST_ClosestObject(Site, RoadNode, "X"), 
+                EndNode: ST_ClosestObject(Site, RoadNode, A.coo)) 
+        FROM A, RoadNetwork, Site 
         WHERE Site.site_id = RoadNode.site_id 
-        ORDER BY B.pm10_avg 
-        DESC LIMIT 1 // Relational
+        ORDER BY A.pm10_avg DESC LIMIT 1 
 ```
 
 
