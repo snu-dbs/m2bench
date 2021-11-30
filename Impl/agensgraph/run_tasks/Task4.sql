@@ -11,7 +11,7 @@ With A as (
 								product.product_id as product_idX,  
 								product.brand_id
 								from product, "order", Brand 
-								where data->'order_line' @> concat('[{ "product_id":"',Product.product_id,'"}]')::jsonb
+								where data->'order_line' @> concat('[{ "product_id":"',Product.product_id::character(10),'"}]')::jsonb
 								and Brand.industry = 'Leisure' and Brand.brand_id = product.brand_id 
 							) as temp
 				where
