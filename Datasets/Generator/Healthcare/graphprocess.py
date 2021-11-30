@@ -22,7 +22,7 @@ def nodes_generator(Nodes_path):
     nodes_seed_df = nodes_df[['disease_id','term']]
     nodes_seed_df = nodes_seed_df.groupby(['disease_id'], as_index= False).agg({'term': lambda x: ', '.join(x.astype(str))}).reset_index()  #['term'].apply(','.join).reset_index()
     nodes_seed_df = nodes_seed_df[['disease_id','term']] 
-    node = nodes_seed_df.to_csv(r'Disease_network_nodes.csv',index=False)
+    node = nodes_seed_df.to_csv(r'../../healthcare/property_graph/Disease_network_nodes.csv',index=False)
     print('----- Disease_network_nodes.csv DONE ----')
 
 def edges_generator(Edges_path):
@@ -46,7 +46,7 @@ def edges_generator(Edges_path):
 
     edges_seed_df.insert(1,'edge_label','is_a')
 
-    edge = edges_seed_df.to_csv(r'Disease_network_edges.csv',index=False)
+    edge = edges_seed_df.to_csv(r'../../healthcare/property_graph/Disease_network_edges.csv',index=False)
     print('----- Disease_network_edges.csv DONE -----')
     print("----- GRAPH DATA ARRANGEMENT DONE -----")
 
