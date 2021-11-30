@@ -36,7 +36,7 @@ CREATE FOREIGN TABLE IF NOT EXISTS hashtag(
         content varchar(30)
         )
 SERVER import_server
-OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/ecommerce/property_graph/hashtag_node.csv', DELIMITER ',');
+OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/ecommerce/property_graph/hashtag_node_SF1.csv', DELIMITER ',');
 
 
 CREATE FOREIGN TABLE IF NOT EXISTS interested_in(
