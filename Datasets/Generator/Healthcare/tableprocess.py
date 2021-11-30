@@ -28,7 +28,7 @@ def table_process(mimic_dirpath):
     patients_df['patient_name'] = patient_name
     seed_patients_df = patients_df[['patient_id','patient_name', 'gender', 'date_of_birth','date_of_death' ]]
 
-    seed_table =seed_patients_df.to_csv (r'Patient.csv',index=False)
+    seed_table =seed_patients_df.to_csv (r'../../healthcare/table/Patient.csv',index=False)
 
     print ('----- Patient.csv DONE -----')
     
@@ -45,7 +45,7 @@ def table_process(mimic_dirpath):
     seed_table_df = seed_table_df.sort_values(by = ['patient_id'])
     seed_table_df['patient_id'] = seed_table_df['patient_id'].astype(int)
     seed_table_df = seed_table_df[['patient_id','drug_id','start_date', 'end_date']]
-    seed_table =seed_table_df.to_csv(r'Prescription.csv',index=False)
+    seed_table =seed_table_df.to_csv(r'../../healthcare/table/Prescription.csv',index=False)
 
     print ('----- Prescription.csv DONE -----')
 
@@ -75,7 +75,7 @@ def table_process(mimic_dirpath):
     diagnoses_seed_df = diagnoses_df[['patient_id','ICD_CODE']]
     seed_table_df = pd.merge(diagnoses_seed_df, snomed_map, on = "ICD_CODE")
     seed_table_df = seed_table_df.sort_values(by = ['patient_id'])
-    seed_table =seed_table_df[['patient_id','disease_id']].to_csv (r'Diagnosis.csv',index=False)
+    seed_table =seed_table_df[['patient_id','disease_id']].to_csv (r'../../healthcare/table/Diagnosis.csv',index=False)
 
     print ('----- Diagnosis.csv DONE -----')
 
