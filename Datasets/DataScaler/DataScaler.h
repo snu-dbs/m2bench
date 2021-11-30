@@ -208,8 +208,12 @@ public:
         }
         string line = "";
         int nline = 0 ;
+	size_t lastindex = filename.find_last_of(".");
+        string rawname = filename.substr(0, lastindex);
 
-        auto outfile = ofstream(split(filename, '.')[0]+"_SF"+to_string(SF)+".csv");
+        auto outfile = ofstream(rawname+"_SF"+to_string(SF)+".csv");
+
+
 
         while (std::getline(inputfile, line))
         {
@@ -262,7 +266,11 @@ public:
         string line = "";
         int nline = 0 ;
 
-        auto outfile = ofstream(split(filename, '.')[0]+"_SF"+to_string(SF)+".csv");
+
+	size_t lastindex = filename.find_last_of(".");
+	string rawname = filename.substr(0, lastindex); 
+        
+	auto outfile = ofstream(rawname+"_SF"+to_string(SF)+".csv");
 
         while (std::getline(inputfile, line))
         {
@@ -332,7 +340,10 @@ public:
         string line = "";
         int nline = 0 ;
 
-        auto outfile = ofstream(split(filename, '.')[0]+"_SF"+to_string(SF)+"."+split(filename, '.')[1]);
+        size_t lastindex = filename.find_last_of(".");
+        string rawname = filename.substr(0, lastindex);
+
+        auto outfile = ofstream(rawname+"_SF"+to_string(SF)+".json");
 
         while (std::getline(inputfile, line))
         {
@@ -453,7 +464,11 @@ public:
         }
 
         line = "";
-        auto outfile = ofstream(split(OrderFilePath, '.')[0]+"_modified.json");
+	
+       	size_t lastindex = OrderFilePath.find_last_of(".");
+ 	string raw_name = OrderFilePath.substr(0, lastindex);
+
+        auto outfile = ofstream(raw_name+"_modified.json");
 
         while (std::getline(inputfile2, line))
         {
