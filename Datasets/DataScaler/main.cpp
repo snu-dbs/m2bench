@@ -29,8 +29,11 @@ void scalingData(int SF, string  path_to_dataset, string path_to_schema ){
 
 
     cout << "Adjust Product and Order" << endl;
-    auto order_res = ScalingOrder.split(order_path, '.')[0]+"_SF"+to_string(SF)+".json";
-    auto order_res_modified = ScalingOrder.split(order_path, '.')[0]+"_SF"+to_string(SF)+"_modified.json";
+    size_t lastindex = order_path.find_last_of(".");
+    string raw_name = order_path.substr(0, lastindex);
+
+    auto order_res = raw_name+"_SF"+to_string(SF)+".json";
+    auto order_res_modified = raw_name+"_SF"+to_string(SF)+"_modified.json";
 
     auto Adjusting = DataScaler();
     Adjusting.AdjustProductAndOrder(path_to_dataset+"ecommerce/table/Product_SF"+to_string(SF)+".csv",
