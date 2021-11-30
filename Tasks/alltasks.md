@@ -61,11 +61,14 @@ A = SELECT Customer.person_id as person_id, SUM(Order.total_price) AS order_pric
     DESC LIMIT 1
 
 B = SELECT Customer.customer_id as 2hop_customer_id 
-    FROM A, SNS, Customer 
-    WHERE (p1:Person) - [FOLLOWS*2] - > (p2:Person) AND SNS.p2.person_id = A.person_id AND SNS.p1.person_id = Customer.person_id
+    FROM A, Customer,
+            (MATCH (p1:Person) - [FOLLOWS*2] - > (p2:Person) 
+             RETURN p1, p2)
+    WHERE p2.person_id = A.person_id AND p1.person_id = Customer.person_id
 
 C = SELECT Order.customer_id AS customer_id, Order.order_line.pid AS pid, Product.brand_name AS brand_name 
-    FROM  B, Order, Product UNNEST Order.order_line 
+    FROM  B, Order, Product 
+    UNNEST Order.order_line 
     WHERE Order.customer_id = B.2hop_customer_id AND Product.product_id=Order.order_line.product_id
 
 D = SELECT Brand.industry, COUNT(*) AS customer_count 
@@ -89,15 +92,20 @@ A = SELECT DISTINCT Customer.person_id as person_id, SUM(Order.Order_line.price)
     GROUP BY person_id 
     HAVING total_spent> 'x'
 
-B = SELECT SNS.influencer.person_id AS person_id, COUNT(SNS.n) AS followers 
-    FROM A, SNS
-    WHERE (n:Person)  - [FOLLOWS] - > (influencer:Person) AND SNS.influencer.person_id=A.person_id 
+B = SELECT influencer.person_id AS person_id, COUNT(n) AS followers 
+    FROM A, 
+         (MATCH (n:Person)  - [FOLLOWS] - > (influencer:Person) 
+          RETURN n, influencer)
+    WHERE influencer.person_id=A.person_id 
+    GROUP BY influencer.person_id
     ORDER BY followers 
     DESC LIMIT N
 
-C = SELECT DISTINCT SNS.t.tag_id 
-    FROM B, SNS  
-    WHERE (p:Person)  - [HAS_INTEREST] - > (t:Tag) AND SNS.p.person_id=B.person_id
+C = SELECT DISTINCT t.tag_id 
+    FROM B, 
+         (MATCH (p:Person)  - [HAS_INTEREST] - > (t:Tag)
+          RETURN p, t )
+    WHERE p.person_id=B.person_id
 ```
 
 
@@ -115,9 +123,10 @@ A = SELECT Customer.person_id AS person_id
           AND Customer.gender=‘female’ // Relational
 
 B = SELECT p, r, node AS subGraph 
-    FROM A, SNS
-    WHERE (p:Person) - [r] -> (node)
-         AND SNS.p.person_id=A.person_id // Graph
+    FROM A, 
+         (MATCH (p:Person) - [r] -> (node)
+          RETURN p, r, node)
+    WHERE p.person_id=A.person_id 
 ```
 
 
@@ -187,13 +196,12 @@ C = SELECT target_id, target_name  AS target node
 D = SELECT drug_target_edge(drug node, target node) AS edge 
     FROM drug
 
-E = Drug.toGraph (Node : B,C {label: drug, target} edge : D {label: has_bond} ) //graph
+E = Drug.toGraph (Source : B as Drug , Dest: C as Target,  Edge : D as has_bond ) //graph
 
 F = SELECT d2.drug_name, count(t) AS common_target 
-    FROM E 
-    WHERE (d1: Drug) - [has_bond] - (t: Target) -[has_bond]-  (d2: Drug) 
-          AND d1.drug_name = A 
-          AND d1.drug_name != d2.drug_name 
+    FROM  (MATCH (d1: Drug) - [has_bond] - (t: Target) -[has_bond]-  (d2: Drug) 
+           WHERE d1.drug_name in A AND d1.drug_name != d2.drug_name  
+           RETURN d1, t, d2)          
     GROUP BY d2 
     ORDER BY common_target DESCENDING // table
 ```
