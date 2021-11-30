@@ -6,7 +6,6 @@ db.Finedust_idx.ensureIndex({type:"hash", fields: ["timestamp"]})
 db.Finedust_idx.ensureIndex({type: "persistent", fields: ["timestamp", "latitude", "longitude"]})
 db.Finedust_idx.ensureIndex({type:  "persistent", fields: ["latitude", "longitude"] })
 
-# use Finedust_idx instead of Finedust
 db.Finedust.ensureIndex({type:"persistent", fields: ["timestamp"]})
 db.Finedust.ensureIndex({type:"persistent", fields: ["longitude"]})
 db.Finedust.ensureIndex({type:"persistent", fields: ["latitude"]})

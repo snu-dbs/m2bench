@@ -1,6 +1,6 @@
-DATASET_PATH= 
-USERNAME=
-PASSWORD=
+DATASET_PATH=$1 
+USERNAME=$2
+PASSWORD=$3
 
 # LOAD TABLE
 
@@ -23,5 +23,6 @@ arangoimp --overwrite true --file "$DATASET_PATH/healthcare/property_graph/Disea
 
 arangoimp --overwrite true --file "$DATASET_PATH/healthcare/property_graph/Disease_network_edges.csv" --type csv --translate "source_id=_from" --translate "destination_id=_to" --collection "Disease_network_edges" --from-collection-prefix Disease_network_nodes --to-collection-prefix Disease_network_nodes --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --create-collection-type edge --threads 4 --server.database Healthcare
 
-arangosh --server.database Healthcare --server.username $USERNAME --server.password $PASSWORD --javascript.execute  create_index.js
+arangosh --server.database Healthcare --server.username $USERNAME --server.password $PASSWORD --javascript.execute  $DATASET_PATH/../Impl/arangodb/load_datasets/healthcare/create_index.js
+
 
