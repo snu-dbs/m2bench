@@ -32,7 +32,7 @@ D = SELECT B.pid, (SUM(B.order_price)/C.revenue*100) AS percent_of_revenue
 ```
 
 
-####  Task 2. Product Recommendation
+####  T2. Product Recommendation
 
 Perform the product recommendation based on the past customer ratings.
 
