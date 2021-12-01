@@ -278,7 +278,9 @@ B = SELECT t.shelter_id, ST_ClosestObject(Site, roadnode, ST_Centroid(t.geometry
                           ) AS t 
     WHERE RoadNode.site_id = Site.site_id
     
-C = SELECT A.gps_id, B.shelter_id, ShortestPath(RoadNode, startNode:A.roadnode_id, endNode:B.roadnode_id) AS cost 
+C = SELECT A.gps_id, 
+           B.shelter_id, 
+           ShortestPath(RoadNode, startNode:A.roadnode_id, endNode:B.roadnode_id) AS cost 
     FROM A, B, RoadNode
 ````
 
@@ -342,9 +344,9 @@ Given timestamps Z1 and Z2, find the nearest building from a fine dust hotspot f
 
 ```SQL
 A = SELECT date, timestamp, latitude, longitude, AVG(pm10) AS pm10_avg 
+    WINDOW OVER (*, 5, 5) // Array
     FROM FineDust 
     WHERE timestamp >= Z1 AND timestamp <= Z2 
-    WINDOW 1, 5, 5 // Array
 
 B = REDIMENSION(A, <pm10_avg: float>[date=0:*, timestamp=0:*, latitude=0:*, longitude=0:*]) // Array
 
@@ -366,8 +368,7 @@ D = SELECT C.date, C.timestamp, ST_ClosestObject(Site, building, C.coordinates) 
 Given timestamps Z1 and Z2 and current coordinates, find the shortest path from the current coordinates to a hotspot of the finedust between Z1 and Z2. To find the hotspot, use window aggregation with a size of 5. (Graph, Document, Array) → Relational
 
 ```SQL
-Q1. A = SELECT (latitude, longitude) AS coo, 
-               AVG(pm10) AS pm10_avg 
+Q1. A = SELECT (latitude, longitude) AS coo, AVG(pm10) AS pm10_avg 
         OVER WINDOW (*, 5, 5)
         FROM FineDust 
         WHERE timestamp >= Z1 AND timestamp <= Z2
@@ -378,7 +379,8 @@ Q2. B = SELECT ShortestPath(
                 EndNode: ST_ClosestObject(Site, RoadNode, A.coo)) 
         FROM A, RoadNetwork, Site 
         WHERE Site.site_id = RoadNode.site_id 
-        ORDER BY A.pm10_avg DESC LIMIT 1 
+        ORDER BY A.pm10_avg DESC 
+        LIMIT 1 
 ```
 
 
@@ -394,7 +396,8 @@ A = SELECT latitude, longitude, AVG(pm10) AS pm10_avg
 
 B = Site.site_id, A.pm10_avg 
     FROM Site, A 
-    WHERE WithIN(Box(A.latitude, A.longitude, A.latitude+e1, A.longitude+e2), ST_Centroid(Site.geometry)) 
+    WHERE WithIN( Box(A.latitude, A.longitude, A.latitude+e1, A.longitude+e2),            
+                  ST_Centroid(Site.geometry)) 
           AND Site.properties.type = 'building' 
           AND Site.properties.description = 'school' // Document
 ```
