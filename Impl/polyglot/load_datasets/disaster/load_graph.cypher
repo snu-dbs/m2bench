@@ -8,3 +8,12 @@ USING PERIODIC COMMIT
 LOAD CSV with headers FROM 'file:///road.csv' AS row  FIELDTERMINATOR ','
 MATCH (c1 : Roadnode {roadnode_id: toInteger(row.from)} ), (c2: Roadnode {roadnode_id: toInteger(row.to)})
 CREATE (c1)-[:Road { distance: toInteger(row.distance)} ]->(c2);
+
+CALL gds.graph.create(
+  'road_network',            
+  'Roadnode',             
+  'Road' ,
+   {
+       relationshipProperties: 'distance'
+   }
+);
