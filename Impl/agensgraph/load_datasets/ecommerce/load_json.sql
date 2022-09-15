@@ -8,3 +8,6 @@ CREATE INDEX order_orderline_product_id_idx2 ON "order" using ((data->'order_lin
 COPY review (data) FROM '/ecommerce/json/review.json';
 CREATE INDEX review_order_id_idx ON review((data->>'order_id'));
 CREATE INDEX review_product_id_idx ON review((data->>'product_id'));
+
+CREATE INDEX ON review(CAST(data->>'rating' AS INT));
+CREATE INDEX ON review(CAST(data->>'rating' AS INT), (data->>'order_id'));

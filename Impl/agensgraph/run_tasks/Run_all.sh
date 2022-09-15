@@ -1,3 +1,6 @@
+echo "T0"
+time agens -d ecommerce -f Task0.sql
+echo
 echo "T1"
 time agens -d ecommerce -f Task1.sql
 echo

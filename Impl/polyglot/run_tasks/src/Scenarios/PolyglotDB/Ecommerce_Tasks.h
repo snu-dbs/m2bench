@@ -1025,4 +1025,273 @@ void T5(string pid, string curdate) {
 }
 
 
+/**
+ *  [Task 0] Building a Logistic Model ([R, D, G, A] => A).
+ *  Build a logistic regression model to predict if a user prefers the given brand.
+ */
+void T0(int brand_id) {
+    int nrows = 0;
+    char buffer[5000];
 
+    // initialize connectors
+    auto mysql = mysql_connector();
+    auto mongodb = mongodb_connector("Ecommerce");
+    auto neo4j = new neo4j_connector();
+    unique_ptr<ScidbConnection> scidb(new ScidbConnection("147.46.125.23:8080"));
+
+    /*
+     * A
+     */
+    // get table (mysql)
+    auto customer = mysql.mysess->getSchema("Ecommerce").getTable("Customer");
+    
+    // create temp table 
+    mysql.mysess->sql("use Ecommerce").execute();
+    mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_A_TEMPTABLE(person_id INT, tag_id INT)").execute();
+
+    // run neo4j query (neo4j)
+    string a_neo4j_query = "MATCH (p:Person)-[:interested_in]->(t:Shopping_Hashtag) RETURN toInteger(p.person_id), toInteger(t.tag_id)";
+    auto results = neo4j_run(neo4j->conn, a_neo4j_query.c_str(), neo4j_null);
+
+    // transfer mongo result to mysql
+    int buffer_cnt = 0;
+    auto insert_temptbl_a = mysql.mysess->getSchema("Ecommerce")
+        .getTable("TASK_NEW_A_TEMPTABLE")
+        .insert("person_id", "tag_id");
+
+    while (true) {
+        neo4j_result_t *result = neo4j_fetch_next(results);
+        if (result == NULL) break;
+
+        // parse the neo4j result
+        int person_id = neo4j_int_value(neo4j_result_field(result, 0));
+        int tag_id = neo4j_int_value(neo4j_result_field(result, 1));
+
+        // buffering
+        insert_temptbl_a.values(person_id, tag_id);
+        buffer_cnt++;
+
+        // flush
+        if (buffer_cnt >= BUFFER) {
+            insert_temptbl_a.execute();
+            insert_temptbl_a = mysql.mysess->getSchema("Ecommerce")
+                .getTable("TASK_NEW_A_TEMPTABLE")
+                .insert("person_id", "tag_id");
+            buffer_cnt = 0;
+        }
+
+    }
+
+    // flush buffer
+    insert_temptbl_a.execute();
+    buffer_cnt = 0;
+
+    // cout << "A done" << endl;
+
+    /*
+     * B
+     */
+
+    // get pairs of customer_id and product_id that the customer gives the highest rating score. 
+    mongocxx::pipeline p{};
+    p.match(make_document(kvp("rating", 5)));
+    p.lookup(make_document(
+        kvp("from", "Order"),
+        kvp("localField", "order_id"),
+        kvp("foreignField", "order_id"),
+        kvp("as", "orders")
+    ));
+    p.unwind("$orders");
+    p.project(make_document(
+        kvp("_id", 0),
+        kvp("customer_id", "$orders.customer_id"),
+        kvp("product_id", "$product_id")
+    ));
+
+    // create temp table to hold the data above
+    mysql.mysess->sql("use Ecommerce").execute();
+    mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_B1_TEMPTABLE(customer_id CHAR(20), product_id CHAR(10))").execute();
+
+    // transfer mongo result to mysql
+    buffer_cnt = 0;
+    auto insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
+        .getTable("TASK_NEW_B1_TEMPTABLE")
+        .insert("customer_id", "product_id");
+
+    // query execution
+    auto cursor = mongodb.db["Review"].aggregate(p, mongocxx::options::aggregate{});
+    for (auto doc : cursor) {
+        // parse
+        auto json = Json::parse(bsoncxx::to_json(doc));
+        string customer_id = json["customer_id"].get<string>();
+        string product_id = json["product_id"].get<string>();
+        
+        // buffering
+        insert_temptbl_b.values(customer_id, product_id);
+        buffer_cnt++;
+
+        // flush
+        if (buffer_cnt >= BUFFER) {
+            insert_temptbl_b.execute();
+            insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
+                .getTable("TASK_NEW_B1_TEMPTABLE")
+                .insert("customer_id", "product_id");
+            buffer_cnt = 0;
+        }
+    }
+
+    // flush buffer
+    insert_temptbl_b.execute();     
+    buffer_cnt = 0;
+
+    // join with brand and store it to temp table
+    // this table is not a temp table because later query refers the table twice in a single query. 
+    mysql.mysess->sql("CREATE TABLE TASK_NEW_B2_TEMPTABLE(person_id INT, brand_id INT, cnt INT)").execute();
+    mysql.mysess->sql(
+        "INSERT INTO TASK_NEW_B2_TEMPTABLE "
+        "SELECT Customer.person_id, Product.brand_id, COUNT(*) "
+        "FROM TASK_NEW_B1_TEMPTABLE AS t, Product, Customer "
+        "WHERE t.product_id = Product.product_id AND "
+            "Customer.customer_id = t.customer_id "
+        "GROUP BY person_id, Product.brand_id").execute();
+
+    // cout << "B done" << endl;
+
+    /*
+     * C
+     */
+    // find favorite brand per customer
+    mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_C_TEMPTABLE(person_id INT, brand_id INT)").execute();
+    // Note that MIN() is for tie-breaking
+    auto res2 = mysql.mysess->sql(
+        "INSERT INTO TASK_NEW_C_TEMPTABLE "
+        "SELECT t1.person_id, MIN(t1.brand_id)  "
+        "FROM TASK_NEW_B2_TEMPTABLE AS t1, "
+            "(SELECT person_id, MAX(cnt) AS max_cnt FROM TASK_NEW_B2_TEMPTABLE GROUP BY person_id"
+            ") AS t2 "
+        "WHERE t1.person_id = t2.person_id AND "
+            "t1.cnt = t2.max_cnt "
+        "GROUP BY t1.person_id").execute();
+    
+    // cout << "C done" << endl;
+
+    /*
+     * D
+     */
+
+    // create array (scidb)
+    // dense array
+    scidb->exec("remove(tnew_d)");
+    // 2984700= 9949*300
+    scidb->exec("store(redimension( apply(apply(build(<val: double> [i=0:2984699:0:1000], 0), person_id, i / 300), tag_id, i % 300), <val:double>[person_id=0:9948:0:1000;tag_id=0:299:0:1000], false), tnew_d)");
+
+    // array for uploading
+    scidb->exec("remove(tnew_d_temp)");
+    scidb->exec("create array tnew_d_temp <person_id:int32, tag_id:int32> [i=0:2984699:0:1000]");
+
+    ScidbSchema schema;
+    schema.attrs.push_back(ScidbAttr("person_id", INT32));
+    schema.attrs.push_back(ScidbAttr("tag_id", INT32));
+
+    shared_ptr<ScidbArrFile> coo(new ScidbArrFile(schema));
+
+    auto res_d = mysql.mysess->getSchema("Ecommerce")
+        .getTable("TASK_NEW_A_TEMPTABLE")
+        .select("person_id", "tag_id")
+        .execute();
+    for (auto row : res_d) {
+        int person_id = row[0].get<int>();
+        int tag_id = row[1].get<int>();
+
+        // append to array to upload    
+        ScidbLineType line;
+        line.push_back(person_id);
+        line.push_back(tag_id);
+        coo->add(line);
+    }
+
+    scidb->upload("tnew_d_temp", coo);
+
+    // densify
+    scidb->exec("insert(redimension(apply(tnew_d_temp, val, 1.0), <val:double>[person_id=0:9948:0:1000;tag_id=0:299:0:1000], false), tnew_d)");
+    // cout << "insert(tnew_d_temp2, tnew_d_temp)" << endl;
+
+    // cout << "D done" << endl;
+
+    /*
+     * E 
+     */
+    // create array (scidb)
+    // dense array
+    scidb->exec("remove(tnew_e)");
+    scidb->exec("store(redimension(apply(build(<favorite: double> [person_id=0:9948:0:1000], 0), j, 0), <favorite: double> [person_id=0:9948:0:1000, j=0:0:0:1000]), tnew_e)");
+    
+    // array for uploading
+    scidb->exec("remove(tnew_e_temp)");
+    scidb->exec("create array tnew_e_temp <person_id:int32, favorite:double> [i=0:9948:0:1000]");
+
+    ScidbSchema schema2;
+    schema2.attrs.push_back(ScidbAttr("person_id", INT32));
+    schema2.attrs.push_back(ScidbAttr("brand_id", DOUBLE));
+    
+    shared_ptr<ScidbArrFile> coo2(new ScidbArrFile(schema2));
+
+    auto res_e = mysql.mysess->getSchema("Ecommerce")
+        .getTable("TASK_NEW_C_TEMPTABLE")
+        .select("person_id", "brand_id")
+        .execute();
+    for (auto row : res_e) {
+        int person_id = row[0].get<int>();
+        int favorite_brand_id = row[1].get<int>();
+
+        // append to array to upload    
+        ScidbLineType line;
+        line.push_back(person_id);
+        if (favorite_brand_id == brand_id) {
+            line.push_back((double) 1);
+        } else {
+            line.push_back((double) 0);
+        }
+        
+        coo2->add(line);
+    }
+
+    scidb->upload("tnew_e_temp", coo2);
+    
+    // densify
+    scidb->exec("insert(redimension(tnew_e_temp, <favorite: double> [person_id=0:9948:0:1000, j=0:0:0:1000], 0), tnew_e)");
+
+    // cout << "E done" << endl;
+
+    /*
+     * Logistic Regression of F
+     */
+
+    // for the third argument of the inner gemm
+    scidb->exec("remove(empty_c)");
+    scidb->exec("create array empty_c <val:double>[i=0:9948:0:1000, j=0:0:0:1000]");
+    
+    // for the third argument of the outer gemm
+    scidb->exec("remove(empty_c2)");
+    scidb->exec("create array empty_c2 <val:double>[i=0:299:0:1000, j=0:0:0:1000]");
+
+    // initialize w
+    scidb->exec("remove(tnew_w)");
+    scidb->exec("store(build(<val:double>[i=0:299:0:1000, j=0:0:0:1000], 1.0), tnew_w)");
+    // scidb->exec("store(build(<val:double>[i=0:299:0:1000, j=0:0:0:1000], random() / 2147483647.0), tnew_w)");
+    
+    // update
+    int max_iter = 1;
+    for (int iter = 0; iter < max_iter; iter++) {
+        // "%2B" is used for "+"
+        scidb->exec("store(project(apply(join(tnew_w, apply(gemm(tnew_d, project(apply(join(apply(gemm(tnew_d, tnew_w, empty_c), inner_gemm, 1 / (1 %2B exp(-1 * gemm))), tnew_e), diff, inner_gemm - favorite), diff), empty_c2, transa:true), subtract_rhs, 0.0001 * gemm)), res, val - subtract_rhs), res), tnew_w2)");
+        scidb->exec("remove(tnew_w)");
+        scidb->exec("store(project(apply(tnew_w2, val, res), val), tnew_w)");
+        scidb->exec("remove(tnew_w2)");
+    }
+    
+    // done!
+    mysql.mysess->sql("DROP TABLE TASK_NEW_B2_TEMPTABLE").execute();
+
+    return;
+}

@@ -1,6 +1,13 @@
 USERNAME=
 PASSWORD=
 
+echo "T0 ==============="
+time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task0_1.js  
+time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task0_2.js  
+echo "T0 finished ======"
+echo
+echo
+
 echo "T1 ==============="
 time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD  --javascript.execute  Task1.js  
 echo "T1 finished ======"

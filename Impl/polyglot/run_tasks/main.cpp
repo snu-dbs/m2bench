@@ -154,6 +154,8 @@ int main(int argc, char *argv[]) {
 
 
     cout << "POLYGLOT TEST" << endl;
+    timer(T0, 50);
+
     string curdate = "2021-06-01";
     timer(T1, curdate);
 
