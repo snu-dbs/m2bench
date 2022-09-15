@@ -6,6 +6,35 @@ This file contains full SQL sentences of the M2bench tasks.
 
 ### E-commerce
 
+#### T0. Building a Logistic Model
+
+Build a logistic regression model to predict if a user prefers the given brand.
+
+```SQL
+A = SELECT p.person_id, t.tag_id
+	FROM (MATCH (p: Person)-[:Interested_in]->(t: Hashtag) RETURN p, t
+
+B = SELECT Customer.person_id, Product.brand_id, COUNT(Review.review_id) as cnt
+	FROM Product, Review, Order, Customer
+	WHERE Customer.customer_id = Order.customer_id AND
+		Order.order_id = Review.order_id AND
+		Review.product_id = Product.product_id AND
+		Review.rating = 5
+	GROUP BY Customer.person_id, Product.brand_id
+
+C = SELECT B.person_id, MIN(B.brand_id)
+	FROM B, (SELECT person_id, MAX(cnt) as max_cnt FROM B GROUP BY person_id) AS T1
+	WHERE B.person_id = T1.person_id AND
+		B.cnt = T1.max_cnt
+	GROUP BY B.person_id
+
+D = A.toArray(dim1: person_id, dim2: tag_id, val: 1)
+
+E = C.toArray(dim1: person_id, val: (brand_id == given_brand_id) ? 1 : 0)
+
+F = LogisticRegression(D, E)
+```
+
 #### T1. Sales Performance
 
 Compute the ratio of total revenue to revenue by item class for the brand which produced the highest revenue last year.
@@ -32,7 +61,7 @@ D = SELECT B.pid, (SUM(B.order_price)/C.revenue*100) AS percent_of_revenue
 ```
 
 
-####  Task 2. Product Recommendation
+####  T2. Product Recommendation
 
 Perform the product recommendation based on the past customer ratings.
 
