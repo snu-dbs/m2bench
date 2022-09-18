@@ -30,7 +30,7 @@ Select count(*) from
 (
 SELECT drug1, drug2, count(*) as common_target from
 (MATCH (d1:drug_t)-[:has_bond]-(t:target_t)-[:has_bond]-(d2:drug_t)
-WHERE d1.drug_id in (select distinct(to_jsonb(drug_id)) from Prescription where patient_id = 18)
+WHERE d1.drug_id in (select distinct(to_jsonb(drug_id)) from Prescription where patient_id = 9)
 RETURN d1.drug_name as drug1, d2.drug_name as drug2) as B
 Group By drug1, drug2
 Order By common_target DESC

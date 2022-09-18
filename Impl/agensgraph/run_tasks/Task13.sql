@@ -1,4 +1,4 @@
-\timing 
+explain analyze  
 SELECT COUNT(*)
 FROM (
 	SELECT Site_centroid.data->'properties'->'description' AS description, COUNT(*)
