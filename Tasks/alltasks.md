@@ -10,6 +10,7 @@ This file contains full SQL sentences of the M2bench tasks.
 
 Build a logistic regression model to predict if a user prefers the given brand.
 
+
 ```SQL
 A = SELECT p.person_id, t.tag_id
 	FROM (MATCH (p: Person)-[:Interested_in]->(t: Hashtag) RETURN p, t
@@ -107,6 +108,7 @@ D = SELECT Brand.industry, COUNT(*) AS customer_count
 #### T4. Customer Interests
 
 Find the interests of top-N famous customers who made more than a certain amount of orders from a given product category.
+- X = 'Leisure' 
 
 ```SQL
 A = SELECT DISTINCT Customer.person_id as person_id, SUM(Order.Order_line.price) as total_spent 
@@ -133,6 +135,8 @@ C = SELECT DISTINCT SNS.t.tag_id
 #### T5. Filtering social network
 
 Extract social network sub-graph of female customers who has bought the given product 'X' within 1 year and wrote the reviews.
+- X = 'B007SYGLZO'   if SF = 0 
+- X = 'B007SYGLZO0'  if SF > 1 
 
 ```SQL
 A = SELECT Customer.person_id AS person_id
@@ -156,6 +160,7 @@ B = SELECT p, r, node AS subGraph
 #### T6. Drug interaction
 
 Find drugs that has known interaction with the prescribed drugs for a given patient ( Relational x Document → Relational )
+- X = 9*SF
 
 ```sql
 A = SELECT drug_id 
@@ -172,6 +177,7 @@ B = SELECT drug_interaction_list.drug_id
 #### T7. Group of patients with similar disease
 
 Find patients suffering from a similar disease with a given patient. ( Relational x Graph → Relational)
+- X = 9*SF
 
 ```SQL
 A = SELECT disease_id 
@@ -200,11 +206,12 @@ D = SELECT gender, count(gender)
 #### T8. Potential drug interaction
 
 Find all potential interaction drugs with the given patient's prescription drug. ( Relational x Document → Relational)
+- X = 9*SF
 
 ```SQL
 A =  SELECT Patient.drug_name 
      FROM Patient 
-     WHERE patient_id = “” // table
+     WHERE patient_id = “X” // table
 
 B = SELECT drug_id, drug_name AS drug node 
     FROM Drug
@@ -231,6 +238,8 @@ F = SELECT d2.drug_name, count(t) AS common_target
 #### T9. Drug similarity
 
 Find similar drugs for a given patient's prescribed drug. (Relational x Document → Array)
+- X = 9*SF
+
 
 ```SQL
 A = SELECT UNIQUE drug_id 
@@ -256,6 +265,8 @@ F = SELECT *
 #### T10. Road Network Filtering
 
 For the earthquakes which occurred between time Z1 and Z2, find the road network subgraph within 5km from the earthquakes' location.
+- Z1 = '2020-06-01 00:00:00'
+- Z2 = '2020-06-01 02:00:00'
 
 ```SQL
 A = SELECT n1, r, n2 AS subgraph 
@@ -270,6 +281,7 @@ A = SELECT n1, r, n2 AS subgraph
 #### T11. Closest Shelter
 
 For a given earthquake information X, find the cost of the shortest path for each GPS coordinate and Shelter pair. (GPS coordinates are limited by 1 hour and 10km from the X. Shelters are limited by 15km from the X.)
+- X = 41862
 
 ````SQL
 A = SELECT GPS.gps_id, ST_ClosestObject(Site, roadnode, GPS.coordinates) AS roadnode_id 
@@ -295,7 +307,8 @@ C = SELECT A.gps_id, B.shelter_id, ShortestPath(RoadNode, startNode:A.roadnode_i
 #### T12. New Shelter
 
 For the shelter of which the number of GPS coordinates are the most within 5km from the shelter between time Z1 and Z2, find five closest buildings from the shelter. The buildings are limited by 1km from the shelter.
-
+- Z1 = '2020-09-17 00:00:00'
+- Z2 = '2020-09-17 01:00:00'
 ```SQL
 A = SELECT Shelter.shelter_id, Site.geometry 
     FROM Shelter, Site, (
@@ -348,7 +361,8 @@ A = SELECT Site.properties.description, COUNT(*)
 #### T14. Sources of Fine Dust
 
 Given timestamps Z1 and Z2, find the nearest building from a fine dust hotspot for each date between Z1 and Z2. To find the hotspot, use window aggregation with a size of 5. (Document, Array) → Document
-
+- Z1 = 5*SF
+- Z2 = 10*SF
 ```SQL
 A = SELECT date, timestamp, latitude, longitude, AVG(pm10) AS pm10_avg 
     FROM FineDust 
@@ -371,8 +385,12 @@ D = SELECT C.date, C.timestamp, ST_ClosestObject(Site, building, C.coordinates) 
 
 
 #### T15. Fine Dust Cleaning Vehicles
-
 Given timestamps Z1 and Z2 and current coordinates, find the shortest path from the current coordinates to a hotspot of the finedust between Z1 and Z2. To find the hotspot, use window aggregation with a size of 5. (Graph, Document, Array) → Relational
+- Z1 = 5*SF
+- Z2 = 10*SF
+- X.lat = 34.068509
+- X.lon = -118.0614431
+
 
 ```SQL
 Q1. A = SELECT (latitude, longitude) AS coo, 
@@ -394,6 +412,8 @@ Q2. B = SELECT ShortestPath(
 ### T16. Fine Dust Backtesting
 
 For a given timestamp, hindcast the pm10 values of the schools. The Z is the number between min, max of the timestamp dimension. (Document, Array) → Relational
+- Z1 = 3*SF
+- Z2 = 4*SF
 
 ```SQL
 A = SELECT latitude, longitude, AVG(pm10) AS pm10_avg 
