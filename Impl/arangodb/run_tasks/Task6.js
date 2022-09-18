@@ -1,5 +1,5 @@
 res = db._query(`
-	Let param_patient_id = 18 
+	Let param_patient_id = 9 
 	Let A = (For prescription in Prescription
 		Filter prescription.patient_id == param_patient_id
 		Collect drug_id = prescription.drug_id

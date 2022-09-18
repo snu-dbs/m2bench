@@ -1,6 +1,6 @@
 res = db._query(`
-LET Z1 = 30
-LET Z2 = 40
+LET Z1 = 3
+LET Z2 = 4
 LET interval = 10800
    
 
