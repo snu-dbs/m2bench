@@ -1030,6 +1030,7 @@ void T5(string pid, string curdate) {
  *  Build a logistic regression model to predict if a user prefers the given brand.
  */
 void T0(int brand_id) {
+    bool mmjoin_optimized = false;
     int nrows = 0;
     char buffer[5000];
 
@@ -1092,68 +1093,150 @@ void T0(int brand_id) {
      * B
      */
 
-    // get pairs of customer_id and product_id that the customer gives the highest rating score. 
-    mongocxx::pipeline p{};
-    p.match(make_document(kvp("rating", 5)));
-    p.lookup(make_document(
-        kvp("from", "Order"),
-        kvp("localField", "order_id"),
-        kvp("foreignField", "order_id"),
-        kvp("as", "orders")
-    ));
-    p.unwind("$orders");
-    p.project(make_document(
-        kvp("_id", 0),
-        kvp("customer_id", "$orders.customer_id"),
-        kvp("product_id", "$product_id")
-    ));
+    if (mmjoin_optimized) {
+        // get pairs of customer_id and product_id that the customer gives the highest rating score. 
+        mongocxx::pipeline p{};
+        p.match(make_document(kvp("rating", 5)));
+        p.lookup(make_document(
+            kvp("from", "Order"),
+            kvp("localField", "order_id"),
+            kvp("foreignField", "order_id"),
+            kvp("as", "orders")
+        ));
+        p.unwind("$orders");
+        p.project(make_document(
+            kvp("_id", 0),
+            kvp("customer_id", "$orders.customer_id"),
+            kvp("product_id", "$product_id")
+        ));
 
-    // create temp table to hold the data above
-    mysql.mysess->sql("use Ecommerce").execute();
-    mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_B1_TEMPTABLE(customer_id CHAR(20), product_id CHAR(10))").execute();
+        // create temp table to hold the data above
+        mysql.mysess->sql("use Ecommerce").execute();
+        mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_B1_TEMPTABLE(customer_id CHAR(20), product_id CHAR(10))").execute();
 
-    // transfer mongo result to mysql
-    buffer_cnt = 0;
-    auto insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
-        .getTable("TASK_NEW_B1_TEMPTABLE")
-        .insert("customer_id", "product_id");
+        // transfer mongo result to mysql
+        buffer_cnt = 0;
+        auto insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
+            .getTable("TASK_NEW_B1_TEMPTABLE")
+            .insert("customer_id", "product_id");
 
-    // query execution
-    auto cursor = mongodb.db["Review"].aggregate(p, mongocxx::options::aggregate{});
-    for (auto doc : cursor) {
-        // parse
-        auto json = Json::parse(bsoncxx::to_json(doc));
-        string customer_id = json["customer_id"].get<string>();
-        string product_id = json["product_id"].get<string>();
-        
-        // buffering
-        insert_temptbl_b.values(customer_id, product_id);
-        buffer_cnt++;
+        // query execution
+        auto cursor = mongodb.db["Review"].aggregate(p, mongocxx::options::aggregate{});
+        for (auto doc : cursor) {
+            // parse
+            auto json = Json::parse(bsoncxx::to_json(doc));
+            string customer_id = json["customer_id"].get<string>();
+            string product_id = json["product_id"].get<string>();
+            
+            // buffering
+            insert_temptbl_b.values(customer_id, product_id);
+            buffer_cnt++;
 
-        // flush
-        if (buffer_cnt >= BUFFER) {
-            insert_temptbl_b.execute();
-            insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
-                .getTable("TASK_NEW_B1_TEMPTABLE")
-                .insert("customer_id", "product_id");
-            buffer_cnt = 0;
+            // flush
+            if (buffer_cnt >= BUFFER) {
+                insert_temptbl_b.execute();
+                insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
+                    .getTable("TASK_NEW_B1_TEMPTABLE")
+                    .insert("customer_id", "product_id");
+                buffer_cnt = 0;
+            }
         }
+
+        // flush buffer
+        insert_temptbl_b.execute();     
+        buffer_cnt = 0;
+
+        // join with brand and store it to temp table
+        // this table is not a temp table because later query refers the table twice in a single query. 
+        mysql.mysess->sql("CREATE TABLE TASK_NEW_B2_TEMPTABLE(person_id INT, brand_id INT, cnt INT)").execute();
+        mysql.mysess->sql(
+            "INSERT INTO TASK_NEW_B2_TEMPTABLE "
+            "SELECT Customer.person_id, Product.brand_id, COUNT(*) "
+            "FROM TASK_NEW_B1_TEMPTABLE AS t, Product, Customer "
+            "WHERE t.product_id = Product.product_id AND "
+                "Customer.customer_id = t.customer_id "
+            "GROUP BY person_id, Product.brand_id").execute();
+    } else {
+        // get pairs of customer_id and product_id that the customer gives the highest rating score. 
+        mongocxx::pipeline p{};
+        p.match(make_document(kvp("rating", 5)));
+        p.lookup(make_document(
+            kvp("from", "Order"),
+            kvp("localField", "order_id"),
+            kvp("foreignField", "order_id"),
+            kvp("as", "orders")
+        ));
+        p.unwind("$orders");
+        p.project(make_document(
+            kvp("_id", 0),
+            kvp("customer_id", "$orders.customer_id"),
+            kvp("product_id", "$product_id")
+        ));
+        // p.group(make_document(
+        //     kvp("_id", make_document(
+        //         kvp("customer_id", "$customer_id"),
+        //         kvp("product_id", "$product_id")
+        //     )),
+        //     kvp("cnt", make_document(kvp("$sum", 1)))
+        // ));
+
+        mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_B2_TEMPTABLE_2(person_id INT, brand_id INT)").execute();
+        auto insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
+                .getTable("TASK_NEW_B2_TEMPTABLE_2")
+                .insert("person_id", "brand_id");
+
+        // query execution
+        auto cursor = mongodb.db["Review"].aggregate(p, mongocxx::options::aggregate{});
+        for (auto doc : cursor) {
+            // parse
+            auto json = Json::parse(bsoncxx::to_json(doc));
+            string customer_id = json["customer_id"].get<string>();
+            string product_id = json["product_id"].get<string>();
+            // string customer_id = json["_id"]["customer_id"].get<string>();
+            // string product_id = json["_id"]["product_id"].get<string>();
+
+            // get customer and product from MySQL
+            auto c_cursor = mysql.mysess->getSchema("Ecommerce")
+                .getTable("Customer")
+                .select("person_id")
+                .where("customer_id = \'" + customer_id + "\'")
+                .execute();
+            int person_id = c_cursor.fetchOne()[0].get<int>();
+
+            auto p_cursor = mysql.mysess->getSchema("Ecommerce")
+                .getTable("Product")
+                .select("brand_id")
+                .where("product_id = \'" + product_id + "\'")
+                .execute();
+            int brand_id = p_cursor.fetchOne()[0].get<int>();
+
+            // insert into new table
+            // buffering
+            insert_temptbl_b.values(person_id, brand_id);
+            buffer_cnt++;
+
+            // flush
+            if (buffer_cnt >= BUFFER) {
+                insert_temptbl_b.execute();
+                insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
+                    .getTable("TASK_NEW_B2_TEMPTABLE_2")
+                    .insert("person_id", "brand_id");
+                buffer_cnt = 0;
+            }
+        }
+
+        // flush buffer
+        insert_temptbl_b.execute();     
+        buffer_cnt = 0;
+
+        // this table is not a temp table because later query refers the table twice in a single query. 
+        mysql.mysess->sql("CREATE TABLE TASK_NEW_B2_TEMPTABLE(person_id INT, brand_id INT, cnt INT)").execute();
+        mysql.mysess->sql(
+            "INSERT INTO TASK_NEW_B2_TEMPTABLE "
+            "SELECT person_id, brand_id, COUNT(*) "
+            "FROM TASK_NEW_B2_TEMPTABLE_2 "
+            "GROUP BY person_id, brand_id").execute();
     }
-
-    // flush buffer
-    insert_temptbl_b.execute();     
-    buffer_cnt = 0;
-
-    // join with brand and store it to temp table
-    // this table is not a temp table because later query refers the table twice in a single query. 
-    mysql.mysess->sql("CREATE TABLE TASK_NEW_B2_TEMPTABLE(person_id INT, brand_id INT, cnt INT)").execute();
-    mysql.mysess->sql(
-        "INSERT INTO TASK_NEW_B2_TEMPTABLE "
-        "SELECT Customer.person_id, Product.brand_id, COUNT(*) "
-        "FROM TASK_NEW_B1_TEMPTABLE AS t, Product, Customer "
-        "WHERE t.product_id = Product.product_id AND "
-            "Customer.customer_id = t.customer_id "
-        "GROUP BY person_id, Product.brand_id").execute();
 
     // cout << "B done" << endl;
 
