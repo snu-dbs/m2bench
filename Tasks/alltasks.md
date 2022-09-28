@@ -1,6 +1,25 @@
 # M2Bench 
 
-This file contains full SQL sentences of the M2bench tasks.
+This file contains a summary of operations and full SQL sentences of the M2bench tasks.
+
+## Summary of Operations
+
+<!-- NOTE: The latex sections (i.e., $ ~~~ $) are not displayed properly in the gitlab but these are properly displayed in github. -->
+
+| Syntax/Function | Description  |
+|---|---|
+| pattern: (*a*: *A*)-[*r*: *R*]-(*b*: *B*) | Node *a* is linked with node *b* through the edge *r*. *A*, *R* and *B* denote the label or field name. Directed edge can be represented using `-[r:R]->` instead of `-[r:R]-`. |
+| MATCH *patterns* WHERE *conditions* RETURN *variables* | Match all *patterns* satisfying the *conditions* in the graph and return a set of *variables* in the matched *patterns*. |
+| Unnest | If a document or object contains a nested array, perform a join of the nested array with its parent object and return the joined object. | 
+| Dot(.) | Return the value of the corresponding nested field. | 
+| toArray( $d_1, d_2, ..., d_n, \space A_1, A_2, ..., A_n$ ) | Convert an object to an array of which size is ( $d_1, d_2, ..., d_n$ ) having $A_1, A_2, ..., A_n$ as attributes. | 
+| MatMul( $m_1, m_2$ ) | Matrix multiplication on two matrices $m_1$ and $m_2$ . | 
+| Factorization | Perform the matrix factorization and produce two matrices, $m_1$ and $m_2$, containing the latent factors. | 
+| ST_ClosestObject(*d*, *o*, *c*) | In the dataset *d*, find the object *o* of which coordinate is closest from the coordinate *c*. | 
+| ShortestPath(*G*, *s*, *e*)  | Find the shortest path and its cost in the graph *G* with start node *s* and end node *e*. | 
+| OVER WINDOW ( $d_1, d_2, ..., d_n$ ) | Calculate window aggregation with a size of $d_1 \times d_2 \times , ..., \times d_n$ . | 
+| LogisticRegression(*X*, *y*)  | Build a logistic model from a matrix *X* and a label vector *y*. | 
+
 
 ## Tasks
 
