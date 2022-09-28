@@ -13,13 +13,15 @@ This file contains a summary of operations and full SQL sentences of the M2bench
 | Unnest | If a document or object contains a nested array, perform a join of the nested array with its parent object and return the joined object. | 
 | Dot(.) | Return the value of the corresponding nested field. | 
 | toArray( $d_1, d_2, ..., d_n, \space A_1, A_2, ..., A_n$ ) | Convert an object to an array of which size is ( $d_1, d_2, ..., d_n$ ) having $A_1, A_2, ..., A_n$ as attributes. | 
+| toGraph(*n*, *e*)  |  Convert an object to a graph of which nodes are *n* and edges are *e*. | 
 | MatMul( $m_1, m_2$ ) | Matrix multiplication on two matrices $m_1$ and $m_2$ . | 
 | Factorization | Perform the matrix factorization and produce two matrices, $m_1$ and $m_2$, containing the latent factors. | 
+| ST_Distance( $g_1, g_2$ )  | Find the euclidean distance between two geometries $g_1$ and $g_2$ . | 
 | ST_ClosestObject(*d*, *o*, *c*) | In the dataset *d*, find the object *o* of which coordinate is closest from the coordinate *c*. | 
 | ShortestPath(*G*, *s*, *e*)  | Find the shortest path and its cost in the graph *G* with start node *s* and end node *e*. | 
 | OVER WINDOW ( $d_1, d_2, ..., d_n$ ) | Calculate window aggregation with a size of $d_1 \times d_2 \times , ..., \times d_n$ . | 
 | LogisticRegression(*X*, *y*)  | Build a logistic model from a matrix *X* and a label vector *y*. | 
-
+| Cosine_similarity(*a*)  | Calculate the row-wise cosine similarity of given array *a*, and returns similarity matrix. | 
 
 ## Tasks
 
