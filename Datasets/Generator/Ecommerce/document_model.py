@@ -7,6 +7,7 @@ from pathlib import Path
 
 def order_generator(unibench_dirpath, outdir_path):
     order_dir_path = "Order/"
+    outdir_path = outdir_path+"/"
 
     f = open(Path(outdir_path+"table/")/'Customer.csv','r')
     rdr = csv.reader(f, delimiter='|')
@@ -60,6 +61,7 @@ def order_generator(unibench_dirpath, outdir_path):
 
 
 def review_generator(outdir_path):
+    outdir_path = outdir_path+"/"
     outputfile = "oid_pid.csv"
     f = open(outputfile, 'w')
     csvwriter = csv.writer(f)

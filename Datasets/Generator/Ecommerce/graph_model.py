@@ -9963,7 +9963,8 @@ func = lambda x: mapping_table.get(x, x)
 
 def edge_generator(unibench_dir_path, outdir_path):
     sns_dir_path = "SocialNetwork/"
-
+    outdir_path = outdir_path+"/"
+    
     ## generate person_follows_person edge 
     follows_edge = pd.read_csv(unibench_dir_path + sns_dir_path + "person_knows_person_0_0.csv", sep="|")
     follows_edge.columns.values[0] = "_from"

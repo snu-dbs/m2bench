@@ -14,9 +14,10 @@ def main(argv):
     outdir_path = '../../ecommerce'
     subdirs=["/array", "/json", "/table"]
     for i in subdirs:
+        outdir_path_i = outdir_path+i
         if os.path.exists(outdir_path+i):
-            os.system("rm -rf " + outdir_path+i)
-        os.mkdir(outdir_path+i)
+            os.system("rm -rf " + outdir_path_i)
+        os.mkdir(outdir_path_i)
 
     if os.path.exists(outdir_path+"/property_graph"):
         for file in os.scandir(outdir_path+"/property_graph"):
@@ -46,3 +47,4 @@ def main(argv):
 
 if __name__ == '__main__':
     main(sys.argv[1:])
+

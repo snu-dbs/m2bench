@@ -6,6 +6,7 @@ pd.set_option('mode.chained_assignment',  None)
 
 def product_generator(unibench_dir_path, outdir_path):
     product_dir_path = "Product/"
+    outdir_path = outdir_path+"/"
 
     product = pd.read_csv(unibench_dir_path + product_dir_path + "Product.csv", encoding='ISO-8859-1', sep=",")
     product.columns.values[0] = "product_id"
@@ -16,7 +17,8 @@ def product_generator(unibench_dir_path, outdir_path):
 
 def brand_generator(unibench_dir_path, outdir_path):
     brand_dir_path = "Vendor/"
-
+    outdir_path = outdir_path+"/"
+    
     brand = pd.read_csv(unibench_dir_path + brand_dir_path + "Vendor.csv", encoding='utf-8', sep=",")
     brand.columns.values[0] = "name"
     brand.columns.values[1] = "country"

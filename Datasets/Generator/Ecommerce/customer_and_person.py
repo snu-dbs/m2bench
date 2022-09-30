@@ -5,7 +5,8 @@ SF1_customer_rows = 9948
 
 
 def generator(tpcds_dir_path, outdir_path):
-
+    outdir_path = outdir_path+"/"
+    
     # Read necessary files to generate Customer.csv
     data1 = pd.read_csv(tpcds_dir_path+"customer.dat", encoding='ISO-8859-1', sep="|",
                         usecols=[0,1,8,9,11,12,13,14,16],
