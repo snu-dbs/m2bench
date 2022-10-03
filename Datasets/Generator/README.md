@@ -70,8 +70,7 @@ $ python3 main.py ../../raw_datasets/tpcds_data/ ../../raw_datasets/Unibench_SF1
 
 
 #### Usage: 
-- Navigate to `Datasets/Generator/Healthcare` directory.
-- 
+- Navigate to `Datasets/Generator/Healthcare` directory and do the following.
 ```bash
 $ python3 main.py [arg1][arg2][arg3][arg4]
 ```
@@ -84,7 +83,7 @@ $ python3 main.py [arg1][arg2][arg3][arg4]
 #### Caution:  Do not forget to extract the downloaded files before usage. 
 - Make sure the dataset directory names does not contain characters such as : "()". Rename the folders if needed. 
 - Keep in mind that arg1, arg4 are directory paths and arg2, arg3 are file paths.*
-- We provide 'ICD9CM_SNOMED_MAP_1TO1_202012.txt' file for table data generation. Make sure the file is located in the same directory where you execute main.py.
+- We provide 'ICD9CM_SNOMED_MAP_1TO1_202012.txt' file for table data generation. Make sure the file is located in the same directory where you run "main.py."
 
 
 
