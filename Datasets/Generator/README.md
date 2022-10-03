@@ -36,7 +36,7 @@ $ ./dsdgen -scale 1 -dir path/to/Datasets/raw_datasets/tpcds_data/
 
 
 ### Usage
-- Navigate to `Datasets/Generator/Ecommerce`.
+- Navigate to `Datasets/Generator/Ecommerce` directory.
 - Run "python3 main.py [arg1] [arg2]"
      (arg1: directory path to TPC-DS dataset/, arg2: directory path to Unibench dataset/)
 
@@ -70,9 +70,10 @@ $ python3 main.py ../../raw_datasets/tpcds_data/ ../../raw_datasets/Unibench_SF1
 
 
 #### Usage: 
-
+- Navigate to `Datasets/Generator/Healthcare` directory.
+- 
 ```bash
-$ python3 Healthcare/main.py [arg1][arg2][arg3][arg4]
+$ python3 main.py [arg1][arg2][arg3][arg4]
 ```
 - arg1: directory path to drugrugbank json dataset
 - arg2: file path to SNOMED Concept description file from Snapshot library (e.g: SnomedCT_xxx/Snapshot/Terminology/ Description_Snapshot_xxx.txt) 
@@ -83,9 +84,10 @@ $ python3 Healthcare/main.py [arg1][arg2][arg3][arg4]
 #### Caution:  Do not forget to extract the downloaded files before usage. 
 - Make sure the dataset directory names does not contain characters such as : "()". Rename the folders if needed. 
 - Keep in mind that arg1, arg4 are directory paths and arg2, arg3 are file paths.*
+- We provide 'ICD9CM_SNOMED_MAP_1TO1_202012.txt' file for table data generation. Make sure the file is located in the same directory where you execute main.py.
 
 
- 
+
 
 ## Disaster & Safety 
 
