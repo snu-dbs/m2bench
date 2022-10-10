@@ -106,6 +106,7 @@ To generate datasets for Disaster & Safety, you should do the following:
     - Shapely (1.8.0 tested)
     - scikit-learn (1.0.1 tested)
     - jsons (1.6.0 tested)
+    - orjson (3.8.0 tested)
 - GDAL (2.4.2 tested)
 
 ### Preparation for raw datasets
@@ -184,4 +185,4 @@ $ python Disaster/main.py
 
 - Since the Earthquakes (USGS) and OSM have been updated, the datasets (Earthquake, OSM, and Shelter) made from our generator can slightly be different from the dataset of the paper.
 - Since the GPS data is generated probabilistically, the dataset made from our generator can slightly be different from the dataset of the paper.
-
+- If you have trouble with the generator, please try [the other version of the data generator](https://github.com/snu-dbs/m2bench/tree/bdcbc21437a0b50585cfc28bec107e046d7a9d4f). 
