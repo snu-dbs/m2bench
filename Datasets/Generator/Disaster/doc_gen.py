@@ -1,17 +1,31 @@
 import os
 import pandas as pd
 import json
+import time
+import math
+from multiprocessing import Process, Manager, Value, Lock, Pool
+import sys
+import orjson
 
-def site_gen(data_dirpath, outdir):
+def p1(data_dirpath):
+    os.system("ogr2ogr -f 'GeoJSON' california-points.geojson " + data_dirpath + "california-latest.osm points > /dev/null")
+
+def p2(data_dirpath):
+    os.system("ogr2ogr -f 'GeoJSON' california-multipolygons.geojson " + data_dirpath + "california-latest.osm multipolygons > /dev/null")
+
+def ogr_background(data_dirpath):
     os.system('cp Disaster/osmconf.ini .')
 
-    os.system("ogr2ogr -f 'GeoJSON' california-points.geojson " + data_dirpath + "california-latest.osm points")
-    os.system("ogr2ogr -f 'GeoJSON' california-multipolygons.geojson " + data_dirpath + "california-latest.osm multipolygons")
+    with Pool(processes=2) as pool:
+        procs2 = []
+        procs2.append(pool.apply_async(p1, (data_dirpath, )))
+        procs2.append(pool.apply_async(p2, (data_dirpath, )))
+        for p in procs2: p.get()
 
     os.system('rm osmconf.ini')
 
-    os.system("./Disaster/site_convert.sh")
 
+def site_gen(outdir):
     df = pd.read_csv(outdir+'/../property_graph/original_roadnode.csv')
 
     with open('Roadnode.json', 'w') as json_file:
@@ -31,7 +45,7 @@ def site_gen(data_dirpath, outdir):
             json.dump(final, json_file)
             json_file.write('\n')
 
-    os.system("cat site.json Roadnode.json > site2.json")
+    os.system("./Disaster/site_convert.sh")
 
     with open('site2.json', 'r') as site_file:
         with open(outdir+'Site.json', 'w') as json_file:
@@ -40,7 +54,7 @@ def site_gen(data_dirpath, outdir):
                 properties = dict()
                 line = line.strip()
                 line = line[:-1] if line[-1] == ',' else line
-                site_json = json.loads(line)
+                site_json = orjson.loads(line)
                 site_json['site_id'] = site_id
                 site_id += 1
                 try:
@@ -71,8 +85,9 @@ def site_gen(data_dirpath, outdir):
                     properties['type'] = 'etc'
                 site_json['properties'] = properties
 
-                json.dump(site_json, json_file)
-                json_file.write('\n')
+                # json.dump(site_json, json_file)
+                res = orjson.dumps(site_json).decode('utf-8')
+                json_file.write(res + '\n')
 
-    os.system("rm site2.json site.json Roadnode.json")
+    os.system("rm site2.json Roadnode.json")
     os.system("rm "+outdir+"/../property_graph/original_roadnode.csv")

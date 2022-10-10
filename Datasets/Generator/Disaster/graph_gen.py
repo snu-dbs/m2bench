@@ -3,9 +3,26 @@ from shapely.geometry import Point, Polygon
 import json
 import numpy as np
 import os
+import time
+import math
+from multiprocessing import Process, Manager, Value, Lock, Pool
+import sys
+
+
+def callfunc2(df_partial, multipoly):
+    result = []
+    for idx, row in df_partial.iterrows():
+        p1 = Point(row['longitude'], row['latitude'])
+        for poly in multipoly:
+            if p1.within(poly):
+                nid, lat, lon = int(row['id']), row['latitude'], row['longitude']
+                result.append([nid, lat, lon])
+                break
+
+    return result
+
 
 def roadnetwork_gen(data_dirpath, outdir):
-
     os.system("sed '1,7d' " + data_dirpath + "USA-road-d.CAL.co | sed 's/ /,/g' > co.csv")
     os.system("sed '1,7d' " + data_dirpath + "USA-road-d.CAL.gr | sed 's/ /,/g' > gr.csv")
 
@@ -31,28 +48,23 @@ def roadnetwork_gen(data_dirpath, outdir):
         multipoly.append(result)
 
     site_id = 9646403
-    nid = []
-    sid = []
-    latitude = []
-    longitude = []
-    for idx, row in df1.iterrows():
-        p1 = Point(row['longitude'], row['latitude'])
-        for poly in multipoly:
-            if p1.within(poly):
-                nid.append(row['id'])
-                sid.append(site_id)
-                latitude.append(row['latitude'])
-                longitude.append(row['longitude'])
-                site_id += 1
-                break
+    num_proc = 8
+    size_df1 = len(df1.index)
+    slice_df1 = int(math.ceil(size_df1 / num_proc))
 
-    result = pd.DataFrame({'roadnode_id':nid, 'site_id':sid})
-    result = result.astype({'roadnode_id':np.int64})
-    result.to_csv(outdir+'Roadnode.csv',index=False) #node
+    merged = []
+    with Pool(processes=num_proc) as pool:
+        m = Manager()
+        procs2 = [pool.apply_async(callfunc2, (df1[(i*slice_df1):min(((i + 1) * slice_df1), size_df1)], multipoly)) for i in range(num_proc)]
+        for p in procs2:
+            res = p.get()
+            merged.extend(res)
 
-    result = pd.DataFrame({'roadnode_id': nid, 'site_id': sid, 'latitude':latitude, 'longitude':longitude})
-    result = result.astype({'roadnode_id': np.int64})
+    result = pd.DataFrame(merged, columns=['roadnode_id', 'latitude', 'longitude'])
+    result['site_id'] = result.index + site_id
+
     result.to_csv(outdir + 'original_roadnode.csv', index=False)  # This is for site data
+    result.drop(columns=['latitude', 'longitude']).to_csv(outdir+'Roadnode.csv',index=False) #node
 
     df2 = df2[['from','to','distance']]
 
@@ -71,3 +83,4 @@ def roadnetwork_gen(data_dirpath, outdir):
     edge.to_csv(outdir+'Road.csv',index=False) #edge
 
     os.system("rm co.csv gr.csv")
+

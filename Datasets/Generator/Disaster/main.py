@@ -4,6 +4,9 @@ import doc_gen
 import graph_gen
 import array_gen
 import os
+import time
+
+from multiprocessing import Process
 
 def main(argv):
     outdir = '../disaster/'
@@ -29,6 +32,13 @@ def main(argv):
     finedust_dirpath = '../raw_datasets/finedust/'
 
     print("------ Disaster Data Generation ------")
+    print("Start OSM Conversion in Background")
+    po = Process(target=doc_gen.ogr_background, args=(site_dirpath, ))
+    po.start()
+
+    print("Start Road Network Generation")
+    pr = Process(target=graph_gen.roadnetwork_gen, args=(roadnetwork_dirpath, outdir + 'property_graph/'))
+    pr.start()
 
     print("Start Earthquake Generation")
     table_gen.earthquake_gen(earthquake_dirpath, outdir + 'table/')
@@ -36,18 +46,18 @@ def main(argv):
     print("Start Gps Generation")
     table_gen.gps_gen(gps_dirpath, outdir + 'table/')
 
-    print("Start Road Network Generation")
-    graph_gen.roadnetwork_gen(roadnetwork_dirpath, outdir + 'property_graph/')
-
-    print("Start Site Generation")
-    doc_gen.site_gen(site_dirpath, outdir + 'json/')
-
-    print("Start Shelter Generation")
-    table_gen.shelter_gen(shelter_dirpath, outdir + 'table/')
-
     print("Start Finedust Generation")
     array_gen.finedust_gen(finedust_dirpath, outdir + 'array/')
     array_gen.finedust_idx_gen(finedust_dirpath, outdir + 'array/')
+
+    print("Waiting Road Network Generation and OSM Conversion")
+    pr.join()
+    po.join()
+    print("Start Site Generation")
+    doc_gen.site_gen(outdir + 'json/')
+
+    print("Start Shelter Generation")
+    table_gen.shelter_gen(shelter_dirpath, outdir + 'table/')
 
 if __name__ == '__main__':
     main(sys.argv)

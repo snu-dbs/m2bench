@@ -8,6 +8,7 @@ from datetime import datetime
 import time
 import sys
 from sklearn.neighbors import KDTree
+from multiprocessing import Process, Manager, Value, Lock, Pool
 import json
 
 def earthquake_gen(data_dirpath, outdir):
@@ -21,7 +22,7 @@ def earthquake_gen(data_dirpath, outdir):
             result = pd.concat([result, df])
 
     result = result.sort_values(by=['time'],axis=0)
-    result = result[result['place'].str.contains("CA")] # choose only CA
+    result = result[result['place'].str.contains("CA", na=False)] # choose only CA
     df = result[['time','latitude','longitude','depth','mag']]
     df.columns = ['time','latitude','longitude','depth','magnitude']
     df = df.reset_index()
@@ -111,24 +112,19 @@ def shelter_gen(data_dirpath, outdir):
 
     os.system("rm "+outdir+"original_shelter.csv")
 
-def gps_gen(data_dirpath, outdir):
-    data = pd.read_csv(data_dirpath + "gpw_v4_admin_unit_center_points_population_estimates_rev11_usaca.csv")
 
-    users = 50000
-    div = 40000000 / users
-    val = data[data['UN_2020_E'] / div >= 1]['UN_2020_E'].values
-    val = val / div
-    val = np.around(val)
-    val_sum = np.sum(val)
-    mul = int(users / val_sum)
+def init(l):
+    global lock
+    lock = l
 
-    gid = 0  # user id
+
+def callfunc2(df_partial, v, div, mul):
     result = []
-    for i in range(len(data)):
-        lat = data.loc[i]['CENTROID_Y']
-        lon = data.loc[i]['CENTROID_X']
-        area = data.loc[i]['TOTAL_A_KM']
-        pol = data.loc[i]['UN_2020_E'] / div
+    for _, row in df_partial.iterrows():
+        lat = row['CENTROID_Y']
+        lon = row['CENTROID_X']
+        area = row['TOTAL_A_KM']
+        pol = row['UN_2020_E'] / div
 
         length = math.sqrt(area) / 2
         measure_spot = (lat, lon)
@@ -141,15 +137,50 @@ def gps_gen(data_dirpath, outdir):
         if pol >= 1:
             pol = int(np.around(pol) * mul)
             for j in range(pol):
+                lock.acquire()
+                gid = v.value
+                v.value += 1
+                lock.release()
+
                 timestamp = 1600182000  # 2020-09-16
                 for k in range(168):  # 7 days x 24 hours
                     new_lon = random.uniform(min_lon, max_lon)
                     new_lat = random.uniform(min_lat, max_lat)
                     d = datetime.fromtimestamp(timestamp).isoformat() + ".000Z"
-                    result.append([gid, new_lon, new_lat, d])
+                    result.append([gid, '{:.6f}'.format(new_lon), '{:.6f}'.format(new_lat), d])
                     timestamp += 3600  # 1 hour
-                gid += 1
 
+    return result
+
+def gps_gen(data_dirpath, outdir):
+    data = pd.read_csv(data_dirpath + "gpw_v4_admin_unit_center_points_population_estimates_rev11_usaca.csv")
+
+    users = 50000
+    div = 40000000 / users
+    val = data[data['UN_2020_E'] / div >= 1]['UN_2020_E'].values
+    val = val / div
+    val = np.around(val)
+    val_sum = np.sum(val)
+    mul = int(users / val_sum)
+
+    #############################
+    gid = 0  # user id
+    result = []
+
+    num_proc = 8
+    size_df1 = len(data.index)
+    slice_df1 = int(math.ceil(size_df1 / num_proc))
+
+    l = Lock()
+    with Pool(processes=num_proc, initializer=init, initargs=(l, )) as pool:
+        m = Manager()
+        v = m.Value('i', gid)
+
+        procs2 = [pool.apply_async(callfunc2, (data[(i*slice_df1):min(((i + 1) * slice_df1), size_df1)], v, div, mul)) for i in range(num_proc)]
+        for p in procs2:
+            result.extend(p.get())
+
+    gid = v.value
     while gid < users:
         for i in range(len(data)):
             lat = data.loc[i]['CENTROID_Y']
@@ -169,7 +200,7 @@ def gps_gen(data_dirpath, outdir):
                 new_lon = random.uniform(min_lon, max_lon)
                 new_lat = random.uniform(min_lat, max_lat)
                 d = datetime.fromtimestamp(timestamp).isoformat() + ".000Z"
-                result.append([gid, new_lon, new_lat, d])
+                result.append([gid, '{:.6f}'.format(new_lon), '{:.6f}'.format(new_lat), d])
                 timestamp += 3600  # 1 hour
             gid += 1
             if gid == users:
@@ -178,6 +209,4 @@ def gps_gen(data_dirpath, outdir):
     df = pd.DataFrame(result, columns=['id', 'longitude', 'latitude', 'time'])
     df.columns = ['user_id', 'longitude', 'latitude', 'time']
     df.index.name = 'gps_id'
-    df['latitude'] = df['latitude'].map(lambda x: '{:.6f}'.format(x))
-    df['longitude'] = df['longitude'].map(lambda x: '{:.6f}'.format(x))
     df.to_csv(outdir+'Gps.csv')
