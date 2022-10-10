@@ -14,3 +14,5 @@ Shapely==1.8.0
 six==1.16.0
 threadpoolctl==3.0.0
 typish==1.9.3
+orjson==3.8.0
+
