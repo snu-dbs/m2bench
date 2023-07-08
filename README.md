@@ -1,4 +1,4 @@
-# M2Bench: A Database Benchmark for Multi-Model Analytic Workloads
+# [M2Bench: A Database Benchmark for Multi-Model Analytic Workloads](https://www.vldb.org/pvldb/vol16/p747-moon.pdf)
 - M2Bench is a new benchmark program capable of evaluating a multi-model DBMS. 
 - M2Bench supports several important data models including **relational, document-oriented, property graph and array models**.
 - M2Bench consists of multi-model workloads that are inspired by real-world problems. 
