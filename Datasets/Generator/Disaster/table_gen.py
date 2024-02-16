@@ -96,9 +96,16 @@ def convert_shelter(outdir):
 
 def shelter_gen(data_dirpath, outdir):
     data = pd.read_csv(data_dirpath + "National_Shelter_System_Facilities.csv", low_memory=False)
-    data = data[data['STATE'] == 'CA']
+    df = None    
+    if 'STATE' in data.columns:
+        # the old dataset has some capitalized columns
+        data = data[data['STATE'] == 'CA']
+        df = data[['X', 'Y', 'EVACUATION_CAPACITY', 'SHELTER_NAME']]
+    else:
+        # the latest dataset has some lowercased columns
+        data = data[data['state'] == 'CA']
+        df = data[['X', 'Y', 'evacuation_capacity', 'shelter_name']]       # X and Y is capitalized
 
-    df = data[['X', 'Y', 'EVACUATION_CAPACITY', 'SHELTER_NAME']]
     df.columns = ['longitude', 'latitude', 'capacity', 'name']
 
     df = df.reset_index()

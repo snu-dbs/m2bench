@@ -32,11 +32,11 @@ def main(argv):
     finedust_dirpath = '../raw_datasets/finedust/'
 
     print("------ Disaster Data Generation ------")
-    print("Start OSM Conversion in Background")
+    print("Start OSM Conversion in background")
     po = Process(target=doc_gen.ogr_background, args=(site_dirpath, ))
     po.start()
 
-    print("Start Road Network Generation")
+    print("Start Road Network Generation in background")
     pr = Process(target=graph_gen.roadnetwork_gen, args=(roadnetwork_dirpath, outdir + 'property_graph/'))
     pr.start()
 

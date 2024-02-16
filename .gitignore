@@ -5,3 +5,13 @@ Impl/polyglot/run_tasks/cmake-build-debug
 Impl/polyglot/run_tasks/build
 Impl/polyglot/run_tasks/.idea
 
+**/__pycache__
+
+# raw_datasets
+Datasets/raw_datasets/earthquake/*.csv
+Datasets/raw_datasets/gps/*.csv
+Datasets/raw_datasets/osm/*.osm
+Datasets/raw_datasets/roadnetwork/*
+!Datasets/raw_datasets/roadnetwork/ca.json
+Datasets/raw_datasets/shelter/*.csv
+Datasets/raw_datasets/tpcds_data/*.dat

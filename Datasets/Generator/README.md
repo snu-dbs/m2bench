@@ -1,44 +1,52 @@
 # How to generate datasets
 
-## E-commerce
-To generate datasets for E-commerce, you should do the following:
+This README file describes how to generate datasets for each scenario that M2Bench provides, namely E-commerce, Healthcare, and Disaster & Safety.
+Before getting started, please ensure you have prepared for the software described in the below "Requirements" section.
 
-1. Install the requirement softwares (the `Requirements` section).
-2. Prepare the raw datasets (the `Preparation for raw datasets` section).
-3. Run the data generator (the `Usage` section).
-
-
-### Requirements (python packages)
+### Requirements
+- GCC 9
 - Python 3.8
-- Python packages
-    - randomtimestamp
-    - pathlib
-    - pandas
+- Python packages described in `requirements.txt` file (you can install the packages by `pip install -r requirements.txt`)
+- GDAL 2.4.2
+- `bison`, `byacc`, and `flex` (to build TPC-DS)
+
+### How to
+To generate datasets, you should do the following for each scenario (E-commerce, Healthcare, and Disaster & Safety):
+
+1. Prepare the raw datasets (the `Preparation for raw datasets` section).
+2. Run the data generator (the `Data generation` section).
+
+
+## E-commerce
 
 ### Preparation for raw datasets
-- M2bench Ecommerce datasets are generated based on TPC-DS and Unibench datasets.
+M2bench E-commerce datasets are generated based on TPC-DS and Unibench datasets. 
+Thus, you need to prepare for these datasets.
 
 #### 1. TPC-DS dataset (SF=1): [http://tpc.org/tpc_documents_current_versions/download_programs/tools-download-request5.asp?bm_type=TPC-DS](http://tpc.org/tpc_documents_current_versions/download_programs/tools-download-request5.asp?bm_type=TPC-DS&bm_vers=3.2.0)
 - The TPC Tools are available free of charge, however all users must agree to the licensing terms and register prior to use.
       Please download and read the TPC-Tools License Agreement prior to registering for the download.
-- After downloading, unzip the TPC-DS tool, navigate to `tools/` directory, and make file to generate binary files required to generate TPC-DS data.
+- After downloading, unzip the TPC-DS tool, navigate to `tools` directory, and make file to generate binary files required to generate TPC-DS data.
 ```bash
 $ make -f Makefile.suite
 ```
-- Create a new directory in `Datasets/raw_datasets` (e.g. `tpcds_data/`) to store the TPC-DS data of scale factor 1, and run the following command in the `tools/` directory:
+
+> **If you encounter a build error..**
+> 
+> If you encounter the multiple definition error during the build, please make sure that you are building TPC-DS with GCC 9.
+
+- Run the following command in the `tools` directory of TPC-DS. It will generate the TPC-DS data of scale factor 1 to `/Datasets/raw_datasets/tpcds_data` directory.
 ```bash
 $ ./dsdgen -scale 1 -dir path/to/Datasets/raw_datasets/tpcds_data/
 ```
 
-#### 2. Unibench dataset (SF=1): [http://udbms.cs.helsinki.fi/?projects/ubench](http://udbms.cs.helsinki.fi/?projects/ubench)
-- Download the dataset by clicking "Download ready-made multi-model dataset" through the link above, unzip the file, and locate the whole folder in `Datasets/raw_datasets` directory.
-- We provide Unibench dataset in `Datasets/raw_datasets` directory.
+#### 2. Unibench dataset (SF=1)
+- Since Unibench is no longer available from [the author's website](http://udbms.cs.helsinki.fi/?projects/ubench), we provide the Unibench dataset in `/Datasets/raw_datasets/Unibench_SF1` directory.
 
 
-### Usage
-- Navigate to `Datasets/Generator/Ecommerce` directory.
-- Run "python3 main.py [arg1] [arg2]"
-     (arg1: directory path to TPC-DS dataset/, arg2: directory path to Unibench dataset/)
+### Data generation
+- Navigate to `/Datasets/Generator/Ecommerce` directory.
+- Run the following command. It will generate data to `/Datasets/ecommerce/` directory.
 
 ```bash
 $ python3 main.py ../../raw_datasets/tpcds_data/ ../../raw_datasets/Unibench_SF1/
@@ -46,30 +54,28 @@ $ python3 main.py ../../raw_datasets/tpcds_data/ ../../raw_datasets/Unibench_SF1
     
 ### Notes
 - Since the TPC-DS Tool is steadily updated, the version of the tool used to generate datasets in M2Bench (v.3.0.1) can be different from the latest version.
-- Since the Unibench dataset has been updated, the datasets generated in M2Bench are slightly different from the datasets of the paper.
-      Therefore, we provide the Unibench dataset as `Unibench_SF1` directory in `raw_datasets/` directory before the update since we have cited the source url above.
-- We also provide synthetic hashtag node data as a part of property graph dataset. It is located in `Datasets/ecommerce/property_graph/` directory.
+- We also provide synthetic hashtag node data as a part of property graph dataset. It is located in `/Datasets/ecommerce/property_graph` directory.
 
 
-## Healthcare 
-
-### Requirements  
-    python pandas package: "pip3 install pandas"
-    python names package: "pip3 install names"
-    python glob package: "pip3 install glob3"
+## Healthcare  # TODO: 
 
 ### Preparation for raw datasets
 
-#### 1. MIMIC III Clinical Dataset (...)
+#### 1. MIMIC III Clinical Dataset: [https://physionet.org/content/mimiciii/](https://physionet.org/content/mimiciii/)
 
-#### 2. SNOMED Terminology : https://www.nlm.nih.gov/healthit/snomedct/us_edition.html (Download by clicking on the download now button)
+- Please access to the above link and download MIMIC-III clinical dataset after fulfilling the requirement described in the website.
+
+#### 2. SNOMED Terminology: [https://www.nlm.nih.gov/healthit/snomedct/us_edition.html](https://www.nlm.nih.gov/healthit/snomedct/us_edition.html)
+
+- Download by clicking on the download now button.
 - You have to set up an account for UMLS Terminology Services (UTS) (https://uts.nlm.nih.gov/uts/) to access the data.
 
-#### 3. Drugbank (drug json data) : https://portal.drugbank.com/ (Download latest DrugBank data in JSON format)
+#### 3. Drugbank (drug json data): [https://portal.drugbank.com/](https://portal.drugbank.com/)
+
+- Download latest DrugBank data in JSON format.
 - You have to set up an account for Drugbank (https://go.drugbank.com/public_users/sign_up) and get approved to access the data.
 
-
-#### Usage: 
+### Data generation 
 - Navigate to `Datasets/Generator/Healthcare` directory and do the following.
 ```bash
 $ python3 main.py [arg1][arg2][arg3][arg4]
@@ -79,35 +85,13 @@ $ python3 main.py [arg1][arg2][arg3][arg4]
 - arg3: file path to SNOMED Concept relationship file from Snapshot library (e.g: SnomedCT_xxx/Snapshot/Terminology/ Relationship_Snapshot_xxx.txt) 
 - arg4: directory path to MIMIC III dataset)
 
-
 #### Caution:  Do not forget to extract the downloaded files before usage. 
 - Make sure the dataset directory names does not contain characters such as : "()". Rename the folders if needed. 
 - Keep in mind that arg1, arg4 are directory paths and arg2, arg3 are file paths.*
 - We provide 'ICD9CM_SNOMED_MAP_1TO1_202012.txt' file for table data generation. Make sure the file is located in the same directory where you run "main.py."
 
 
-
-
 ## Disaster & Safety 
-
-To generate datasets for Disaster & Safety, you should do the following:
-
-1. Install the requirement softwares (the `Requirements` section).
-2. Prepare the raw datasets (the `Preparation for raw datasets` section).
-3. Run the data generator (the `Usage` section).
-
-### Requirements
-
-- Python 3.8
-- Python packages (you can use `requirements.txt`)
-    - pandas (1.3.4 tested)
-    - numpy (1.21.4 tested)
-    - geopy (2.2.0 tested)
-    - Shapely (1.8.0 tested)
-    - scikit-learn (1.0.1 tested)
-    - jsons (1.6.0 tested)
-    - orjson (3.8.0 tested)
-- GDAL (2.4.2 tested)
 
 ### Preparation for raw datasets
 
@@ -130,22 +114,23 @@ To generate datasets for Disaster & Safety, you should do the following:
                 - South: 32.260500
             - Output Options
                 - Format: CSV
-2. Move all downloaded files to `/Datasets/raw_datasets/earthquake/` of this repository.
+2. Move all downloaded files to `/Datasets/raw_datasets/earthquake` of this repository.
 
 #### 2. GPS: [SEDAC Gridded Population of the World (GPW), v4](https://sedac.ciesin.columbia.edu/data/set/gpw-v4-admin-unit-center-points-population-estimates-rev11/data-download)
 
 1. Open the link above.
 2. On the bottom of the contents, select "North America" of the "Geography" field and "Comma Separated Values (CSV)" of the "FileFormat" field, and then select the checkbox of the "USA: California".
 3. Press the "Create Download" to download the data. (It may require logging in to the EARTHDATA.)
-4. Unzip the downloaded file and move the unzipped files to `/Datasets/raw_datasets/gps/`.
+4. Unzip the downloaded file and move the unzipped files to `/Datasets/raw_datasets/gps`.
     - Make sure that the file named `gpw_v4_admin_unit_center_points_population_estimates_rev11_usaca.csv` exists.
 
 #### 3. Shelter: [Homeland Infrastructure Foundation-Level Data (HIFLD)](https://hifld-geoplatform.opendata.arcgis.com/datasets/national-shelter-system-facilities)
 
-1. Open the link above.
+1. Open the link above. Please be patient because it might take a long time to access.
 2. Select the "Download" button (cloud icon) at the right of the left sidebar.
 3. On the left sidebar, select the "Download Options" of the "CSV" and then select "Download file previously generated on ...". 
     - Make sure that the filename is `National_Shelter_System_Facilities.csv`.
+4. Place the CSV file to `/Datasets/raw_datasets/shelter`.
 
 #### 4. Road Network: [9th DIMACS Implementation Challenge - Shortest Paths](http://www.diag.uniroma1.it//~challenge9/download.shtml)
 
@@ -154,9 +139,9 @@ To generate datasets for Disaster & Safety, you should do the following:
     - If the above links are not available, follow the below instruction.
         1. Open [the download link](http://www.diag.uniroma1.it//~challenge9/download.shtml).
         2. In the "Challenge benchmarks", download the "Distance graph" and the "Coordinates" of the CAL.
-2. Unzip all downloaded files and move the unzipped files to `/Datasets/raw_datasets/roadnetwork/`.
+2. Unzip all downloaded files and move the unzipped files to `/Datasets/raw_datasets/roadnetwork`.
     - Make sure that the filenames are `USA-road-d.CAL.gr` and `USA-road-d.CAL.co`.
-    - `ca.json` is provided by us.
+    - Please note that you can find the `ca.json` file in the `roadnetwork` directory. This file is used to generate data.
 
 #### 5. OSM: [Open Street Map](https://download.geofabrik.de/)
 
@@ -164,18 +149,18 @@ To generate datasets for Disaster & Safety, you should do the following:
     - Link: [california-latest.osm.bz2](https://download.geofabrik.de/north-america/us/california-latest.osm.bz2)
     - If the above link is not available, follow the below instruction.
         1. Open [the download link of the United States of America](https://download.geofabrik.de/north-america/us.html).
-        2. In the "Sub Regions", download the ".osm.bz2" of the "California".
-2. Unzip the downloaded file and move the unzipped file to `/Datasets/raw_datasets/osm/`.
+        2. Under the "Sub Regions", download the ".osm.bz2" of the "California".
+2. Unzip the downloaded file and move the unzipped file to `/Datasets/raw_datasets/osm`.
     - Make sure that the filename is `california-latest.osm`.
 
 #### 6. Finedust: MISE, An Array-Based Integrated System for Atmospheric Scanning LiDAR (SSDBM 2021)
 
-We provide the Finedust dataset. See `/Datasets/raw_datasets/finedust/`.
+We provide the Finedust dataset. See `/Datasets/raw_datasets/finedust`.
 
-### Usage
+### Data generation
 
-Set up the datasets described above, then run `Disaster/main.py` from the `/Datasets/Generator` directory.
-Result dataset will be saved in the `/Datasets/disaster/` directory.
+Set up the raw datasets described above, then run `Disaster/main.py` **from the `/Datasets/Generator` directory**.
+Result dataset will be stored in the `/Datasets/disaster` directory.
 
 ```bash
 $ python Disaster/main.py 

@@ -1,3 +1,8 @@
+## Datasets
+
+To assess a multi-model database system using M2Bench, we need to generate datasets that will be fed into the database system.
+This README file describes how to generate and scale datasets.
+
 ### How to generate Datasets
 - Follow instructions in the `Generator` folder
 
