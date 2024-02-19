@@ -57,38 +57,43 @@ $ python3 main.py ../../raw_datasets/tpcds_data/ ../../raw_datasets/Unibench_SF1
 - We also provide synthetic hashtag node data as a part of property graph dataset. It is located in `/Datasets/ecommerce/property_graph` directory.
 
 
-## Healthcare  # TODO: 
+## Healthcare
 
 ### Preparation for raw datasets
 
 #### 1. MIMIC III Clinical Dataset: [https://physionet.org/content/mimiciii/](https://physionet.org/content/mimiciii/)
 
-- Please access to the above link and download MIMIC-III clinical dataset after fulfilling the requirement described in the website.
+- Please access the above link and download the MIMIC-III clinical dataset after fulfilling the requirements described on the website.
+- Unzip the downloaded data. Note that the downloaded data also has zipped files. Please unzip these files as well.
+- Put the unzipped files into `/Datasets/raw_datasets/mimic` directory.
 
 #### 2. SNOMED Terminology: [https://www.nlm.nih.gov/healthit/snomedct/us_edition.html](https://www.nlm.nih.gov/healthit/snomedct/us_edition.html)
 
+- Before downloading, you have to set up an account for UMLS Terminology Services (UTS) (https://uts.nlm.nih.gov/uts/) to access the data.
 - Download by clicking on the download now button.
-- You have to set up an account for UMLS Terminology Services (UTS) (https://uts.nlm.nih.gov/uts/) to access the data.
+- You would get a directory named `SnomedCT_xxx`. Please copy the two files below to `/Datasets/raw_datasets/snomed` directory and rename these files. 
+    - Copy `SnomedCT_xxx/Snapshot/Terminology/ xxx_Description_Snapshot_xxx.txt` file and rename it to `description.txt`.
+    - Copy `SnomedCT_xxx/Snapshot/Terminology/ xxx_Relationship_Snapshot_xxx.txt` file and rename it to `relationship.txt`.
+
 
 #### 3. Drugbank (drug json data): [https://portal.drugbank.com/](https://portal.drugbank.com/)
 
-- Download latest DrugBank data in JSON format.
-- You have to set up an account for Drugbank (https://go.drugbank.com/public_users/sign_up) and get approved to access the data.
+- Before downloading, you have to set up an account for Drugbank (https://go.drugbank.com/public_users/sign_up) and get approved to access the data.
+- Download the latest DrugBank data in JSON format.
+- Put the JSON files of the downloaded data into `/Datasets/raw_datasets/drugbank` directory.
+
 
 ### Data generation 
-- Navigate to `Datasets/Generator/Healthcare` directory and do the following.
-```bash
-$ python3 main.py [arg1][arg2][arg3][arg4]
-```
-- arg1: directory path to drugrugbank json dataset
-- arg2: file path to SNOMED Concept description file from Snapshot library (e.g: SnomedCT_xxx/Snapshot/Terminology/ Description_Snapshot_xxx.txt) 
-- arg3: file path to SNOMED Concept relationship file from Snapshot library (e.g: SnomedCT_xxx/Snapshot/Terminology/ Relationship_Snapshot_xxx.txt) 
-- arg4: directory path to MIMIC III dataset)
+- Navigate to `/Datasets/Generator/Healthcare` directory and run the following command.
 
-#### Caution:  Do not forget to extract the downloaded files before usage. 
-- Make sure the dataset directory names does not contain characters such as : "()". Rename the folders if needed. 
-- Keep in mind that arg1, arg4 are directory paths and arg2, arg3 are file paths.*
-- We provide 'ICD9CM_SNOMED_MAP_1TO1_202012.txt' file for table data generation. Make sure the file is located in the same directory where you run "main.py."
+```bash
+$ python3 main.py
+```
+
+### Notes
+
+- Make sure the dataset directory names do not contain characters such as "()". Rename the folders if needed. 
+- We provide `ICD9CM_SNOMED_MAP_1TO1_202012.txt` file for table data generation. Make sure the file is located in the same directory where you run `main.py`.
 
 
 ## Disaster & Safety 

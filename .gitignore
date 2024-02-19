@@ -15,3 +15,12 @@ Datasets/raw_datasets/roadnetwork/*
 !Datasets/raw_datasets/roadnetwork/ca.json
 Datasets/raw_datasets/shelter/*.csv
 Datasets/raw_datasets/tpcds_data/*.dat
+Datasets/raw_datasets/mimic/*
+!Datasets/raw_datasets/mimic/.keep
+Datasets/raw_datasets/snomed/*
+!Datasets/raw_datasets/snomed/.keep
+Datasets/raw_datasets/drugbank/*.json
+
+# generated datasets
+Datasets/**/*.csv
+Datasets/**/*.json

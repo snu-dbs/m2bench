@@ -6,7 +6,7 @@ SF=$1
 sed -i 's/\r$//g' ../ecommerce/property_graph/person_interestedIn_tag.csv
 
 ./build/scaler $SF $DATASET_PATH $SCHEMA_PATH
-echo "3. Scale up Ecommerce Datasets ..."
+echo "3. Scale up Disaster Datasets ..."
 echo "Scale GPS ..."
 python ./disaster_scaler/gps.py $SF ../raw_datasets/gps/  ../disaster/table/
 

@@ -4,20 +4,19 @@
 - M2Bench consists of multi-model workloads that are inspired by real-world problems. 
 - Each task of the workloads mimics a real-world problem that involves at least two different models of data.
 
-## Datasets
-- All datasets in M2Bench are explained in the `Datasets` folder. 
-
-## Workloads (Tasks)
-- All tasks in M2Bench are explained in the `Tasks` folder. 
-
 ## How to Run M2Bench
-1. Generate datasets of M2Bench following the instructions in the `Datasets` folder.
-2. Choose DBMS X `[agensgraph|arangodb|orientdb|polyglot]`. 
-3. Load the datasets into DBMS X following the instructions in the `Impl/X/load_datasets` folder.  
-4. Run tasks of M2Bench following the instruction in the `Imp/X/run_tasks` folder.  
 
+1. Generate datasets of M2Bench following the instructions in `Datasets/README.md`.
+2. Choose DBMS X `[agensgraph|arangodb|polyglot]`. 
+3. Load the datasets into DBMS X and run tasks, following the instructions in `Impl/X/README.md`.
 
 ## Directory Overview
+
+- All datasets in M2Bench are explained in the `Datasets` folder. 
+- Data loading scripts and query implementations are stored in the `Impl` directory.
+- All tasks in M2Bench are explained in the `/Tasks/alltasks.md` file. 
+
+
 ```
 m2bench
 ├── Datasets                # How to generate the datasets of M2Bench from the realworld datasets.
@@ -44,3 +43,11 @@ m2bench
 └── LICENSE
 ``` 
 
+## DBMS Versions
+
+DBMS versions used for the experiment in the paper are as follows.
+Please install the same versions to reproduce the evaluation results.
+
+- Polyglot: MySQL 8.0.25, MongoDB 4.2.6, Neo4j 4.0.3, and SciDB 19.11.5.
+- ArangoDB 3.7.12
+- AgensGraph 2.2 (based on PostgreSQL 10.4)
