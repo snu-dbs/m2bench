@@ -9,7 +9,7 @@ IGNORE 1 ROWS;
 
 LOAD DATA LOCAL INFILE '../../../Datasets/ecommerce/table/Customer.csv' 
 INTO TABLE Customer
-FIELDS TERMINATED BY ',' 
+FIELDS TERMINATED BY '|' 
 ENCLOSED BY '"'
 LINES TERMINATED BY '\n'
 IGNORE 1 ROWS;
