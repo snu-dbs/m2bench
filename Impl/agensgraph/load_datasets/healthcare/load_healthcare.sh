@@ -1,11 +1,10 @@
+agens healthcare -c "CREATE EXTENSION postgis;"
 
-agens -f ./create_table.sql
-agens -f ./load_table.sql
+agens healthcare -f ./create_table.sql
+agens healthcare -f ./load_table.sql
 
+agens healthcare -f ./create_json.sql
+agens healthcare -f ./load_json.sql
 
-agens -f ./create_json.sql
-agens -f ./load_json.sql
-
-
-agens -f ./create_graph.sql
-agnes -f ./load_graph.sql
+agens healthcare -f ./create_graph.sql
+agens healthcare -f ./load_graph.sql

@@ -12,7 +12,7 @@ CREATE FOREIGN TABLE IF NOT EXISTS Roadnodes (
         site_id INT
         )
 SERVER test
-OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/disaster/property_graph/Roadnode.csv', delimiter',');
+OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/tmp/m2bench/disaster/property_graph/Roadnode.csv', delimiter',');
 
 CREATE FOREIGN TABLE IF NOT EXISTS Roads (
         _from INT,
@@ -20,6 +20,6 @@ CREATE FOREIGN TABLE IF NOT EXISTS Roads (
         distance INT
         )
 SERVER test
-OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/disaster/property_graph/Road.csv', delimiter',');
+OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/tmp/m2bench/disaster/property_graph/Road.csv', delimiter',');
 
 CREATE GRAPH Road_network;

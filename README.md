@@ -50,4 +50,4 @@ Please install the same versions to reproduce the evaluation results.
 
 - Polyglot: MySQL 8.0.25, MongoDB 4.2.6, Neo4j 4.0.3, and SciDB 19.11.5.
 - ArangoDB 3.7.12
-- AgensGraph 2.2 (based on PostgreSQL 10.4)
+- AgensGraph 2.1.3 (based on PostgreSQL 10.4)

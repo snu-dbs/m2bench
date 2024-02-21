@@ -12,7 +12,7 @@ CREATE FOREIGN TABLE IF NOT EXISTS Disease (
         term varchar(10000)
         )
 SERVER test
-OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/healthcare/property_graph/Disease_network_nodes.csv', delimiter',');
+OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/tmp/m2bench/healthcare/property_graph/Disease_network_nodes.csv', delimiter',');
 
 CREATE FOREIGN TABLE IF NOT EXISTS Is_a (
         source_id BIGINT,
@@ -20,6 +20,6 @@ CREATE FOREIGN TABLE IF NOT EXISTS Is_a (
         destination_id BIGINT
         )
 SERVER test
-OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/healthcare/property_graph/Disease_network_edges.csv', delimiter',');
+OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/tmp/m2bench/healthcare/property_graph/Disease_network_edges.csv', delimiter',');
 
 CREATE GRAPH disease_network;

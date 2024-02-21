@@ -19,7 +19,7 @@ CREATE FOREIGN TABLE IF NOT EXISTS person(
         email varchar(50)
         )
 SERVER import_server
-OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/ecommerce/property_graph/person_node.csv', DELIMITER '|');
+OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/tmp/m2bench/ecommerce/property_graph/person_node.csv', DELIMITER '|');
 
 
 CREATE FOREIGN TABLE IF NOT EXISTS follows(
@@ -28,7 +28,7 @@ CREATE FOREIGN TABLE IF NOT EXISTS follows(
         created_time timestamp
         )
 SERVER import_server
-OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/ecommerce/property_graph/person_follows_person.csv', DELIMITER '|');
+OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/tmp/m2bench/ecommerce/property_graph/person_follows_person.csv', DELIMITER '|');
 
 
 CREATE FOREIGN TABLE IF NOT EXISTS hashtag(
@@ -36,7 +36,7 @@ CREATE FOREIGN TABLE IF NOT EXISTS hashtag(
         content varchar(30)
         )
 SERVER import_server
-OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/ecommerce/property_graph/hashtag_node_SF1.csv', DELIMITER ',');
+OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/tmp/m2bench/ecommerce/property_graph/hashtag_node.csv', DELIMITER ',');
 
 
 CREATE FOREIGN TABLE IF NOT EXISTS interested_in(
@@ -45,7 +45,7 @@ CREATE FOREIGN TABLE IF NOT EXISTS interested_in(
         created_time char(20)
         )
 SERVER import_server
-OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/ecommerce/property_graph/person_interestedIn_tag.csv', DELIMITER ',');
+OPTIONS (FORMAT 'csv', HEADER 'true', FILENAME '/tmp/m2bench/ecommerce/property_graph/person_interestedIn_tag.csv', DELIMITER ',');
 
 
 CREATE GRAPH social_network;

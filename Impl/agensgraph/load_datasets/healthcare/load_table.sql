@@ -1,10 +1,10 @@
 \c healthcare;
   
-COPY Patient FROM '/healthcare/table/Patient.csv' DELIMITER ',' CSV HEADER;
+COPY Patient FROM '/tmp/m2bench/healthcare/table/Patient.csv' DELIMITER ',' CSV HEADER;
 
-COPY Prescription FROM '/healthcare/table/Prescription.csv' DELIMITER ',' CSV HEADER;
+COPY Prescription FROM '/tmp/m2bench/healthcare/table/Prescription.csv' DELIMITER ',' CSV HEADER;
 
-COPY Diagnosis FROM '/healthcare/table/Diagnosis.csv' DELIMITER ',' CSV HEADER;
+COPY Diagnosis FROM '/tmp/m2bench/healthcare/table/Diagnosis.csv' DELIMITER ',' CSV HEADER;
 
 
 Create index diagnosis_pi_idx on diagnosis(patient_id);
