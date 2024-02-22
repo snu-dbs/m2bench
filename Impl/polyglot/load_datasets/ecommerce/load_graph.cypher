@@ -1,3 +1,8 @@
+// remove all nodes and edges first (maybe indexes can be used but it is fine)
+MATCH (n:Person) DETACH DELETE n;
+MATCH (n:Shopping_Hashtag) DETACH DELETE n;
+
+// create nodes
 USING PERIODIC COMMIT
 LOAD CSV with headers FROM 'file:///person_node.csv' AS row  FIELDTERMINATOR '|'
 CREATE(:Person {person_id: row.person_id, gender: row.gender, date_of_birth: row.date_of_birth, firstname: row.firstname, lastname: row.lastname, nationality: row.nationality, email: row.email});
@@ -6,15 +11,12 @@ USING PERIODIC COMMIT
 LOAD CSV with headers FROM 'file:///hashtag_node.csv' AS row FIELDTERMINATOR ','
 CREATE(:Shopping_Hashtag { tag_id: row.tag_id, content: row.content});
 
-
-// comment the below lines out if it is not a first trial and run "DROP INDEX idx_XXX;"
+// create indexes
 CREATE INDEX idx_person_id for (x:Person) on (x.person_id);
 CREATE INDEX idx_hashtag_id for (x:Shopping_Hashtag) on (x.tag_id);
+CALL db.awaitIndexes();
 
-CALL db.awaitIndex('idx_person_id');
-CALL db.awaitIndex('idx_hashtag_id');
-
-
+// create edges
 USING PERIODIC COMMIT
 LOAD CSV with headers FROM 'file:///person_interestedIn_tag.csv' AS row  FIELDTERMINATOR ','
 MATCH (c1 : Person {person_id: row.person_id} ), (c2: Shopping_Hashtag {tag_id: row.tag_id})

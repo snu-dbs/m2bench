@@ -14,20 +14,25 @@ CREATE TABLE IF NOT EXISTS Earthquake (
         coordinates POINT NOT NULL SRID 0,
         depth FLOAT,
         magnitude FLOAT,
-        spatial index (coordinates)
-        );
+
+        spatial index (coordinates),
+        index (magnitudee)
+);
 
 CREATE TABLE IF NOT EXISTS Shelter (
-        id INT,
+        id INT PRIMARY KEY,
         site_id INT,
         capacity FLOAT,
-        name  CHAR(100)
-        );
+        name  CHAR(100),
+
+        index (site_id)
+);
 
 CREATE TABLE IF NOT EXISTS Gps (
-        id INT,
+        id INT PRIMARY KEY,
         user_id INT,
         coordinates POINT not NULL SRID 0,
         time DATETIME,
+
         spatial index(coordinates)
-        );
+);
