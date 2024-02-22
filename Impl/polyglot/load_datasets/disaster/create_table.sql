@@ -10,24 +10,18 @@ DROP TABLE IF EXISTS Gps;
 
 CREATE TABLE IF NOT EXISTS Earthquake (
         id INT PRIMARY KEY,
-        gender CHAR(1),
         time DATETIME,
         coordinates POINT NOT NULL SRID 0,
         depth FLOAT,
         magnitude FLOAT,
         spatial index (coordinates)
-
         );
 
 CREATE TABLE IF NOT EXISTS Shelter (
         id INT,
-        shelter_index INT,
-        coordinates POINT NOT NULL SRID 0,
-        city CHAR(50),
-        state CHAR(2),
+        site_id INT,
         capacity FLOAT,
-        name  CHAR(100),
-        spatial index(coordinates)
+        name  CHAR(100)
         );
 
 CREATE TABLE IF NOT EXISTS Gps (

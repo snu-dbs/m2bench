@@ -7,8 +7,12 @@ LOAD CSV with headers FROM 'file:///hashtag_node.csv' AS row FIELDTERMINATOR ','
 CREATE(:Shopping_Hashtag { tag_id: row.tag_id, content: row.content});
 
 
+// comment the below lines out if it is not a first trial and run "DROP INDEX idx_XXX;"
 CREATE INDEX idx_person_id for (x:Person) on (x.person_id);
 CREATE INDEX idx_hashtag_id for (x:Shopping_Hashtag) on (x.tag_id);
+
+CALL db.awaitIndex('idx_person_id');
+CALL db.awaitIndex('idx_hashtag_id');
 
 
 USING PERIODIC COMMIT

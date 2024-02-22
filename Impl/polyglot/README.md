@@ -24,10 +24,11 @@ We provide a script named `import.sh` in the `load_datasets` directory.
 This script is configured to use database configurations below. If your database instance has different configuration, please modify files in each scenario directory to match your configuration.
 - MySQL: the connection port is `3306` and a password should not be required.
 - MongoDB: the connection port is `27017` and a password should not be required.
-- Neo4J: the connection port is `7687`. Authentication is required when you run the script.
+- Neo4j: the connection port is `7687`. Authentication is required when you run the script.
 - SciDB: the connection port to SciDB Shim is `8080`.
 
 Before you run the script, please read the below:
+- Please install the Graph Data Science library (GDS) v1.6.0 for Neo4j.
 - Please make sure that the user to run the command should have read/write permission to `/var/lib/neo4j/import` and `/tmp`.
 - Make sure that you are able to call `mysql` (for MySQL), `mongoimport` (for MongoDB), `cypher-shell` (for Neo4J), and `iquery` (for SciDB).
 - If you do not have `iquery`, the script will import data to SciDB inside the docker conatiner. You will be asked for the name of the conainter in this case.
