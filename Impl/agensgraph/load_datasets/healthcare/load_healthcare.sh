@@ -1,4 +1,4 @@
-agens healthcare -c "CREATE EXTENSION postgis;"
+agens healthcare -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 
 agens healthcare -f ./create_table.sql
 agens healthcare -f ./load_table.sql

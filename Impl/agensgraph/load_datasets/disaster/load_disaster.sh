@@ -1,5 +1,5 @@
 
-agens disaster -c "CREATE EXTENSION postgis;"
+agens disaster -c "CREATE EXTENSION IF NOT EXISTS postgis;"
 
 agens disaster -f ./create_table.sql
 agens disaster -f ./load_table.sql
