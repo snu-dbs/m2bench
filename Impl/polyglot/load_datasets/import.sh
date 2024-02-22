@@ -5,7 +5,7 @@ SF=$1
 
 # E-commerce
 echo "========================================"
-echo "E-commerce"
+printf "\tE-commerce\n"
 echo "========================================"
 
 echo "==== Import data to MySQL ===="
@@ -19,15 +19,15 @@ echo "==== Import data to Neo4J ===="
 # make symbolic links to the data files
 NEO4J_DATA=$(pwd)/../../../Datasets/ecommerce/property_graph/
 for f in $(ls $NEO4J_DATA); do
-    ln -s $NEO4J_DATA/$f /var/lib/neo4j/import
+    ln -s $NEO4J_DATA/$f /var/lib/neo4j/import > /dev/null 2>&1
 done
 # import data
-cypher-shell -f ./ecommerce/load_graph.cypher
+cypher-shell --fail-at-end -f ./ecommerce/load_graph.cypher
 
 
 # Healthcare
 echo "========================================"
-echo "Healthcare"
+printf "\tHealthcare\n"
 echo "========================================"
 
 echo "==== Import data to MySQL ===="
@@ -41,16 +41,16 @@ echo "==== Import data to Neo4J ===="
 # make symbolic links to the data files
 NEO4J_DATA=$(pwd)/../../../Datasets/healthcare/property_graph/
 for f in $(ls $NEO4J_DATA); do
-    ln -s $NEO4J_DATA/$f /var/lib/neo4j/import
+    ln -s $NEO4J_DATA/$f /var/lib/neo4j/import > /dev/null 2>&1
 done
 
 # import node
-cypher-shell -f ./healthcare/load_graph.cypher
+cypher-shell --fail-at-end -f ./healthcare/load_graph.cypher
 
 
 # Disaster & Safety
 echo "========================================"
-echo "Disaster & Safety"
+printf "\tDisaster & Safety\n"
 echo "========================================"
 
 echo "==== Import data to MySQL ===="
@@ -64,10 +64,10 @@ echo "==== Import data to Neo4J ===="
 # make symbolic links to the data files
 NEO4J_DATA=$(pwd)/../../../Datasets/disaster/property_graph/
 for f in $(ls $NEO4J_DATA); do
-    ln -s $NEO4J_DATA/$f /var/lib/neo4j/import
+    ln -s $NEO4J_DATA/$f /var/lib/neo4j/import > /dev/null 2>&1
 done
 # import data
-cypher-shell -f ./disaster/load_graph.cypher
+cypher-shell --fail-at-end -f ./disaster/load_graph.cypher
 
 echo "==== Import data to SciDB ===="
 echo "You can ignore errors during the import process if the final arrays are created."
@@ -75,7 +75,7 @@ SCIDB_DATA=$(pwd)/../../../Datasets/disaster/array/
 if command -v iquery &> /dev/null
 then
     mkdir -p /tmp/m2bench
-    ln -s $SCIDB_DATA/Finedust_idx.csv /tmp/m2bench
+    ln -s $SCIDB_DATA/Finedust_idx.csv /tmp/m2bench > /dev/null 2>&1
     bash ./disaster/load_array.sh
 else
     echo -n "iquery not found. Please type the name of the SciDB container: "
