@@ -164,11 +164,11 @@ We provide the Finedust dataset. See `/Datasets/raw_datasets/finedust`.
 
 ### Data generation
 
-Set up the raw datasets described above, then run `Disaster/main.py` **from the `/Datasets/Generator` directory**.
+Set up the raw datasets described above, then run `Disaster/main.sh` **from the `/Datasets/Generator` directory**.
 Result dataset will be stored in the `/Datasets/disaster` directory.
 
 ```bash
-$ python Disaster/main.py 
+$ bash Disaster/main.sh
 ```
 
 ### Notes

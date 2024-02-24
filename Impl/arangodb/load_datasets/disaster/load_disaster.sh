@@ -12,6 +12,7 @@ arangoimp --overwrite true --file "$DATASET_PATH/disaster/table/Shelter.csv" --t
 
 #LOAD JSON
 arangoimp --overwrite true --file "$DATASET_PATH/disaster/json/Site.json" --type json --collection "Site" --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --threads 4 --server.database Disaster
+arangoimp --overwrite true --file "$DATASET_PATH/disaster/json/Site_centroid.json" --type json --collection "Site_centroid" --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --threads 4 --server.database Disaster
 
 #LOAD GRAPH
 arangoimp --overwrite true --file "$DATASET_PATH/disaster/property_graph/Roadnode.csv" --type csv --translate "roadnode_id=_key" --collection "Roadnode" --server.username $USERNAME  --server.password "$PASSWORD" --create-collection true --threads 4 --server.database Disaster

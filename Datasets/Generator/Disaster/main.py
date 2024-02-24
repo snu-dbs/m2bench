@@ -53,6 +53,7 @@ def main(argv):
     print("Waiting Road Network Generation and OSM Conversion")
     pr.join()
     po.join()
+    
     print("Start Site Generation")
     doc_gen.site_gen(outdir + 'json/')
 

@@ -3,9 +3,10 @@ import pandas as pd
 import json
 import time
 import math
-from multiprocessing import Process, Manager, Value, Lock, Pool
 import sys
 import orjson
+
+from multiprocessing import Process, Manager, Value, Lock, Pool
 
 def p1(data_dirpath):
     os.system("ogr2ogr -f 'GeoJSON' california-points.geojson " + data_dirpath + "california-latest.osm points > /dev/null")
@@ -34,7 +35,7 @@ def site_gen(outdir):
 
             geometry = dict()
             geometry["type"] = "Point"
-            geometry["coordinates"] = ['{:.6f}'.format(row['longitude']), '{:.6f}'.format(row['latitude'])]
+            geometry["coordinates"] = [row['longitude'], row['latitude']]
 
             properties = dict()
             properties["roadnode"] = "yes"
