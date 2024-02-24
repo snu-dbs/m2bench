@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS Earthquake (
         magnitude FLOAT,
 
         spatial index (coordinates),
-        index (magnitudee)
+        index (magnitude)
 );
 
 CREATE TABLE IF NOT EXISTS Shelter (
