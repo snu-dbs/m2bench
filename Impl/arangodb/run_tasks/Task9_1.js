@@ -1,10 +1,10 @@
 db._useDatabase("Healthcare")
 
-db.drug_matrix.drop()
-db.similarity1.drop()
-db.inv_norm.drop()
-db.similarity2.drop()
-db.drug_similarity.drop()
+if (db._collection("drug_matrix") != null) db.drug_matrix.drop();
+if (db._collection("similarity1") != null) db.similarity1.drop();
+if (db._collection("inv_norm") != null) db.inv_norm.drop();
+if (db._collection("similarity2") != null) db.similarity2.drop();
+if (db._collection("drug_similarity") != null) db.drug_similarity.drop();
 
 db._create("drug_matrix")
 db._create("similarity1")

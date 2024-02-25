@@ -1,8 +1,8 @@
 /* 0. Create TEMP_A, TEMP_C, LR_w, and LR_w_new */
-db.TEMP_A.drop();
-db.TEMP_C.drop();
-db.LR_w.drop();
-db.LR_w_new.drop();
+if (db._collection("TEMP_A") != null) db.TEMP_A.drop();
+if (db._collection("TEMP_C") != null) db.TEMP_C.drop();
+if (db._collection("LR_w") != null) db.LR_w.drop();
+if (db._collection("LR_w_new") != null) db.LR_w_new.drop();
 
 db._create("TEMP_A");
 db._create("TEMP_C");

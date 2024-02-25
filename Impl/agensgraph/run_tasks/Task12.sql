@@ -1,6 +1,6 @@
 SET graph_path = Road_network;
 
-explain analyze 
+-- explain analyze 
     WITH A AS (
         SELECT shelter.shelter_id, ST_GeomFromGeoJSON(site_centroid.data->>'centroid') AS centroid, COUNT(gps.gps_id) AS numGps
         FROM shelter, site_centroid, gps
