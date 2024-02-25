@@ -16,6 +16,8 @@ We recommend to use the SciDB docker image.
 
 Please make sure that you have configured each system.
 
+### Data Loading
+
 Before running tasks, you need to load the generated data to each database system. 
 In the `load_datasets` directory, you can find directories for each scenario in M2Bench.
 These directories contains scripts for data loading and creating indexes.
@@ -36,5 +38,70 @@ Before you run the script, please read the below:
 In order to import data, naviate to the `/Impl/polyglot/load_datasets` directory and run the following command. 
 ```bash
 $ bash import.sh
+```
+
+## Running Tasks
+
+### Prerequsite
+
+Please install the below software to build Polyglot persistence.
+
+- Cmake >= 3.11.x 
+- [Neo4j client](https://github.com/majensen/libneo4j-client.git)
+- [MySQL connector](https://dev.mysql.com/downloads/repo/apt/)
+- [MongoDB connector](http://mongocxx.org/mongocxx-v3/installation/)
+<!-- 
+```bash
+$ sudo apt-get install -y libedit-dev
+$ sudo apt-get install cypher-lint libcypher-parser-dev
+$ git clone https://github.com/majensen/libneo4j-client.git
+$ cd libneo4j-client
+$ sudo apt-get install libssl-dev
+$ sudo apt-get install autoconf
+$ sudo apt-get install libtool
+$ sudo apt-get install pkg-config
+$ ./autogen.sh
+$ ./configure --without-tls --disable-tools
+$ make clean check  # Remove  "-Wno-error=stringop-truncation -Wno-unknown-warning-option [-Werror]" in the "configure.ac" file,  if  it invokes an error. 
+$ sudo make install
+```
+
+- Mysql connector using the following commands
+
+```bash
+download apt repository : https://dev.mysql.com/downloads/repo/apt/
+$ sudo dpkg -i ....deb
+$ sudo apt update
+$ sudo apt install libmysqlcppconn-dev
+```
+
+- Install mongocxx connector
+
+```
+http://mongocxx.org/mongocxx-v3/installation/
+``` -->
+
+
+### Build Polyglot
+
+Before you build Polyglot persistence, you need to set connection configurations correctly.
+Please navigate to the `include/Connection` directory and update each `mongodb_connector.h`, `mysql_connector.h`, and `neo4j_connector.h` file to meet your database connection information.
+Next, please navigate to the `src/Scenarios/PolyglotDB` directory and modify `SCIDB_HOST_XXX` variables in each `Ecommerce_Tasks.h`, `Healthcare_Tasks.h`, and `Disaster_Tasks.h`.
+
+Now you can build Polyglot persistence with the following commands.
+
+```bash
+mkdir build
+cd build
+cmake ..
+make
+```
+
+### Run Polyglot
+
+The following command runs the whole tasks (i.e., Task 0 to Task 16).
+
+```bash
+./m2bench
 ```
 
