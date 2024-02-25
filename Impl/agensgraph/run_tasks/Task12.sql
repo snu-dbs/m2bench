@@ -1,4 +1,5 @@
 SET graph_path = Road_network;
+\timing
 
 -- explain analyze 
     WITH A AS (

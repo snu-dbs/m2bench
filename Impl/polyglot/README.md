@@ -105,3 +105,11 @@ The following command runs the whole tasks (i.e., Task 0 to Task 16).
 ./m2bench
 ```
 
+Since M2Bench data are generated from real-world datasets that is updated sometimes, you may have to check if the input argument of a task is valid.
+For example, the task 11 requires an input argument `earthquake_id` and the default value `41862` may not return anything.
+At the point we write this documentation, the id of the same earthquake is `43744` and if you change the value of the argument to this value, you can find appropriate results.
+We attach the row of the earthquake for your reference.
+```csv
+43744,2020-09-16T00:06:39.040Z,35.592167,-117.597500,4.26,1.58
+```
+

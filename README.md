@@ -4,11 +4,30 @@
 - M2Bench consists of multi-model workloads that are inspired by real-world problems. 
 - Each task of the workloads mimics a real-world problem that involves at least two different models of data.
 
+
+## Before Getting Started
+
+- If you need to get a support during reproducing this work, feel free to contact us.
+- We highly recommend to use the described database systems with Ubuntu 18.04 that we used for the publication.
+
+
+### DBMS Versions
+
+DBMS versions used for the experiment in the paper are as follows.
+
+- Polyglot: MySQL 8.0.25, MongoDB 4.2.6, Neo4j 4.0.3, and SciDB 19.11.5.
+- ArangoDB 3.7.12
+- AgensGraph 2.1.3 (based on PostgreSQL 10.4)
+
+
 ## How to Run M2Bench
+
+In order to run M2Bench, please follow the below steps.
 
 1. Generate datasets of M2Bench following the instructions in `Datasets/README.md`.
 2. Choose DBMS X `[agensgraph|arangodb|polyglot]`. 
 3. Load the datasets into DBMS X and run tasks, following the instructions in `Impl/X/README.md`.
+
 
 ## Directory Overview
 
@@ -42,12 +61,3 @@ m2bench
 ├── README.md
 └── LICENSE
 ``` 
-
-## DBMS Versions
-
-DBMS versions used for the experiment in the paper are as follows.
-Please install the same versions to reproduce the evaluation results.
-
-- Polyglot: MySQL 8.0.25, MongoDB 4.2.6, Neo4j 4.0.3, and SciDB 19.11.5.
-- ArangoDB 3.7.12
-- AgensGraph 2.1.3 (based on PostgreSQL 10.4)

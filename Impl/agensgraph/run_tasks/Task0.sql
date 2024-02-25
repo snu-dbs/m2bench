@@ -1,3 +1,5 @@
+\timing
+
 SET graph_path = social_network;
 
 CREATE TEMPORARY TABLE TNEW_D (person_id INT, tag_id INT, val DOUBLE PRECISION);
@@ -104,3 +106,6 @@ INSERT INTO TEMP_w
 SELECT i, val FROM TEMP_w_new;
 
 DELETE FROM TEMP_w_new;
+
+
+SELECT COUNT(*) FROM TEMP_w;

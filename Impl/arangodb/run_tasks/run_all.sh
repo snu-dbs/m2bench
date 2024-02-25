@@ -1,4 +1,4 @@
-USERNAME=
+USERNAME=root
 PASSWORD=
 
 echo "T0 ==============="
@@ -59,7 +59,7 @@ echo
 
 echo "T8 ==============="
 time arangosh --server.database Healthcare --server.username $USERNAME --server.password $PASSWORD --server.request-timeout 7200  --javascript.execute  Task8_1.js
-time arangosh --server.database Healthcare --server.username $USERNAME --server.password $PASSWORD --server.request-timeout 7200  --javascript.execute  Task8_1.js
+time arangosh --server.database Healthcare --server.username $USERNAME --server.password $PASSWORD --server.request-timeout 7200  --javascript.execute  Task8_2.js
 echo "T8 finished ======"
 
 echo
@@ -88,7 +88,6 @@ echo "T11 =============="
 time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD --server.request-timeout 7200  --javascript.execute  Task11_1.js
 time arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD --server.request-timeout 7200  --javascript.execute  Task11_2.js
 echo "T11 finished ====="
-
 
 echo
 echo
