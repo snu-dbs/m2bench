@@ -42,6 +42,7 @@ def site_gen(outdir):
 
             final["geometry"] = geometry
             final["properties"] = properties
+            final["site_id"] = int(row['site_id'])
 
             json.dump(final, json_file)
             json_file.write('\n')
@@ -56,8 +57,12 @@ def site_gen(outdir):
                 line = line.strip()
                 line = line[:-1] if line[-1] == ',' else line
                 site_json = orjson.loads(line)
-                site_json['site_id'] = site_id
-                site_id += 1
+                
+                # a json from roadnode has site_id, so we need to preserve site_id in such case
+                if 'site_id' not in site_json:
+                    site_json['site_id'] = site_id
+                    site_id += 1
+
                 try:
                     if site_json['properties']['building'] is not None:
                         properties['type'] = 'building'

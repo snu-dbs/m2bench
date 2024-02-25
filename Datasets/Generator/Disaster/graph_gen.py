@@ -47,7 +47,7 @@ def roadnetwork_gen(data_dirpath, outdir):
         result = Polygon(poly)
         multipoly.append(result)
 
-    site_id = 9646403
+    site_id = 100000000         # Really big number. osm objects in california may not exceed this number.
     num_proc = 8
     size_df1 = len(df1.index)
     slice_df1 = int(math.ceil(size_df1 / num_proc))

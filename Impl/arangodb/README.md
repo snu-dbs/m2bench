@@ -20,3 +20,5 @@
 - **PASSWORD** is the password to access ArangoDB.
 - Run `./run_all.sh`
 
+If you encounter a timeout error, please open the `run_all.sh` file and increase the value of the `--server.request-timeout` option.
+

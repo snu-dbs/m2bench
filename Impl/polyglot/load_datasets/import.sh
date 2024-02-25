@@ -75,13 +75,14 @@ SCIDB_DATA=$(pwd)/../../../Datasets/disaster/array/
 if command -v iquery &> /dev/null
 then
     mkdir -p /tmp/m2bench
-    ln -s $SCIDB_DATA/Finedust_idx.csv /tmp/m2bench > /dev/null 2>&1
+    tail -n +2 $SCIDB_DATA/Finedust_idx.csv > /tmp/m2bench/Finedust_idx.csv
     bash ./disaster/load_array.sh
 else
     echo -n "iquery not found. Please type the name of the SciDB container: "
     read SCIDB_CONTAINER
     docker exec -it $SCIDB_CONTAINER mkdir -p /tmp/m2bench
-    docker cp $SCIDB_DATA/Finedust_idx.csv $SCIDB_CONTAINER:/tmp/m2bench
+    docker cp $SCIDB_DATA/Finedust_idx.csv $SCIDB_CONTAINER:/tmp/m2bench/Finedust_idx_with_header.csv
+    docker exec -it $SCIDB_CONTAINER bash -c "tail -n +2 /tmp/m2bench/Finedust_idx_with_header.csv > /tmp/m2bench/Finedust_idx.csv"
     docker cp ./disaster/load_array.sh $SCIDB_CONTAINER:/tmp/m2bench
     docker exec -it $SCIDB_CONTAINER bash /tmp/m2bench/load_array.sh
 fi
