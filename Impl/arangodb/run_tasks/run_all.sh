@@ -1,5 +1,5 @@
 USERNAME=root
-PASSWORD=
+PASSWORD=dbs402418!
 
 echo "T0 ==============="
 time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD --server.request-timeout 7200  --javascript.execute  Task0_1.js  
