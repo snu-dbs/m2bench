@@ -306,7 +306,7 @@ void T8(int patient_id){
             buffer++;
             if( buffer>=BUFFER){
                 batch_str += "{drug_id: \""+to_string(stored_element1.get_int32())+"\", "
-                             "drug_name: \""+stored_element2.get_utf8().value.to_string()+"\"}";
+                             "drug_name: \""+ string(stored_element2.get_utf8().value)+"\"}";
                 std::string query_str = ("WITH [" + batch_str + "] AS rows "
                                        "UNWIND rows as row "
                                     "CREATE (n:drug) SET n += row");
@@ -316,7 +316,7 @@ void T8(int patient_id){
                 batch_str = "";
             }else{
                 batch_str += "{drug_id: \""+to_string(stored_element1.get_int32())+"\", "
-                             "drug_name: \""+stored_element2.get_utf8().value.to_string()+"\"},";
+                             "drug_name: \""+ string(stored_element2.get_utf8().value)+"\"},";
             }
         }
     }
@@ -347,8 +347,8 @@ void T8(int patient_id){
         if(stored_element1 && stored_element2) {
             buffer++;
             if( buffer>=BUFFER){
-                batch_str += "{target_id: \""+stored_element1.get_utf8().value.to_string()+"\", "
-                              "target_name: \""+stored_element2.get_utf8().value.to_string()+"\"}";
+                batch_str += "{target_id: \""+ string(stored_element1.get_utf8().value)+"\", "
+                              "target_name: \""+string(stored_element2.get_utf8().value)+"\"}";
                 std::string query_str = ("WITH [" + batch_str + "] AS rows "
                                          "UNWIND rows as row "
                                          "CREATE (n:target) SET n += row");
@@ -357,8 +357,8 @@ void T8(int patient_id){
                 buffer = 0;
                 batch_str = "";
             }else{
-               batch_str += "{target_id: \""+stored_element1.get_utf8().value.to_string()+"\", "
-                         "target_name: \""+stored_element2.get_utf8().value.to_string()+"\"},";
+               batch_str += "{target_id: \""+string(stored_element1.get_utf8().value)+"\", "
+                         "target_name: \""+string(stored_element2.get_utf8().value)+"\"},";
             }
         }
     }
@@ -390,7 +390,7 @@ void T8(int patient_id){
             buffer++;
             if( buffer>=BUFFER){
                 batch_str += "{drug_id: \""+to_string(stored_element3.get_int32())+"\", "
-                              "target_id: \""+stored_element1.get_utf8().value.to_string()+"\"}";
+                              "target_id: \""+string(stored_element1.get_utf8().value)+"\"}";
                 std::string query_str = ("WITH [" + batch_str + "] AS rows "
                                           "UNWIND rows as row "
                                           "MATCH (d:drug{drug_id: row.drug_id}), (t:target{target_id:row.target_id})"
@@ -401,7 +401,7 @@ void T8(int patient_id){
                 batch_str = "";
             }else{
                 batch_str += "{drug_id: \""+to_string(stored_element3.get_int32())+"\", "
-                           "target_id: \""+stored_element1.get_utf8().value.to_string()+"\"},";
+                           "target_id: \""+string(stored_element1.get_utf8().value)+"\"},";
             }
         }
     }
@@ -519,7 +519,7 @@ void T9(int patient_id) {
     int buffer = 0;
     for (auto row : cursor) {
         int drug_id = row["drug"].get_int32();
-        string adverse_effect_id = row["adverse_effect"].get_utf8().value.to_string();
+        string adverse_effect_id = string(row["adverse_effect"].get_utf8().value);
         int is_adverse_effect = row["is_adverse_effect"].get_int32();
 
         insert2D2A.values(drug_id, adverse_effect_id);
@@ -555,7 +555,7 @@ void T9(int patient_id) {
 
     int dim1 = mysql.mysess->getSchema("Healthcare").getTable("Rdrug").count();
     int dim2 = mysql.mysess->getSchema("Healthcare").getTable("Radverse_effect").count();
-    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_HEALTHCARE + ":8080"));
+    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_HEALTHCARE + string(":8080")));
 
     conn->exec("remove(temp)");
     conn->exec("remove(drug_matrix)");

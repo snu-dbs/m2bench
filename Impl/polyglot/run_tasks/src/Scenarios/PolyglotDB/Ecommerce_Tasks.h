@@ -260,49 +260,6 @@ void T2() {
                                                                                                  "rating");
     int buffer = 0;
 
-//    auto cursor = orders.find({},
-//                              mongocxx::options::find{}.projection(
-//                                      make_document(
-//                                              kvp("order_id", 1),
-//                                              kvp("customer_id", 1),
-//                                              kvp("_id", 0))));
-//    for (auto order : cursor) {
-//        bsoncxx::document::element stored_element1{order["order_id"]};
-//        bsoncxx::document::element stored_element2{order["customer_id"]};
-//        if (stored_element1 && stored_element2) {
-//            stdx::string_view view = order["order_id"].get_utf8().value;
-//            std::string order_id = view.to_string();
-//            stdx::string_view view2 = order["customer_id"].get_utf8().value;
-//            std::string customer_id = view2.to_string();
-//
-//            auto cursor2 = reviews.find(
-//                    make_document(kvp("order_id", order_id)),
-//                    mongocxx::options::find{}.projection(
-//                            make_document(
-//                                    kvp("rating", 1),
-//                                    kvp("product_id", 1),
-//                                    kvp("_id", 0))));
-//
-//
-//            for (auto review : cursor2) {
-//                bsoncxx::document::element stored_element3{review["rating"]};
-//                bsoncxx::document::element stored_element4{review["product_id"]};
-//                int rating = stored_element3.get_int32();
-//                std::string product_id = stored_element4.get_utf8().value.to_string();
-//                Rating_history.values(customer_id, product_id, rating);
-//                buffer++;
-//                if (buffer >= BUFFER) {
-//                    Rating_history.execute();
-//                    Rating_history =
-//                            mysql.mysess->getSchema("Ecommerce").getTable("Rating_history")
-//                                    .insert("customer_id", "product_id", "rating");
-//                    buffer = 0;
-//                }
-//            }
-//
-//        }
-//    }
-//    if (buffer != 0) Rating_history.execute();
     mongocxx::pipeline p{};
     p.lookup( make_document(
             kvp("from", "Order"),
@@ -328,8 +285,8 @@ void T2() {
                 bsoncxx::document::element stored_element3{history["val"]};
 
                 int rating = stored_element3.get_double();
-                std::string product_id = stored_element2.get_utf8().value.to_string();
-                auto customer_id =  stored_element1.get_array().value[0].get_utf8().value.to_string();
+                std::string product_id = std::string(stored_element2.get_utf8().value);
+                auto customer_id = std::string(stored_element1.get_array().value[0].get_utf8().value);
                 Rating_history.values(customer_id, product_id, rating);
                 buffer++;
                 if (buffer >= BUFFER) {
@@ -369,9 +326,7 @@ void T2() {
 
 
     int nrows = 0;
-
-    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_ECOMMERCE + ":8080"));
-
+    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_ECOMMERCE + string(":8080")));
 
     int dim1 = mysql.mysess->getSchema("Ecommerce").getTable("Rcustomer").count();
     int dim2 = mysql.mysess->getSchema("Ecommerce").getTable("Rproduct").count();
@@ -983,7 +938,7 @@ void T5(string pid, string curdate) {
     for (auto review : cursor) {
         bsoncxx::document::element stored_element{review["order_id"]};
         stdx::string_view view = stored_element.get_utf8().value;
-        std::string order_id = view.to_string();
+        std::string order_id = std::string(view);
         auto cursor2 = mongodb.db["Order"].find(
                 make_document(kvp("order_id", order_id),
                               kvp("order_date", make_document(kvp("$lte",curdate),kvp("$gte", OneYearAgo)))),
@@ -995,7 +950,7 @@ void T5(string pid, string curdate) {
 
             bsoncxx::document::element stored_element{order["customer_id"]};
             stdx::string_view view = stored_element.get_utf8().value;
-            std::string customer_id = view.to_string();
+            std::string customer_id = std::string(view);
             auto rows = customer.select("person_id").where(
                     "customer_id = '" + customer_id + "' and gender = 'F'").execute();
 
@@ -1038,7 +993,7 @@ void T0(int brand_id) {
     auto mysql = mysql_connector();
     auto mongodb = mongodb_connector("Ecommerce");
     auto neo4j = new neo4j_connector();
-    unique_ptr<ScidbConnection> scidb(new ScidbConnection("147.46.125.23:8080"));
+    unique_ptr<ScidbConnection> scidb(new ScidbConnection(SCIDB_HOST_ECOMMERCE + string(":8080")));
 
     /*
      * A

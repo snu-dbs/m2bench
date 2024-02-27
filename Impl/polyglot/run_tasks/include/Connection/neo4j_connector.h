@@ -30,7 +30,8 @@ public:
     }
 
     neo4j_connector(){
-        conn= neo4j_connect("neo4j://" + NEO4J_ID + ":" + NEO4J_PW + "@" + NEO4J_HOST + ":3308", NULL, NEO4J_INSECURE);
+        string info = (string("neo4j://") + NEO4J_ID + ":" + NEO4J_PW + "@" + NEO4J_HOST + ":3308");
+        conn= neo4j_connect(info.c_str(), NULL, NEO4J_INSECURE);
         if ( conn == NULL){
             neo4j_perror(stderr, errno, "Connection failed");
         }

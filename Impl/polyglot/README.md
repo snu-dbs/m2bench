@@ -47,40 +47,9 @@ $ bash import.sh
 Please install the below software to build Polyglot persistence.
 
 - Cmake >= 3.11.x 
-- [Neo4j client](https://github.com/majensen/libneo4j-client.git)
-- [MySQL connector](https://dev.mysql.com/downloads/repo/apt/)
-- [MongoDB connector](http://mongocxx.org/mongocxx-v3/installation/)
-<!-- 
-```bash
-$ sudo apt-get install -y libedit-dev
-$ sudo apt-get install cypher-lint libcypher-parser-dev
-$ git clone https://github.com/majensen/libneo4j-client.git
-$ cd libneo4j-client
-$ sudo apt-get install libssl-dev
-$ sudo apt-get install autoconf
-$ sudo apt-get install libtool
-$ sudo apt-get install pkg-config
-$ ./autogen.sh
-$ ./configure --without-tls --disable-tools
-$ make clean check  # Remove  "-Wno-error=stringop-truncation -Wno-unknown-warning-option [-Werror]" in the "configure.ac" file,  if  it invokes an error. 
-$ sudo make install
-```
-
-- Mysql connector using the following commands
-
-```bash
-download apt repository : https://dev.mysql.com/downloads/repo/apt/
-$ sudo dpkg -i ....deb
-$ sudo apt update
-$ sudo apt install libmysqlcppconn-dev
-```
-
-- Install mongocxx connector
-
-```
-http://mongocxx.org/mongocxx-v3/installation/
-``` -->
-
+- [Neo4j client](https://neo4j-client.net/)
+- [MySQL C++ connector for MySQL 8.0.25](https://dev.mysql.com/downloads/)
+- [MongoDB C++ connector 3.6.2](http://mongocxx.org/mongocxx-v3/installation/)
 
 ### Build Polyglot
 

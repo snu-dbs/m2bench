@@ -3,8 +3,7 @@ set (CMAKE_CXX_STANDARD 17)
 
 project(m2bench_ao)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -91,14 +90,12 @@ add_executable(m2bench_ao main.cpp
         src/Scenarios/AgensGraph/Ecommerce_Tasks.h
         src/Scenarios/AgensGraph/Healthcare_Tasks.h
         src/Scenarios/AgensGraph/Disaster_Tasks.h
-        src/Generator/DataScaler.cpp
-        src/Generator/DataScaler.h
         )
 
 target_link_libraries(m2bench_ao PRIVATE cpr::cpr)
 target_link_libraries(m2bench_ao PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(m2bench_ao PUBLIC /usr/local/lib/libmongocxx.so /usr/local/lib/libbsoncxx.so)
+target_link_libraries(m2bench_ao PUBLIC -lmongocxx)
+target_link_libraries(m2bench_ao PUBLIC -lbsoncxx)
 target_link_libraries(m2bench_ao PUBLIC -lneo4j-client)
 target_link_libraries(m2bench_ao PUBLIC -lmysqlcppconn8)
-target_link_libraries(m2bench_ao PUBLIC -lprofiler)
 target_link_libraries(m2bench_ao PUBLIC ${Boost_LIBRARIES})

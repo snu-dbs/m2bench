@@ -9,11 +9,12 @@
 #include "include/Connection/ScidbConnection.h"
 
 using json = nlohmann::json;         // for convenience
+using namespace std;
 
 #define SCIDB_HOST    "192.168.0.1"
 
 void test_download_query() {
-    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST + ":8080"));
+    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST + string(":8080")));
 
     ScidbSchema schema;
     schema.dims.push_back(ScidbDim("i", 0, INT32_MAX, 0, 1000000));
@@ -31,7 +32,7 @@ void test_coo_upload_and_download() {
     std::cout << "COO Test" << std::endl;
 
     // connection
-    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST + ":8080"));
+    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST + string(":8080")));
 
     // execute array
     conn->exec("remove(testarray)");
@@ -86,7 +87,7 @@ void test_coo_siheung_download_and_upload() {
     std::cout << "COO FineDust Test" << std::endl;
 
     // connection
-    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST + ":8080"));
+    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST + string(":8080")));
 
     // download siheung
     auto download = conn->download("siheung");
@@ -132,7 +133,7 @@ void test_coo_finedust_download() {
     std::cout << "COO FineDust Test" << std::endl;
 
     // connection
-    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST + ":8080"));
+    unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST + string(":8080")));
 
     // download siheung
     auto download = conn->download("finedust");
