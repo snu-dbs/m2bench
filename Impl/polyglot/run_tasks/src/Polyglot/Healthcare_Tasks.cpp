@@ -22,7 +22,7 @@ using std::chrono::high_resolution_clock;
 using std::chrono::milliseconds;
 
 #define BUFFER 1000
-#define SCIDB_HOST_HEALTHCARE "192.168.0.1"
+#define SCIDB_HOST_HEALTHCARE "127.0.0.1"
 
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;

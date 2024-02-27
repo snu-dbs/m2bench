@@ -20,7 +20,7 @@ using bsoncxx::builder::stream::document;
 using bsoncxx::builder::stream::finalize;
 using Json = nlohmann::json;
 
-#define SCIDB_HOST_ECOMMERCE "192.168.0.1"
+#define SCIDB_HOST_ECOMMERCE "127.0.0.1"
 
 template <typename T>
 bool cmp(const pair<T, double> &a, const pair<T, double> &b)

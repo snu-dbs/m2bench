@@ -12,25 +12,25 @@
 #include <mysqlx/xdevapi.h>
 #include <iostream>
 
-#define MYSQL_HOST    "192.168.0.1"
-#define MYSQL_ID      ""
-#define MYSQL_PW      ""
+#define MYSQL_HOST "127.0.0.1"
+#define MYSQL_ID ""
+#define MYSQL_PW ""
 
 using namespace std;
-class mysql_connector {
+class mysql_connector
+{
 public:
-    mysqlx::Session* mysess;
+    mysqlx::Session *mysess;
 
-    mysql_connector(){
-        mysess =  new mysqlx::Session(MYSQL_HOST, 33060, MYSQL_ID, MYSQL_PW);
+    mysql_connector()
+    {
+        mysess = new mysqlx::Session(MYSQL_HOST, 33060, MYSQL_ID, MYSQL_PW);
     }
 
-    ~mysql_connector(){
+    ~mysql_connector()
+    {
         delete mysess;
-
     }
-
 };
 
-
-#endif //M2BENCH_MYSQL_CONNECTOR_H
+#endif // M2BENCH_MYSQL_CONNECTOR_H

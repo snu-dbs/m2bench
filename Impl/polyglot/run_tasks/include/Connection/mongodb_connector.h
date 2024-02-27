@@ -12,24 +12,26 @@
 #include <mongocxx/uri.hpp>
 #include <mongocxx/instance.hpp>
 
-#define MONGODB_HOST    "192.168.0.1"
-#define MONGODB_ID      ""
-#define MONGODB_PW      ""
+#define MONGODB_HOST "127.0.0.1"
+#define MONGODB_ID ""
+#define MONGODB_PW ""
 
 using namespace mongocxx;
 
-class mongodb_connector {
+class mongodb_connector
+{
 
-
-    public :
+public:
     static int init;
     mongocxx::database db;
-    mongocxx::client* client;
-    mongodb_connector(std::string dbname = "mxmdb") {
+    mongocxx::client *client;
+    mongodb_connector(std::string dbname = "mxmdb")
+    {
         std::string id = MONGODB_ID;
         std::string pwd = MONGODB_PW;
 
-        if( init == 1004 ){
+        if (init == 1004)
+        {
             mongocxx::instance instance{}; // This should be done only once.
             init = 1;
         }
@@ -38,12 +40,11 @@ class mongodb_connector {
         mongocxx::uri uri(uri_string_string);
         client = new mongocxx::client(uri);
         db = (*client)[dbname];
-
     }
-    ~mongodb_connector(){
+    ~mongodb_connector()
+    {
         delete client;
-
     }
 };
 
-#endif //M2BENCH_MONGODB_CONNECTOR_H
+#endif // M2BENCH_MONGODB_CONNECTOR_H

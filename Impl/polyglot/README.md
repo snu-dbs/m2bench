@@ -55,7 +55,7 @@ Please install the below software to build Polyglot persistence.
 
 Before you build Polyglot persistence, you need to set connection configurations correctly.
 Please navigate to the `include/Connection` directory and update each `mongodb_connector.h`, `mysql_connector.h`, and `neo4j_connector.h` file to meet your database connection information.
-Next, please navigate to the `src/Scenarios/PolyglotDB` directory and modify `SCIDB_HOST_XXX` variables in each `Ecommerce_Tasks.h`, `Healthcare_Tasks.h`, and `Disaster_Tasks.h`.
+Next, please navigate to the `src/Polyglot` directory and modify `SCIDB_HOST_XXX` variables in each `Ecommerce_Tasks.cpp`, `Healthcare_Tasks.cpp`, and `Disaster_Tasks.cpp`.
 
 Now you can build Polyglot persistence with the following commands.
 

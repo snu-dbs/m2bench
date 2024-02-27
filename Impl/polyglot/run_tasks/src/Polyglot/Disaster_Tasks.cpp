@@ -26,7 +26,7 @@ using std::chrono::high_resolution_clock;
 
 using Json = nlohmann::json;
 
-#define SCIDB_HOST_DISASTER "192.168.0.1"
+#define SCIDB_HOST_DISASTER "127.0.0.1"
 #define BUFFER 1000
 
 double distance(double lat, double lon, double lat2, double lon2)
