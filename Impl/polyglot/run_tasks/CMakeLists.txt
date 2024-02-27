@@ -46,36 +46,14 @@ include_directories(include)
 include_directories(src)
 
 add_executable(m2bench_ao main.cpp
-        include/Cursor.h
-        include/Connection/Connection.h
-        include/Connection/OrientConnection.h
-        include/Connection/ArangoConnection.h
-        include/Connection/ScidbConnection.h
-        include/Connection/ScidbPrimitives.h
-        include/Session/Session.h
-        include/Session/ArangoSession.h
-        include/Session/OrientSession.h
-        include/Session/ScidbSession.h
-
-        include/Connection/mysql_connector.h
-        include/Connection/neo4j_connector.h
-        include/Connection/mongodb_connector.h
-
         src/Connection/mysql_connector.cpp
         src/Connection/neo4j_connector.cpp
         src/Connection/mongodb_connector.cpp
 
-        src/Example/mysql_example.h
-        src/Example/neo4j_example.h
-        src/Example/mongodb_example.h
-        src/Example/scidb.h
-        src/Example/arangodb.h
-        src/Example/orientdb.h
-
-        src/Scenarios/PolyglotDB/Ecommerce_Tasks.h
-        src/Scenarios/PolyglotDB/Healthcare_Tasks.h
-        src/Scenarios/PolyglotDB/Disaster_Tasks.h
-        src/Scenarios/PolyglotDB/Latency_Check.h
+        src/Polyglot/Ecommerce_Tasks.cpp
+        src/Polyglot/Healthcare_Tasks.cpp
+        src/Polyglot/Disaster_Tasks.cpp
+        src/Polyglot/Latency_Check.cpp
 
         src/Cursor.cpp
         src/Connection/ArangoConnection.cpp
@@ -87,9 +65,6 @@ add_executable(m2bench_ao main.cpp
 
         src/CurlHelper.cpp
         include/CurlHelper.h
-        src/Scenarios/AgensGraph/Ecommerce_Tasks.h
-        src/Scenarios/AgensGraph/Healthcare_Tasks.h
-        src/Scenarios/AgensGraph/Disaster_Tasks.h
         )
 
 target_link_libraries(m2bench_ao PRIVATE cpr::cpr)
