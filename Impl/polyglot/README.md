@@ -47,9 +47,26 @@ $ bash import.sh
 Please install the below software to build Polyglot persistence.
 
 - Cmake >= 3.11.x 
-- [Neo4j client](https://neo4j-client.net/)
-- [MySQL C++ connector for MySQL 8.0.25](https://dev.mysql.com/downloads/)
-- [MongoDB C++ connector 3.6.2](http://mongocxx.org/mongocxx-v3/installation/)
+- [Neo4j client v5.0.3](https://github.com/majensen/libneo4j-client)
+- [MySQL C++ connector for MySQL v8.0.25](https://dev.mysql.com/downloads/)
+- [MongoDB C Driver & BSON Library v1.17.4](https://mongoc.org/libmongoc/current/installing.html)
+- [MongoDB C++ connector v3.6.2](http://mongocxx.org/mongocxx-v3/installation/)
+
+The Neo4j client might need a more configuration to build.
+The below script is to build the project from the source code.
+
+```bash
+$ sudo apt-get install -y libedit-dev autoconf libtool pkg-config libssl-dev
+$ https://github.com/majensen/libneo4j-client/archive/refs/tags/v5.0.3.tar.gz
+$ tar zxvf v5.0.3.tar.gz
+$ cd libneo4j-client-5.0.3
+$ ./autogen.sh
+$ vim configure.ac    # Remove  "-Wno-error=stringop-truncation -Wno-unknown-warning-option " in the "GCC_FLAGS". You can use another text editor.
+$ ./configure --disable-tools --without-tls --disable-werror
+$ make 
+# make install if you need it
+```
+
 
 ### Build Polyglot
 

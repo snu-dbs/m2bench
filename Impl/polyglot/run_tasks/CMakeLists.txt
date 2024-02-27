@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.10)
 set (CMAKE_CXX_STANDARD 17)
 
-project(m2bench_ao)
+project(m2bench)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -41,11 +41,11 @@ if(NOT json_POPULATED)
     add_subdirectory(${json_SOURCE_DIR} ${json_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif()
 
-# m2bench_ao
+# m2bench
 include_directories(include)
 include_directories(src)
 
-add_executable(m2bench_ao main.cpp
+add_executable(m2bench main.cpp
         src/Connection/mysql_connector.cpp
         src/Connection/neo4j_connector.cpp
         src/Connection/mongodb_connector.cpp
@@ -63,10 +63,10 @@ add_executable(m2bench_ao main.cpp
         include/CurlHelper.h
         )
 
-target_link_libraries(m2bench_ao PRIVATE cpr::cpr)
-target_link_libraries(m2bench_ao PRIVATE nlohmann_json::nlohmann_json)
-target_link_libraries(m2bench_ao PUBLIC -lmongocxx)
-target_link_libraries(m2bench_ao PUBLIC -lbsoncxx)
-target_link_libraries(m2bench_ao PUBLIC -lneo4j-client)
-target_link_libraries(m2bench_ao PUBLIC -lmysqlcppconn8)
-target_link_libraries(m2bench_ao PUBLIC ${Boost_LIBRARIES})
+target_link_libraries(m2bench PRIVATE cpr::cpr)
+target_link_libraries(m2bench PRIVATE nlohmann_json::nlohmann_json)
+target_link_libraries(m2bench PUBLIC -lmongocxx)
+target_link_libraries(m2bench PUBLIC -lbsoncxx)
+target_link_libraries(m2bench PUBLIC -lneo4j-client)
+target_link_libraries(m2bench PUBLIC -lmysqlcppconn8)
+target_link_libraries(m2bench PUBLIC ${Boost_LIBRARIES})

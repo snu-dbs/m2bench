@@ -6,6 +6,8 @@
 #define M2BENCH_AO_MONGODB_CONNECTOR_H
 
 #include <iostream>
+#include <string>
+
 #include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
 #include <mongocxx/stdx.hpp>
@@ -23,6 +25,7 @@ class mongodb_connector
 
 public:
     static int init;
+    static mongocxx::instance inst;
     mongocxx::database db;
     mongocxx::client *client;
     mongodb_connector(std::string dbname = "mxmdb")
@@ -36,7 +39,15 @@ public:
             init = 1;
         }
 
-        std::string uri_string_string = "mongodb://" + id + ":" + pwd + "@" + MONGODB_HOST + ":27017/?authSource=" + dbname;
+        std::string uri_string_string;
+        if (id == "" && pwd == "")
+        {
+            uri_string_string = std::string("mongodb://") + MONGODB_HOST + ":27017/";
+        }
+        else
+        {
+            uri_string_string = std::string("mongodb://") + id + ":" + pwd + "@" + MONGODB_HOST + ":27017/?authSource=" + dbname;
+        }
         mongocxx::uri uri(uri_string_string);
         client = new mongocxx::client(uri);
         db = (*client)[dbname];

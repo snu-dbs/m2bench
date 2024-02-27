@@ -32,7 +32,7 @@ public:
 
     neo4j_connector()
     {
-        string info = (string("neo4j://") + NEO4J_ID + ":" + NEO4J_PW + "@" + NEO4J_HOST + ":3308");
+        string info = (string("neo4j://") + NEO4J_ID + ":" + NEO4J_PW + "@" + NEO4J_HOST + ":7687");
         conn = neo4j_connect(info.c_str(), NULL, NEO4J_INSECURE);
         if (conn == NULL)
         {
