@@ -9,11 +9,11 @@ import orjson
 from multiprocessing import Process, Manager, Value, Lock, Pool
 
 def p1(data_dirpath):
-    os.system("ogr2ogr -f 'GeoJSON' california-points.geojson " + data_dirpath + "california-latest.osm points > /dev/null")
+    os.system("ogr2ogr -f 'GeoJSON' california-points.geojson " + data_dirpath + "/california-latest.osm -sql \"SELECT * FROM points WHERE ST_IsValid(geometry)\" -dialect SQLite > /dev/null 2>&1")
 
 def p2(data_dirpath):
-    os.system("ogr2ogr -f 'GeoJSON' california-multipolygons.geojson " + data_dirpath + "california-latest.osm multipolygons > /dev/null")
-
+    os.system("ogr2ogr -f 'GeoJSON' california-multipolygons.geojson " + data_dirpath + "/california-latest.osm -sql \"SELECT * FROM multipolygons WHERE ST_IsValid(geometry)\" -dialect SQLite > /dev/null 2>&1")
+    
 def ogr_background(data_dirpath):
     os.system('cp Disaster/osmconf.ini .')
 
