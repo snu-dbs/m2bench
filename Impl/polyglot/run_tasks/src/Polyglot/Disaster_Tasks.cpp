@@ -263,7 +263,7 @@ void T10(string Z1, string Z2)
     auto neo4j = new neo4j_connector();
 
     std::string where = "time >= STR_TO_DATE(" + Z1 + ", '%Y-%m-%d %H:%i:%s') AND time < STR_TO_DATE(" + Z2 + ", '%Y-%m-%d %H:%i:%s')";
-    auto matched_earthquakes = Earthquake.select("earthquake_id", "ST_X(coordinates)", "ST_Y(coordinates)").where(where).execute();
+    auto matched_earthquakes = Earthquake.select("id", "ST_X(coordinates)", "ST_Y(coordinates)").where(where).execute();
 
     int res_count = 0;
     for (auto eqk : matched_earthquakes)
@@ -344,14 +344,14 @@ void T11(int X_id)
 
     int buffer = 0;
     mysql.mysess->sql("use Disaster").execute();
-    mysql.mysess->sql("CREATE TEMPORARY TABLE Gps_list(gps_id INT, gps_roadnode_id INT)").execute();
-    mysql.mysess->sql("CREATE TEMPORARY TABLE Shelter_list(shelter_id INT, shelter_roadnode_id INT)").execute();
+    mysql.mysess->sql("CREATE TEMPORARY TABLE Gps_list(id INT, gps_roadnode_id INT)").execute();
+    mysql.mysess->sql("CREATE TEMPORARY TABLE Shelter_list(id INT, shelter_roadnode_id INT)").execute();
 
     auto Earthquake = mysql.mysess->getSchema("Disaster").getTable("Earthquake");
-    mysql.mysess->sql("CREATE TEMPORARY TABLE IF NOT EXISTS eqk_X AS (SELECT time, coordinates FROM Earthquake WHERE earthquake_id=" + to_string(X_id) + ")").execute();
+    mysql.mysess->sql("CREATE TEMPORARY TABLE IF NOT EXISTS eqk_X AS (SELECT time, coordinates FROM Earthquake WHERE id=" + to_string(X_id) + ")").execute();
 
     /* step A: find gps */
-    std::string select = "Gps.gps_id, ST_Y(Gps.coordinates), ST_X(Gps.coordinates) ";
+    std::string select = "Gps.id, ST_Y(Gps.coordinates), ST_X(Gps.coordinates) ";
     std::string from = "Gps, eqk_X ";
     std::string where = "Gps.time >= eqk_X.time AND Gps.time < date_add(eqk_X.time, interval 1 hour)"
                         " AND ST_Distance_Sphere("
@@ -360,7 +360,7 @@ void T11(int X_id)
                         ") <= 10000";
     auto filtered_gps = mysql.mysess->sql("SELECT " + select + "FROM " + from + "WHERE " + where).execute();
 
-    auto insert2Gps_list = mysql.mysess->getSchema("Disaster").getTable("Gps_list").insert("gps_id", "gps_roadnode_id");
+    auto insert2Gps_list = mysql.mysess->getSchema("Disaster").getTable("Gps_list").insert("id", "gps_roadnode_id");
     for (auto gps : filtered_gps)
     {
         int gps_id = gps[0].get<int>();
@@ -386,7 +386,7 @@ void T11(int X_id)
             if (buffer >= BUFFER)
             {
                 insert2Gps_list.execute();
-                insert2Gps_list = mysql.mysess->getSchema("Disaster").getTable("Gps_list").insert("gps_id", "gps_roadnode_id");
+                insert2Gps_list = mysql.mysess->getSchema("Disaster").getTable("Gps_list").insert("id", "gps_roadnode_id");
                 buffer = 0;
             }
         }
@@ -397,9 +397,9 @@ void T11(int X_id)
 
     /* step B: find shelters */
     // create TEMP TABLE Shelter_temp (shelter with geometry)
-    mysql.mysess->sql("CREATE TEMPORARY TABLE Shelter_temp(shelter_id INT, site_id INT, lon double, lat double)").execute();
-    auto insert2Shelter_temp = mysql.mysess->getSchema("Disaster").getTable("Shelter_temp").insert("shelter_id", "site_id", "lon", "lat");
-    auto shelter = mysql.mysess->sql("SELECT shelter_id, site_id FROM Shelter").execute();
+    mysql.mysess->sql("CREATE TEMPORARY TABLE Shelter_temp(id INT, site_id INT, lon double, lat double)").execute();
+    auto insert2Shelter_temp = mysql.mysess->getSchema("Disaster").getTable("Shelter_temp").insert("id", "site_id", "lon", "lat");
+    auto shelter = mysql.mysess->sql("SELECT id, site_id FROM Shelter").execute();
     for (auto row : shelter)
     {
         int shelter_id = row[0].get<int>(), site_id = row[1].get<int>();
@@ -413,18 +413,18 @@ void T11(int X_id)
         if (buffer >= BUFFER)
         {
             insert2Shelter_temp.execute();
-            insert2Shelter_temp = mysql.mysess->getSchema("Disaster").getTable("Shelter_temp").insert("shelter_id", "site_id", "lon", "lat");
+            insert2Shelter_temp = mysql.mysess->getSchema("Disaster").getTable("Shelter_temp").insert("id", "site_id", "lon", "lat");
             buffer = 0;
         }
     }
     if (buffer != 0)
         insert2Shelter_temp.execute();
     buffer = 0;
-    mysql.mysess->sql("CREATE INDEX shelter_id_idx ON Shelter_temp(shelter_id)").execute();
+    mysql.mysess->sql("CREATE INDEX shelter_id_idx ON Shelter_temp(id)").execute();
     mysql.mysess->sql("CREATE INDEX lon_idx ON Shelter_temp(lon)").execute();
     mysql.mysess->sql("CREATE INDEX lat_idx ON Shelter_temp(lat)").execute();
 
-    select = " Shelter_temp.shelter_id, Shelter_temp.lon, Shelter_temp.lat ";
+    select = " Shelter_temp.id AS shelter_id, Shelter_temp.lon, Shelter_temp.lat ";
     from = " eqk_X, Shelter_temp ";
     where = " ST_Distance_Sphere("
             "ST_GeomFromText(CONCAT('POINT (', Shelter_temp.lat, ' ', Shelter_temp.lon, ')'), 4326), "
@@ -432,7 +432,7 @@ void T11(int X_id)
             ") <= 15000";
     auto filtered_shelter = mysql.mysess->sql("SELECT" + select + "FROM" + from + "WHERE" + where).execute();
 
-    auto insert2Shelter_list = mysql.mysess->getSchema("Disaster").getTable("Shelter_list").insert("shelter_id", "shelter_roadnode_id");
+    auto insert2Shelter_list = mysql.mysess->getSchema("Disaster").getTable("Shelter_list").insert("id", "shelter_roadnode_id");
     for (auto shelter : filtered_shelter)
     {
         int shelter_id = shelter[0].get<int>();
@@ -458,7 +458,7 @@ void T11(int X_id)
             if (buffer >= BUFFER)
             {
                 insert2Shelter_list.execute();
-                insert2Shelter_list = mysql.mysess->getSchema("Disaster").getTable("Shelter_list").insert("shelter_id", "shelter_roadnode_id");
+                insert2Shelter_list = mysql.mysess->getSchema("Disaster").getTable("Shelter_list").insert("id", "shelter_roadnode_id");
                 buffer = 0;
             }
         }
@@ -534,9 +534,9 @@ void T12(string Z1, string Z2)
 
     int buffer = 0;
     mysql.mysess->sql("use Disaster").execute();
-    mysql.mysess->sql("CREATE TEMPORARY TABLE Shelter_temp(shelter_id INT, site_id INT, lon double, lat double)").execute();
-    auto insert2Shelter_temp = mysql.mysess->getSchema("Disaster").getTable("Shelter_temp").insert("shelter_id", "site_id", "lon", "lat");
-    auto shelter = mysql.mysess->sql("SELECT shelter_id, site_id FROM Shelter").execute();
+    mysql.mysess->sql("CREATE TEMPORARY TABLE Shelter_temp(id INT, site_id INT, lon double, lat double)").execute();
+    auto insert2Shelter_temp = mysql.mysess->getSchema("Disaster").getTable("Shelter_temp").insert("id", "site_id", "lon", "lat");
+    auto shelter = mysql.mysess->sql("SELECT id, site_id FROM Shelter").execute();
     for (auto row : shelter)
     {
         int shelter_id = row[0].get<int>(), site_id = row[1].get<int>();
@@ -552,7 +552,7 @@ void T12(string Z1, string Z2)
             if (buffer >= BUFFER)
             {
                 insert2Shelter_temp.execute();
-                insert2Shelter_temp = mysql.mysess->getSchema("Disaster").getTable("Shelter_temp").insert("shelter_id", "site_id", "lon", "lat");
+                insert2Shelter_temp = mysql.mysess->getSchema("Disaster").getTable("Shelter_temp").insert("id", "site_id", "lon", "lat");
                 buffer = 0;
             }
         }
@@ -560,11 +560,11 @@ void T12(string Z1, string Z2)
     if (buffer != 0)
         insert2Shelter_temp.execute();
     buffer = 0;
-    mysql.mysess->sql("CREATE INDEX shelter_id_idx ON Shelter_temp(shelter_id)").execute();
+    mysql.mysess->sql("CREATE INDEX shelter_id_idx ON Shelter_temp(id)").execute();
     mysql.mysess->sql("CREATE INDEX lon_idx ON Shelter_temp(lon)").execute();
     mysql.mysess->sql("CREATE INDEX lat_idx ON Shelter_temp(lat)").execute();
 
-    std::string select = " Shelter_temp.shelter_id AS shelter_id, Shelter_temp.lon AS shelter_lon, Shelter_temp.lat AS shelter_lat, COUNT(Gps.gps_id) AS numGps ";
+    std::string select = " Shelter_temp.id AS shelter_id, Shelter_temp.lon AS shelter_lon, Shelter_temp.lat AS shelter_lat, COUNT(Gps.id) AS numGps ";
     std::string from = " Gps, Shelter_temp ";
     Z1 = "\'" + Z1 + "\'";
     Z2 = "\'" + Z2 + "\'";
@@ -572,7 +572,7 @@ void T12(string Z1, string Z2)
                                                                                                                        "ST_GeomFromText(CONCAT('POINT (', Shelter_temp.lat, ' ', Shelter_temp.lon, ')'), 4326), "
                                                                                                                        "ST_GeomFromText(CONCAT('POINT (', ST_X(coordinates), ' ', ST_Y(coordinates), ')'), 4326)"
                                                                                                                        ") <= 5000";
-    std::string others = " GROUP BY Shelter_temp.shelter_id, Shelter_temp.lon, Shelter_temp.lat ORDER BY numGps DESC LIMIT 1";
+    std::string others = " GROUP BY Shelter_temp.id, Shelter_temp.lon, Shelter_temp.lat ORDER BY numGps DESC LIMIT 1";
     auto target_shelter = mysql.mysess->sql("SELECT" + select + "FROM" + from + "WHERE" + where + others).execute().fetchOne();
     int target_shelter_id = target_shelter[0].get<int>();
     double target_shelter_lon = target_shelter[1].get<double>(), target_shelter_lat = target_shelter[2].get<double>();
@@ -793,7 +793,7 @@ void T14(int z1, int z2)
 
     // Query A and B
     // 8 is magic number for dataset
-    scidb->exec("store(redimension(apply(window(between(finedust, " + to_string(z1) + ", 0, 0, " + to_string(z2) + ", 522, 522), 0, 0, 2, 2, 2, 2, avg(pm10)), date, timestamp/8), <pm10_avg: double>[date=0:*:0:?; timestamp=0:*:0:?; latitude=0:*:0:?; longitude=0:*:0:?]), t14t1)");
+    scidb->exec("store(redimension(apply(window(between(Finedust, " + to_string(z1) + ", 0, 0, " + to_string(z2) + ", 522, 522), 0, 0, 2, 2, 2, 2, avg(pm10)), date, timestamp/8), <pm10_avg: double>[date=0:*:0:?; timestamp=0:*:0:?; latitude=0:*:0:?; longitude=0:*:0:?]), t14t1)");
 
     // Query C
     ScidbSchema t2Schema;
@@ -865,7 +865,7 @@ void T15(int z1, int z2, double lon, double lat)
     hotspotSchema.attrs.push_back(ScidbAttr("longitude", INT64));
 
     // cout << to_string(z1) << "," << to_string(z2) << "," << to_string(max_win_oneside) << endl;
-    auto hotspot = scidb->download("limit(sort(redimension(apply(window(aggregate(between(finedust, " + to_string(z1) + ", 0, 0, " + to_string(z2) + ", 522, 522), sum(pm10), count(pm10), latitude, longitude), 2, 2, 2, 2, sum(pm10_sum), sum(pm10_count)), pm10_avg, pm10_sum_sum / pm10_count_sum), <pm10_avg:double, latitude:int64, longitude: int64>[i=0:*:0:100000000]), pm10_avg desc), 1)", hotspotSchema);
+    auto hotspot = scidb->download("limit(sort(redimension(apply(window(aggregate(between(Finedust, " + to_string(z1) + ", 0, 0, " + to_string(z2) + ", 522, 522), sum(pm10), count(pm10), latitude, longitude), 2, 2, 2, 2, sum(pm10_sum), sum(pm10_count)), pm10_avg, pm10_sum_sum / pm10_count_sum), <pm10_avg:double, latitude:int64, longitude: int64>[i=0:*:0:100000000]), pm10_avg desc), 1)", hotspotSchema);
     auto hotspotCells = hotspot->readcell();
     auto current = ST_ClosestObject_RoadNode(mapCollection, neo4j, lat, lon); // Current coord
     int target = -1;
@@ -960,7 +960,7 @@ void T16(long timestamp)
 
     //  aggregate(between(finedust, 0,null, null,1,null,null), avg(pm10), latitude, longitude)
     conn->exec("remove(finedust_temp)");
-    conn->exec("store(aggregate(between(finedust," + to_string(normZ1) + ",null, null," + to_string(normZ2) + ",null,null), avg(pm10), latitude, longitude),finedust_temp)");
+    conn->exec("store(aggregate(between(Finedust," + to_string(normZ1) + ",null, null," + to_string(normZ2) + ",null,null), avg(pm10), latitude, longitude),finedust_temp)");
 
     mongocxx::pipeline p{};
     p.match(make_document(kvp("properties.type", "building")));

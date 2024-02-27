@@ -262,7 +262,7 @@ void T7(int patient_id)
     // cout << "gender count" << endl;
     for (auto row : res)
     {
-        // cout << row[0].get<std::string>() << " " << row[1].get<int>() << endl;
+        cout << row[0].get<std::string>() << " " << row[1].get<int>() << endl;
         nrow++;
     }
 

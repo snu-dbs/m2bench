@@ -97,12 +97,20 @@ int main(int argc, char *argv[])
     string T10_ts2 = "2020-06-01 02:00:00";
     timer(T10, T10_ts1, T10_ts2);
 
-    int earthquake_X = 41862;
+    int earthquake_X = 43744;
     timer(T11, earthquake_X);
 
     string T12_ts1 = "2020-09-17 00:00:00";
     string T12_ts2 = "2020-09-17 01:00:00";
     timer(T12, T12_ts1, T12_ts2);
+
+    timer(T13);
+
+    int Z1 = 5, Z2 = 10;
+    timer(T14, Z1, Z2);
+
+    double CLON = -118.0614431, CLAT = 34.068509;
+    timer(T15, Z1, Z2, CLON, CLAT);
 
     long ts = 1600182000 + 10800 * 3.5;
     timer(T16, ts);
