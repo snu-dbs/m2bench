@@ -35,7 +35,7 @@ mysql < ./healthcare/create_table.sql
 mysql --local-infile < ./healthcare/load_data.sql
 
 echo "==== Import data to MongoDB ===="
-bash ./ecommerce/load_json.sh
+bash ./healthcare/load_json.sh
 
 echo "==== Import data to Neo4J ===="
 # make symbolic links to the data files
@@ -77,6 +77,9 @@ then
     mkdir -p /tmp/m2bench
     tail -n +2 $SCIDB_DATA/Finedust_idx.csv > /tmp/m2bench/Finedust_idx.csv
     bash ./disaster/load_array.sh
+
+    iquery -aq "load_library('linear_algebra')"
+    iquery -aq "load_library('dense_linear_algebra')"
 else
     echo -n "iquery not found. Please type the name of the SciDB container: "
     read SCIDB_CONTAINER
@@ -85,4 +88,7 @@ else
     docker exec -it $SCIDB_CONTAINER bash -c "tail -n +2 /tmp/m2bench/Finedust_idx_with_header.csv > /tmp/m2bench/Finedust_idx.csv"
     docker cp ./disaster/load_array.sh $SCIDB_CONTAINER:/tmp/m2bench
     docker exec -it $SCIDB_CONTAINER bash /tmp/m2bench/load_array.sh
+
+    docker exec -it $SCIDB_CONTAINER iquery -aq "load_library('linear_algebra')"
+    docker exec -it $SCIDB_CONTAINER iquery -aq "load_library('dense_linear_algebra')"
 fi

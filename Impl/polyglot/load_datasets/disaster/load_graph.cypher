@@ -18,6 +18,7 @@ MATCH (c1 : Roadnode {roadnode_id: toInteger(row._from)} ), (c2: Roadnode {roadn
 CREATE (c1)-[:Road { distance: toInteger(row.distance)} ]->(c2);
 
 // gds call
+CALL gds.graph.drop('road_network');
 CALL gds.graph.create(
   'road_network',            
   'Roadnode',             
