@@ -270,6 +270,7 @@ void T10(string Z1, string Z2)
     {
         int eqk_id = eqk[0];
         double eqk_lat = eqk[1].get<double>(), eqk_lon = eqk[2].get<double>();
+        // we can only make an 2dsphere index on GeoJSON object, so we need to calculate it with spherical geometry.
         auto roadnode_sites = Site.find(
             make_document(kvp("geometry",
                               make_document(kvp("$nearSphere", make_document(kvp(

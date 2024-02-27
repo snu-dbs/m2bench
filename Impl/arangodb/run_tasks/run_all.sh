@@ -1,4 +1,4 @@
-USERNAME=root
+USERNAME=
 PASSWORD=
 
 echo "T0 ==============="
