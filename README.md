@@ -25,7 +25,7 @@ DBMS versions used for the experiment in the paper are as follows.
 In order to run M2Bench, please follow the below steps.
 
 1. Generate datasets of M2Bench following the instructions in `Datasets/README.md`.
-2. Choose DBMS X `[agensgraph|arangodb|polyglot]`. 
+2. Choose one of Polyglot, AgensGraph, and ArangoDB. Refer to the chosen DBMS as X.
 3. Load the datasets into DBMS X and run tasks, following the instructions in `Impl/X/README.md`.
 
 
