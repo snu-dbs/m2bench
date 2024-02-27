@@ -56,10 +56,6 @@ add_executable(m2bench_ao main.cpp
         src/Polyglot/Latency_Check.cpp
 
         src/Cursor.cpp
-        src/Connection/ArangoConnection.cpp
-        src/Session/ArangoSession.cpp
-        src/Connection/OrientConnection.cpp
-        src/Session/OrientSession.cpp
         src/Session/ScidbSession.cpp
         src/Connection/ScidbConnection.cpp
 
