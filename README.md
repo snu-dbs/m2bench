@@ -7,11 +7,11 @@
 
 ## Before Getting Started
 
-- If you need to get a support during reproducing this work, feel free to contact us.
-- We highly recommend to use the described database systems with Ubuntu 18.04 that we used for the publication.
+- If you need a support during reproducing this work, feel free to contact us.
+- We highly recommend to use the described versions of software with Ubuntu 18.04 that we used for the publication.
 
 
-### DBMS Versions
+### Software Versions
 
 DBMS versions used for the experiment in the paper are as follows.
 
@@ -19,6 +19,10 @@ DBMS versions used for the experiment in the paper are as follows.
 - ArangoDB 3.7.12
 - AgensGraph 2.1.3 (based on PostgreSQL 10.4)
 
+For SciDB installation, please refer to the description for Polyglot (`Impl/Polyglot/README.md`).
+
+Each data generator, data scaler, and client program of Polyglot needs different prerequisites to run them.
+For such dependencies, we will describe those in a description of each part.
 
 ## How to Run M2Bench
 
@@ -38,21 +42,20 @@ In order to run M2Bench, please follow the below steps.
 
 ```
 m2bench
-├── Datasets                # How to generate the datasets of M2Bench from the realworld datasets.
-│   ├── ecommerce          
-│   ├── healthcare
-│   ├── disaster
-│   └── README.md
-├── Tasks                   # Description of all tasks of M2Bench
-|   └── alltasks.md
+├── Datasets
+│   ├── ecommerce           # Generated e-commerce data
+│   ├── healthcare          # Generated healthcare data
+│   ├── disaster            # Generated disaster & safety data
+│   ├── DataScaler          # Data scaler
+│   ├── Generator           # Data generator        
+│   └── README.md           # How to generate the datasets of M2Bench from the realworld datasets.
+├── Tasks                   
+|   └── alltasks.md         # Description of all tasks of M2Bench
 ├── Impl                    # Implementation of tasks of M2Bench on various DBMSs
 │   ├── agensgraph  
 │   │   ├── load_datasets   # How to load datasets into DBMS
 │   │   └── run_tasks       # How to run tasks
 │   ├── arangodb
-│   │   ├── load_datasets 
-│   │   └── run_tasks
-│   ├── orientdb
 │   │   ├── load_datasets 
 │   │   └── run_tasks
 │   └── polyglot            # polyglot persistence

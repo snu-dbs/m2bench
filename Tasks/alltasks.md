@@ -1,4 +1,4 @@
-# M2Bench 
+# M2Bench Tasks
 
 This file contains a summary of operations and full SQL sentences of the M2bench tasks.
 

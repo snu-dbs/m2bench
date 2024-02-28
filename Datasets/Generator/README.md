@@ -26,7 +26,7 @@ Thus, you need to prepare for these datasets.
 #### 1. TPC-DS dataset (SF=1): [http://tpc.org/tpc_documents_current_versions/download_programs/tools-download-request5.asp?bm_type=TPC-DS](http://tpc.org/tpc_documents_current_versions/download_programs/tools-download-request5.asp?bm_type=TPC-DS&bm_vers=3.2.0)
 - The TPC Tools are available free of charge, however all users must agree to the licensing terms and register prior to use.
       Please download and read the TPC-Tools License Agreement prior to registering for the download.
-- After downloading, unzip the TPC-DS tool, navigate to `tools` directory, and make file to generate binary files required to generate TPC-DS data.
+- After downloading, unzip the TPC-DS tool, navigate to the `tools` directory, and make generate binary files required to generate TPC-DS data.
 ```bash
 $ make -f Makefile.suite
 ```
@@ -35,18 +35,18 @@ $ make -f Makefile.suite
 > 
 > If you encounter the multiple definition error during the build, please make sure that you are building TPC-DS with GCC 9.
 
-- Run the following command in the `tools` directory of TPC-DS. It will generate the TPC-DS data of scale factor 1 to `/Datasets/raw_datasets/tpcds_data` directory.
+- Run the following command in the `tools` directory of TPC-DS. It will generate the TPC-DS data of scale factor 1 to the `/Datasets/raw_datasets/tpcds_data` directory.
 ```bash
 $ ./dsdgen -scale 1 -dir path/to/Datasets/raw_datasets/tpcds_data/
 ```
 
 #### 2. Unibench dataset (SF=1)
-- Since Unibench is no longer available from [the author's website](http://udbms.cs.helsinki.fi/?projects/ubench), we provide the Unibench dataset in `/Datasets/raw_datasets/Unibench_SF1` directory.
+- Since Unibench is no longer available from [the author's website](http://udbms.cs.helsinki.fi/?projects/ubench), we provide the Unibench dataset in the `/Datasets/raw_datasets/Unibench_SF1` directory.
 
 
 ### Data generation
-- Navigate to `/Datasets/Generator/Ecommerce` directory.
-- Run the following command. It will generate data to `/Datasets/ecommerce/` directory.
+- Navigate to the `/Datasets/Generator/Ecommerce` directory.
+- Run the following command. It will generate data to the `/Datasets/ecommerce/` directory.
 
 ```bash
 $ python3 main.py ../../raw_datasets/tpcds_data/ ../../raw_datasets/Unibench_SF1/
@@ -54,7 +54,7 @@ $ python3 main.py ../../raw_datasets/tpcds_data/ ../../raw_datasets/Unibench_SF1
     
 ### Notes
 - Since the TPC-DS Tool is steadily updated, the version of the tool used to generate datasets in M2Bench (v.3.0.1) can be different from the latest version.
-- We also provide synthetic hashtag node data as a part of property graph dataset. It is located in `/Datasets/ecommerce/property_graph` directory.
+- We also provide synthetic hashtag node data as a part of property graph dataset. It is located in the `/Datasets/ecommerce/property_graph` directory.
 
 
 ## Healthcare
@@ -65,26 +65,26 @@ $ python3 main.py ../../raw_datasets/tpcds_data/ ../../raw_datasets/Unibench_SF1
 
 - Please access the above link and download the MIMIC-III clinical dataset after fulfilling the requirements described on the website.
 - Unzip the downloaded data. Note that the downloaded data also has zipped files. Please unzip these files as well.
-- Put the unzipped files into `/Datasets/raw_datasets/mimic` directory.
+- Put the unzipped files into the `/Datasets/raw_datasets/mimic` directory.
 
 #### 2. SNOMED Terminology: [https://www.nlm.nih.gov/healthit/snomedct/us_edition.html](https://www.nlm.nih.gov/healthit/snomedct/us_edition.html)
 
 - Before downloading, you have to set up an account for UMLS Terminology Services (UTS) (https://uts.nlm.nih.gov/uts/) to access the data.
 - Download by clicking on the download now button.
-- You would get a directory named `SnomedCT_xxx`. Please copy the two files below to `/Datasets/raw_datasets/snomed` directory and rename these files. 
-    - Copy `SnomedCT_xxx/Snapshot/Terminology/ xxx_Description_Snapshot_xxx.txt` file and rename it to `description.txt`.
-    - Copy `SnomedCT_xxx/Snapshot/Terminology/ xxx_Relationship_Snapshot_xxx.txt` file and rename it to `relationship.txt`.
+- You would get a directory named `SnomedCT_xxx`. Please copy the two files below to the `/Datasets/raw_datasets/snomed` directory and rename these files. 
+    - Copy the `SnomedCT_xxx/Snapshot/Terminology/ xxx_Description_Snapshot_xxx.txt` file and rename it to `description.txt`.
+    - Copy the `SnomedCT_xxx/Snapshot/Terminology/ xxx_Relationship_Snapshot_xxx.txt` file and rename it to `relationship.txt`.
 
 
 #### 3. Drugbank (drug json data): [https://portal.drugbank.com/](https://portal.drugbank.com/)
 
 - Before downloading, you have to set up an account for Drugbank (https://go.drugbank.com/public_users/sign_up) and get approved to access the data.
 - Download the latest DrugBank data in JSON format.
-- Put the JSON files of the downloaded data into `/Datasets/raw_datasets/drugbank` directory.
+- Put the JSON files of the downloaded data into the `/Datasets/raw_datasets/drugbank` directory.
 
 
 ### Data generation 
-- Navigate to `/Datasets/Generator/Healthcare` directory and run the following command.
+- Navigate to the `/Datasets/Generator/Healthcare` directory and run the following command.
 
 ```bash
 $ python3 main.py
@@ -165,7 +165,7 @@ We provide the Finedust dataset. See `/Datasets/raw_datasets/finedust`.
 ### Data generation
 
 Set up the raw datasets described above, then run `Disaster/main.sh` **from the `/Datasets/Generator` directory**.
-Result dataset will be stored in the `/Datasets/disaster` directory.
+Result data will be stored in the `/Datasets/disaster` directory.
 
 ```bash
 $ bash Disaster/main.sh
@@ -173,6 +173,6 @@ $ bash Disaster/main.sh
 
 ### Notes
 
-- Since the Earthquakes (USGS) and OSM have been updated, the datasets (Earthquake, OSM, and Shelter) made from our generator can slightly be different from the dataset of the paper.
-- Since the GPS data is generated probabilistically, the dataset made from our generator can slightly be different from the dataset of the paper.
+- Since the Earthquakes (USGS) and OSM have been updated, the datasets (Earthquake, OSM, and Shelter) made from our generator can slightly be different from the dataset in the paper.
+- Since the GPS data is generated probabilistically, the dataset made from our generator can slightly be different from the dataset in the paper.
 - If you have trouble with the generator, please try [the other version of the data generator](https://github.com/snu-dbs/m2bench/tree/bdcbc21437a0b50585cfc28bec107e046d7a9d4f). 

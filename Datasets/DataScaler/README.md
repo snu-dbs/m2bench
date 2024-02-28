@@ -15,9 +15,9 @@ After installing the required software in the `Requirements` section, build this
 ```bash
 mkdir build
 cd build
-cmake ../
+cmake ..
 make 
-../
+cd ..
 ```
 
 ### How to run
@@ -25,4 +25,4 @@ make
 ./scaler.sh [ScaleFactor]
 # e.g., ./scaler.sh 2
 ```
-- Scaled datasets are located in each scenario folder ex) `../ecommerce/table/Customer\_SF2.csv`
+- Scaled datasets are located in each scenario folder. For example, `/Datasets/ecommerce/table/Customer_SF2.csv`
