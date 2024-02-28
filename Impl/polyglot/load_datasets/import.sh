@@ -1,7 +1,4 @@
-#! /bin/bash
-
-# FIXME:
-SF=$1
+#!/bin/bash
 
 # E-commerce
 echo "========================================"

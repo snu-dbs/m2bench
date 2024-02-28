@@ -1,6 +1,3 @@
-# FIXME:
-SF=$1
-
 DATA_PATH=$(pwd)/../../../Datasets/
 mkdir -p /tmp/m2bench/
 ln -s $DATA_PATH/ecommerce /tmp/m2bench/ 2>&1 >& /dev/null
