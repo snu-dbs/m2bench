@@ -1,0 +1,26 @@
+{
+  "source": { "file": { "path":"__TBAPATH/../../../Datasets/ecommerce/property_graph/person_interestedIn_tag.csv" } },
+  "extractor": { "csv": {"separator":","} },
+  "transformers": [
+    { "merge": { "joinFieldName":"person_id", "lookup":"Person.person_id", "unresolvedLinkAction": "ERROR" } },
+    { "vertex": { "class": "Person"} },
+    { "edge": {
+        "class": "Interested_in",
+        "joinFieldName": "tag_id",
+        "lookup": "Hashtag.tag_id",
+        "unresolvedLinkAction": "ERROR"
+      }
+    }
+  ],
+  "loader": {
+    "orientdb": {
+       "dbURL": "plocal:/opt/orientdb/databases/Ecommerce",
+       "dbType": "graph",
+       "classes": [
+         {"name": "Person", "extends": "V"},
+         {"name": "Hashtag", "extends": "V"},
+         {"name": "Interested_in", "extends": "E"}
+       ], "indexes": []
+    }
+  }
+}

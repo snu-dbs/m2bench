@@ -1,0 +1,28 @@
+{
+  "config": {
+    "log": "debug"
+  },
+  "source" : {
+    "file": { "path": "__TBAPATH/../../../Datasets/ecommerce/json/_review_list.json" }
+  },
+  "extractor" : {
+	  "json": {}
+},
+  "transformers": [
+    { "vertex": { "class": "Review" } }
+  ],
+  "loader" : {
+    "orientdb": {
+       "dbURL": "plocal:/opt/orientdb/databases/Ecommerce",
+      "wal": false,
+      "dbType": "graph",
+       "classes": [
+         {"name": "Review"}
+       ],
+       "indexes": [
+         {"class":"Review", "fields":["order_id:string"], "type":"NOTUNIQUE" },
+         {"class":"Review", "fields":["product_id:string"], "type":"NOTUNIQUE" }
+       ]
+    }
+ }
+}

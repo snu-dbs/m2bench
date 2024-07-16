@@ -1,0 +1,18 @@
+{
+  "source": { "file": { "path": "__TBAPATH/../../../Datasets/healthcare/table/Prescription.csv" } },
+  "extractor": { "csv": {"separator": ","} },
+  "transformers": [
+    { "vertex": { "class": "Prescription" } }
+  ],
+  "loader": {
+    "orientdb": {
+       "dbURL": "plocal:/opt/orientdb/databases/Healthcare",
+       "dbType": "graph",
+       "classes": [
+         {"name": "Prescription"}
+       ], "indexes": [
+	  {"class":"Prescription", "fields":["patient_id:int"], "type":"NOTUNIQUE" }
+       ]
+    }
+  }
+}

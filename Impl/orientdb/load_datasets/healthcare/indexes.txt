@@ -1,0 +1,9 @@
+Relational
+- Patient: patient_id UNIQUE
+
+
+JSON
+- Drug: drug_id UNIQUE
+
+Graph
+- Disease: disease_id UNIQUE
