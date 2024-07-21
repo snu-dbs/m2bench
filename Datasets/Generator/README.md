@@ -41,7 +41,8 @@ $ ./dsdgen -scale 1 -dir path/to/Datasets/raw_datasets/tpcds_data/
 ```
 
 #### 2. Unibench dataset (SF=1)
-- Since Unibench is no longer available from [the author's website](http://udbms.cs.helsinki.fi/?projects/ubench), we provide the Unibench dataset in the `/Datasets/raw_datasets/Unibench_SF1` directory.
+- Since Unibench is no longer available from [the author's website](http://udbms.cs.helsinki.fi/?projects/ubench), we provide the Unibench dataset.
+Please download the dataset from [here](https://drive.google.com/file/d/1Fai0jkswYn6O7X9Yg7wN5ggF8Qsa_DLf/view?usp=drive_link) and unzip it to the `/Datasets/raw_datasets/Unibench_SF1` directory.
 
 
 ### Data generation
@@ -160,7 +161,8 @@ $ python3 main.py
 
 #### 6. Finedust: MISE, An Array-Based Integrated System for Atmospheric Scanning LiDAR (SSDBM 2021)
 
-We provide the Finedust dataset. See `/Datasets/raw_datasets/finedust`.
+We provide the Finedust dataset. 
+Please download the dataset from [here](https://drive.google.com/file/d/1jQU2V4LEfF8vJnkqxpWsN7LQlAhT_CHU/view?usp=drive_link) and unzip it to the `/Datasets/raw_datasets/finedust` directory.
 
 ### Data generation
 
