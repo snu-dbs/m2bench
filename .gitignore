@@ -27,3 +27,4 @@ Datasets/raw_datasets/drugbank/*.json
 Datasets/**/*.csv
 !Datasets/ecommerce/property_graph/hashtag*.csv
 Datasets/**/*.json
+!Datasets/DataScaler/schema/*.json
