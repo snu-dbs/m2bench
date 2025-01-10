@@ -443,7 +443,7 @@ A = SELECT latitude, longitude, AVG(pm10) AS pm10_avg
     WHERE timestamp >= Z1 AND timestamp <= Z2 
     GROUP BY latitude, longitude // Document
 
-B = Site.site_id, A.pm10_avg 
+B = SELECT Site.site_id, A.pm10_avg 
     FROM Site, A 
     WHERE WithIN(Box(A.latitude, A.longitude, A.latitude+e1, A.longitude+e2), ST_Centroid(Site.geometry)) 
           AND Site.properties.type = 'building' 
