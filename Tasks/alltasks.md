@@ -80,6 +80,7 @@ D = SELECT B.pid, (SUM(B.order_price)/C.revenue*100) AS percent_of_revenue
     FROM B, C 
     WHERE C.topseller_brand=B.brand_name 
     GROUP BY B.pid
+    ORDER BY percent_of_revenue
 ```
 
 
