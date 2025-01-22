@@ -266,7 +266,7 @@ Find similar drugs for a given patient's prescribed drug. (Relational x Document
 
 ```SQL
 A = SELECT UNIQUE drug_id 
-    FROM Patient 
+    FROM Prescription 
     WHERE patient_id="" //table
 
 B = SELECT UNIQUE adverse_effect_list.adverse_effect_name 
