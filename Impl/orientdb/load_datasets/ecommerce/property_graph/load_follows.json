@@ -1,0 +1,25 @@
+{
+  "source": { "file": { "path":"__TBAPATH/../../../Datasets/ecommerce/property_graph/person_follows_person.csv" } },
+  "extractor": { "csv": {"separator":"|"} },
+  "transformers": [
+    { "merge": { "joinFieldName":"_from", "lookup":"Person.person_id", "unresolvedLinkAction": "ERROR" } },
+    { "vertex": { "class": "Person"} },
+    { "edge": {
+        "class": "Follows",
+        "joinFieldName": "_to",
+        "lookup": "Person.person_id",
+        "unresolvedLinkAction": "ERROR"
+      }
+    }
+  ],
+  "loader": {
+    "orientdb": {
+       "dbURL": "plocal:/opt/orientdb/databases/Ecommerce",
+       "dbType": "graph",
+       "classes": [
+         {"name": "Person", "extends": "V"},
+         {"name": "Follows", "extends": "E"}
+       ], "indexes": []
+    }
+  }
+}

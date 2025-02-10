@@ -1,0 +1,18 @@
+{
+  "source": { "file": { "path": "__TBAPATH/../../../Datasets/ecommerce/table/Customer.csv" } },
+  "extractor": { "csv": {"separator": "|"} },
+  "transformers": [
+    { "vertex": { "class": "Customer" } }
+  ],
+  "loader": {
+    "orientdb": {
+       "dbURL": "plocal:/opt/orientdb/databases/Ecommerce",
+       "dbType": "graph",
+       "classes": [
+         {"name": "Customer"}
+       ], "indexes": [
+         {"class":"Customer", "fields":["customer_id:string"], "type":"UNIQUE" }
+       ]
+    }
+  }
+}

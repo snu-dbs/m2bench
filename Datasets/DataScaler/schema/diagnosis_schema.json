@@ -1,0 +1,5 @@
+{
+        "patient_id" : "fk_int_sf",
+        "disease_id" : "fk_int"
+}
+

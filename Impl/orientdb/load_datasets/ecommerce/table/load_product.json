@@ -1,0 +1,18 @@
+{
+  "source": { "file": { "path": "__TBAPATH/../../../Datasets/ecommerce/table/Product.csv" } },
+  "extractor": { "csv": {"separator": ","} },
+  "transformers": [
+    { "vertex": { "class": "Product" } }
+  ],
+  "loader": {
+    "orientdb": {
+       "dbURL": "plocal:/opt/orientdb/databases/Ecommerce",
+       "dbType": "graph",
+       "classes": [
+         {"name": "Product"}
+       ], "indexes": [
+         {"class":"Product", "fields":["product_id:string"], "type":"UNIQUE" }
+       ]
+    }
+  }
+}

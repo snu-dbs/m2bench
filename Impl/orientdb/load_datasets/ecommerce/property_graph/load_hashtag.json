@@ -1,0 +1,19 @@
+{
+  "source": { "file": { "path": "__TBAPATH/../../../Datasets/ecommerce/property_graph/hashtag_node.csv" } },
+  "extractor": { "csv": {"separator": ","} },
+  "transformers": [
+    { "vertex": { "class": "Hashtag" } }
+  ],
+  "loader": {
+    "orientdb": {
+       "dbURL": "plocal:/opt/orientdb/databases/Ecommerce",
+       "dbType": "graph",
+       "classes": [
+         {"name": "Hashtag", "extends": "V"}
+       ],
+       "indexes": [
+	  {"class":"Hashtag", "fields":["tag_id:integer"], "type":"UNIQUE" }
+       ]
+    }
+  }
+}

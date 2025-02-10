@@ -1,0 +1,28 @@
+{
+  "config": {
+    "log": "debug"
+  },
+  "source" : {
+    "file": { "path": "__TBAPATH/../../../Datasets/ecommerce/json/_order_list.json" }
+  },
+  "extractor" : {
+	  "json": {}
+},
+  "transformers": [
+    { "vertex": { "class": "Order" } }
+  ],
+  "loader" : {
+    "orientdb": {
+       "dbURL": "plocal:/opt/orientdb/databases/Ecommerce",
+      "wal": false,
+      "dbType": "graph",
+       "classes": [
+         {"name": "Order"}
+       ],
+       "indexes": [
+         {"class":"Order", "fields":["order_id:string"], "type":"UNIQUE" },
+         {"class":"Order", "fields":["customer_id:string"], "type":"NOTUNIQUE" }
+       ]
+    }
+ }
+}

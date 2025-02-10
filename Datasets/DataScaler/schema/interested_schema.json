@@ -1,0 +1,5 @@
+{
+        "person_id" : "pk_int",
+        "tag_id" : "fk_int_sf",
+        "created_time" : "date(DD/MM/YYYY/HH:MM:SS)"
+}

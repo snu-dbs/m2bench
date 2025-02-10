@@ -1,0 +1,1 @@
+select count(*)  from  (select distinct(drug_name)  from        (             select drug_interaction.interaction_drug.drug_name as drug_name from  (select drug.drug_interaction_list as drug_interaction from Prescription where patient_id =9     unwind drug_interaction)     )    )

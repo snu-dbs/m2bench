@@ -1,0 +1,25 @@
+{
+  "config": {
+    "log": "debug"
+  },
+  "source" : {
+    "file": { "path": "__TBAPATH/../../../Datasets/healthcare/json/_drug_list.json" }
+  },
+  "extractor" : {
+	  "json": {}
+},
+  "transformers": [
+    { "vertex": { "class": "Drug" } }
+  ],
+  "loader" : {
+    "orientdb": {
+       "dbURL": "plocal:/opt/orientdb/databases/Healthcare",
+      "wal": false,
+      "dbType": "graph",
+       "classes": [
+         {"name": "Drug"}
+       ],
+       "indexes": []
+    }
+ }
+}
