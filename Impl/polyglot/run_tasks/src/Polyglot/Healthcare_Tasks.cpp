@@ -13,7 +13,7 @@
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
-#define SCIDB_HOST_HEALTHCARE "127.0.0.1""
+#define SCIDB_HOST_HEALTHCARE "127.0.0.1"
 #define BUFFER 1000
 
 /**

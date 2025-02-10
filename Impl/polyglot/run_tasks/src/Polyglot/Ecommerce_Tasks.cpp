@@ -19,7 +19,7 @@ using Json = nlohmann::json;
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
-#define SCIDB_HOST_ECOMMERCE "127.0.0.1""
+#define SCIDB_HOST_ECOMMERCE "127.0.0.1"
 #define BUFFER 1000
 
 /**
