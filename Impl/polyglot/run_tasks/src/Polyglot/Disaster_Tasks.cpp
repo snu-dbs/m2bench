@@ -39,13 +39,13 @@ std::tuple<double, double> STcentroid(Json multipolygon)
     return std::make_tuple(lon / nrow, lat / nrow);
 }
 
-int ST_ClosestObject_RoadNode(mongocxx::collection mapCollection, double candidate_lat, double candidate_lon)
+int ST_ClosestObject_RoadNode(mongocxx::collection mapCentroidCollection, double candidate_lat, double candidate_lon)
 {
     auto nnQBuilder = bsoncxx::builder::stream::document{};
     bsoncxx::document::value nnQ = nnQBuilder
                                    << "properties.type"
                                    << "roadnode"
-                                   << "geometry" << bsoncxx::builder::stream::open_document
+                                   << "centroid" << bsoncxx::builder::stream::open_document
                                    << "$near" << bsoncxx::builder::stream::open_document
                                    << "type"
                                    << "Point"
@@ -55,7 +55,7 @@ int ST_ClosestObject_RoadNode(mongocxx::collection mapCollection, double candida
                                    << bsoncxx::builder::stream::close_document
                                    << bsoncxx::builder::stream::close_document
                                    << bsoncxx::builder::stream::finalize;
-    auto doc = mapCollection.find_one(nnQ.view(), mongocxx::options::find{}.limit(1));
+    auto doc = mapCentroidCollection.find_one(nnQ.view(), mongocxx::options::find{}.limit(1));
 
     if (doc)
         return doc->view()["site_id"].get_int32();
@@ -159,7 +159,6 @@ void T14(int z1, int z2)
     scidb->exec("remove(t14t1)");
 
     cout << "[TASK 14]: TOTAL " << nrow << " ROWS ARE REPORTED" << endl;
-    // cout << "[TASK 14]: TASK COMPLETED" << endl;
 }
 
 /**
@@ -171,7 +170,7 @@ void T14(int z1, int z2)
 void T15(int z1, int z2, double lon, double lat)
 {
     mongodb_connector mongodb("Disaster");
-    auto mapCollection = mongodb.db["Site"];
+    auto mapCentroidCollection = mongodb.db["Site_centroid"];
     
     unique_ptr<ScidbConnection> scidb(new ScidbConnection(SCIDB_HOST_DISASTER + string(":8080")));
     
@@ -192,15 +191,15 @@ void T15(int z1, int z2, double lon, double lat)
     double targetLat = 34.011898718557454 + static_cast<double>(get<long long>(hotspotCells.at(2))) * 0.000172998;
     double targetLon = -118.34501002237936 + static_cast<double>(get<long long>(hotspotCells.at(3))) * 0.000216636;
 
-    int current = ST_ClosestObject_RoadNode(mapCollection, lat, lon);
-    int target = ST_ClosestObject_RoadNode(mapCollection, targetLat, targetLon);
+    int current = ST_ClosestObject_RoadNode(mapCentroidCollection, lat, lon);
+    int target = ST_ClosestObject_RoadNode(mapCentroidCollection, targetLat, targetLon);
 
     /* save result matrix to csv */
     // std::ofstream csv_file("/tmp/t15.csv");
     // csv_file << "int64\n" << current << "\n" << target << "\n";
     // csv_file.close();
-
-     cout << "[TASK 15]: TASK COMPLETED" << endl;
+    cout << current << ", " << target << endl;
+    cout << "[TASK 15]: TASK COMPLETED" << endl;
 }
 
 /**

@@ -31,6 +31,7 @@ void T0(int brand_id)
     // A
     auto mysql = mysql_connector();
     mysql.mysess->sql("USE Ecommerce").execute();
+    mysql.mysess->sql("DROP TABLE IF EXISTS TASK_NEW_B2_TEMPTABLE").execute();
     mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_A_TEMPTABLE AS "
                       "SELECT p.person_id, h.tag_id "
                       "FROM Person p "
@@ -285,25 +286,23 @@ void T0(int brand_id)
                     "inner_gemm, 1 / (1 %2B exp(-1 * gemm))), tnew_e), diff, inner_gemm - favorite), diff), "
                     "empty_c2, transa:true), subtract_rhs, 0.0001 * gemm)), "
                     "res, val - subtract_rhs), res), tnew_w2)");
-        
         scidb->exec("remove(tnew_w)");
         scidb->exec("store(project(apply(tnew_w2, val, res), val), tnew_w)");
         scidb->exec("remove(tnew_w2)");
     }
     mysql.mysess->sql("DROP TABLE TASK_NEW_B2_TEMPTABLE").execute();
 
-    // auto result = scidb->download("tnew_w");
-    // auto cell = result->readcell();
-    // while(cell.size() != 0) {
-    //     nrow++;
-    //     cell = result->readcell();
-    // }
+    auto result = scidb->download("tnew_w");
+    auto cell = result->readcell();
+    while(cell.size() != 0) {
+        nrow++;
+        cell = result->readcell();
+    }
 
     /* save result matrix to csv */
     // scidb->exec("save(tnew_w, '/tmp/t0.csv', -2, 'csv')");
 
-    // cout << "[TASK 0]: TOTAL " << nrow << " ROWS ARE REPORTED" << endl;
-    cout << "[TASK 0]: TASK COMPLETED" << endl;
+    cout << "[TASK 0]: TOTAL " << nrow << " ROWS ARE REPORTED" << endl;
 }
 
 /**
@@ -536,17 +535,16 @@ void T2()
         // conn->exec(newV);
         // conn->exec(agg);
 
-        // auto result = conn->download("W");
-        // auto cell = result->readcell();
-        // while (cell.size() != 0) {
-        //     cell = result->readcell();
-        //     nrow++;
-        // }
+        auto result = conn->download("W");
+        auto cell = result->readcell();
+        while (cell.size() != 0) {
+            cell = result->readcell();
+            nrow++;
+        }
     }
 
     /* save result matrix to csv */
     // conn->exec("save(W, '/tmp/t2.csv', -2, 'csv')");
 
-    // cout << "[TASK 2]: TOTAL " << nrow << " ROWS ARE REPORTED" << endl;
-    cout << "[TASK 2]: TASK COMPLETED" << endl;
+    cout << "[TASK 2]: TOTAL " << nrow << " ROWS ARE REPORTED" << endl;
 }

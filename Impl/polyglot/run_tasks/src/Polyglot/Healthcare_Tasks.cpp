@@ -190,25 +190,24 @@ void T9(int patient_id)
     // std::ofstream csv_file("/tmp/t9.csv");
     // csv_file << "drug_1,drug_2,val\n";
 
-    // int nrow = 0;
-    // for (auto row : prescribed_drugs) {
-    //     int drug1 = row[0].get<int>();
-    //     auto download = conn->download("slice(drug_similarity,drug2," + to_string(drug1) + ")", schema);
+    int nrow = 0;
+    for (auto row : prescribed_drugs) {
+        int drug1 = row[0].get<int>();
+        auto download = conn->download("slice(drug_similarity,drug2," + to_string(drug1) + ")", schema);
         
-    //     auto line = download->readcell();
-    //     while (line.size() != 0) {
+        auto line = download->readcell();
+        while (line.size() != 0) {
             // int drug2 = std::get<int>(line.at(0));
             // double similarity = std::get<double>(line.at(1));
             // csv_file << drug1 << "," << drug2 << "," << similarity << "\n";
 
-            // line = download->readcell();
-            // nrow++;
-        // }
-    // }
+            line = download->readcell();
+            nrow++;
+        }
+    }
 
     /* save result matrix to csv */
     // csv_file.close();
 
-    // cout << "[TASK 9]: TOTAL " << nrow++ << " ROWS ARE REPORTED" << endl;
-    cout << "[TASK 9]: TASK COMPLETED" << endl;
+    cout << "[TASK 9]: TOTAL " << nrow++ << " ROWS ARE REPORTED" << endl;
 }
