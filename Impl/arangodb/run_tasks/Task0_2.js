@@ -73,7 +73,7 @@ res5 = db._query(`
 `).getExtra();
 
 /**
- * 3. Logistic Regression
+ * 2. Logistic Regression
  */
 res6 = db._query(`
     LET Xw = (
@@ -112,8 +112,11 @@ res7 = db._query(`FOR row IN LR_w REMOVE row IN LR_w`).getExtra();
 res8 = db._query(`FOR row IN LR_w_new INSERT row INTO LR_w`).getExtra();
 res9 = db._query(`FOR row IN LR_w_new REMOVE row IN LR_w_new`).getExtra();
 
-/* Print Execution Time */
-print(
+res10 = db._query(`RETURN COUNT(LR_w)`);
+
+/* Print result and execution time */
+print(res10.next());
+print('Elapsed Time: ',
     res1['stats']['executionTime'] +
     res2['stats']['executionTime'] +
     res3['stats']['executionTime'] +
@@ -122,7 +125,8 @@ print(
     res6['stats']['executionTime'] +
     res7['stats']['executionTime'] +
     res8['stats']['executionTime'] +
-    res9['stats']['executionTime']
+    res9['stats']['executionTime'] +
+    res10.getExtra()['stats']['executionTime']
 );
 
 // Answer Validation

@@ -4,9 +4,9 @@ let res1 = db._query(`
     LET CLON = -118.0614431  
     LET CLAT = 34.068509
 
-    FOR site IN Site  
+    FOR site IN Site_centroid 
         FILTER site.properties.type == 'roadnode'  
-        SORT GEO_DISTANCE([CLON, CLAT], site.geometry) ASC  
+        SORT GEO_DISTANCE([CLON, CLAT], site.centroid) ASC  
         LIMIT 1  
         RETURN site
 `);
@@ -51,9 +51,9 @@ let res2 = db._query(`
 
     FOR cell IN AB  
         SORT cell.pm10_avg DESC  
-            FOR site IN Site  
+            FOR site IN Site_centroid
                 FILTER site.properties.type == 'roadnode'  
-                SORT GEO_DISTANCE([cell.coordinates[0], cell.coordinates[1]], site.geometry) ASC  
+                SORT GEO_DISTANCE([cell.coordinates[0], cell.coordinates[1]], site.centroid) ASC
                 LIMIT 1  
                 RETURN site
 `);

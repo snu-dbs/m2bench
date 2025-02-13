@@ -8,7 +8,7 @@ CREATE TEMPORARY TABLE T15A (
 );
 
 CREATE TEMPORARY TABLE T15B (
-    coordinates	CENTROID, 
+    coordinates	GEOMETRY, 
     pm10_avg	DOUBLE PRECISION
 );
 

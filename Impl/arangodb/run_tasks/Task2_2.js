@@ -114,7 +114,11 @@ res9 = db._query(`
     INSERT { customer_id: w.customer_id, feature_id: w.feature_id, val } INTO newW
 `).getExtra();
 
-print(
+res10 = db._query(`RETURN COUNT(newW)`);
+
+/* Print result and execution time */
+print(res10.next());
+print('Elapsed Time: ',
     res1['stats']['executionTime'] +
     res2['stats']['executionTime'] +
     res3['stats']['executionTime'] +
@@ -123,7 +127,8 @@ print(
     res6['stats']['executionTime'] +
     res7['stats']['executionTime'] +
     res8['stats']['executionTime'] +
-    res9['stats']['executionTime']
+    res9['stats']['executionTime'] +
+    res10.getExtra()['stats']['executionTime']
 );
 
 // Answer Validation
