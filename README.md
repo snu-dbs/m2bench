@@ -7,17 +7,18 @@
 
 ## Before Getting Started
 
+- This `tileduck` branch contains modified code from the `publish` branch to run experiments for TileDuck.
 - If you need a support during reproducing this work, feel free to contact us.
-- We highly recommend to use the described versions of software with Ubuntu 18.04 that we used for the publication.
+- We highly recommend to use the described versions of software with Ubuntu 22.04.
 
 
 ### Software Versions
 
 DBMS versions used for the experiment in the paper are as follows.
 
-- Polyglot: MySQL 8.0.25, MongoDB 4.2.6, Neo4j 4.0.3, and SciDB 19.11.5.
-- ArangoDB 3.7.12
-- AgensGraph 2.1.3 (based on PostgreSQL 10.4)
+- Polyglot: MySQL 9.2.0, MongoDB 8.0.4, and SciDB 19.11.5.
+- ArangoDB 3.12.3
+- AgensGraph 2.14.0 (based on PostgreSQL 14.6)
 
 For SciDB installation, please refer to the description for Polyglot (`Impl/Polyglot/README.md`).
 
