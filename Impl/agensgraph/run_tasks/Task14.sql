@@ -1,6 +1,6 @@
 \timing 
 
-CREATE TEMP TABLE T14A (
+CREATE TEMPORARY TABLE T14A (
     date       INTEGER, 
     timestamp  INTEGER, 
     latitude   INTEGER, 
@@ -8,7 +8,7 @@ CREATE TEMP TABLE T14A (
     pm10_avg   DOUBLE PRECISION
 );
 
-CREATE TEMP TABLE T14C (
+CREATE TEMPORARY TABLE T14C (
     date       INTEGER, 
     timestamp  INTEGER, 
     coordinates GEOMETRY
@@ -74,5 +74,3 @@ FROM (
 --     ORDER BY T14C.date ASC
 -- ) TO '/tmp/t14.csv' DELIMITER ',' CSV HEADER;
 
-DROP TABLE T14A;
-DROP TABLE T14C;

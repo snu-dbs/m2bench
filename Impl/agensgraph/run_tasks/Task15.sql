@@ -1,16 +1,15 @@
-SET graph_path = Road_network;
 \timing
 
-CREATE TEMP TABLE T15A (
+CREATE TEMPORARY TABLE T15A (
     longitude  INT, 
     latitude   INT, 
     pm10_sum   DOUBLE PRECISION, 
     pm10_count INT
 );
 
-CREATE TEMP TABLE T15B (
-    coordinates GEOMETRY, 
-    pm10_avg   DOUBLE PRECISION
+CREATE TEMPORARY TABLE T15B (
+    coordinates	CENTROID, 
+    pm10_avg	DOUBLE PRECISION
 );
 
 INSERT INTO T15A
@@ -41,16 +40,16 @@ WHERE ((t1.latitude - 2) <= t2.latitude)
   AND (t2.longitude <= (t1.longitude + 2))
 GROUP BY coordinates;
 
-SELECT CAST(Site.data->>'site_id' AS INT)
-FROM Site
-WHERE Site.data->'properties'->>'type' = 'roadnode'
-ORDER BY ST_GeomFromGeoJSON(Site.data->>'geometry') <-> ST_Point(:CLON, :CLAT)::geography ASC
+SELECT CAST(Site_centroid.data->>'site_id' AS INT)
+FROM Site_centroid
+WHERE Site_centroid.data->'properties'->>'type' = 'roadnode'
+ORDER BY ST_GeomFromGeoJSON(Site_centroid.data->>'centroid') <-> ST_Point(:CLON, :CLAT)::geography ASC
 LIMIT 1;
 
-SELECT CAST(Site.data->>'site_id' AS INT)
-FROM Site
-WHERE Site.data->'properties'->>'type' = 'roadnode'
-ORDER BY ST_GeomFromGeoJSON(Site.data->>'geometry') <-> ((
+SELECT CAST(Site_centroid.data->>'site_id' AS INT)
+FROM Site_centroid
+WHERE Site_centroid.data->'properties'->>'type' = 'roadnode'
+ORDER BY ST_GeomFromGeoJSON(Site_centroid.data->>'centroid') <-> ((
     SELECT T15B.coordinates 
     FROM T15B, 
          (SELECT MAX(T15B.pm10_avg) AS max_avg FROM T15B) AS tc1 
@@ -59,5 +58,3 @@ ORDER BY ST_GeomFromGeoJSON(Site.data->>'geometry') <-> ((
 )::geography) ASC
 LIMIT 1;
 
-DROP TABLE T15A;
-DROP TABLE T15B;

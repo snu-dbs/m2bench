@@ -1,16 +1,16 @@
 \timing
 
-CREATE TEMP TABLE A AS (
+CREATE TEMPORARY TABLE A AS (
     SELECT latitude, 
            longitude, 
            AVG(pm10) AS pm10
     FROM finedust_idx
-    WHERE timestamp >= 3 /* SF1= 3*/
+    WHERE timestamp >= 3 /* SF1 = 3*/
       AND timestamp <= 4 /* SF1 = 4*/
     GROUP BY latitude, longitude
 );
 
-CREATE TEMP TABLE B AS (
+CREATE TEMPORARY TABLE B AS (
     SELECT site_id, 
            SUM((coo->>0)::FLOAT) / COUNT(site_id) AS longitude, 
            SUM((coo->>1)::FLOAT) / COUNT(site_id) AS latitude
@@ -52,5 +52,3 @@ FROM (
 --       AND (B.longitude - (-118.3450100223)) / 0.000216636 <= A.longitude + 1
 -- ) TO '/tmp/t16.csv' DELIMITER ',' CSV HEADER;
 
-DROP TABLE A;
-DROP TABLE B;
