@@ -1,5 +1,6 @@
 # Run M2Bench in ArangoDB 
 - This document explains how to run M2Bench in ArangoDB
+- If you have set **USERNAME** to `root` and **PASSWORD** to `m2bench`, you can use the scripts as-is. Otherwise, update them accordingly.
 
 ## Load Dataset into ArangoDB 
 1. Go to `load_dataset` folder

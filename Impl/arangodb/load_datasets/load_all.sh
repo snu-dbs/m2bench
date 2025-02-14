@@ -1,8 +1,8 @@
 #!/bin/bash
 
 DATASET_PATH=../../../Datasets
-USERNAME=
-PASSWORD=
+USERNAME=root
+PASSWORD=m2bench
 
 ./ecommerce/load_ecommerce.sh $DATASET_PATH $USERNAME $PASSWORD
 ./healthcare/load_healthcare.sh $DATASET_PATH $USERNAME $PASSWORD

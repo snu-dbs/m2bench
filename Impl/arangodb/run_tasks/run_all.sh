@@ -1,7 +1,7 @@
 #!/bin/bash
 
-USERNAME=
-PASSWORD=
+USERNAME=root
+PASSWORD=m2bench
 
 echo "=============== Task 0 ==============="
 time arangosh --server.database Ecommerce --server.username $USERNAME --server.password $PASSWORD --server.request-timeout 7200 --javascript.execute Task0_1.js

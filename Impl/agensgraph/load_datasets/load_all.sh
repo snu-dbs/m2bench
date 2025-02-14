@@ -1,6 +1,6 @@
 #!/bin/bash 
 
-DATA_PATH=../../../Datasets/
+DATA_PATH=$(pwd)/../../../Datasets/
 mkdir -p /tmp/m2bench/
 
 ln -s $DATA_PATH/ecommerce /tmp/m2bench/ 2>&1 >& /dev/null
