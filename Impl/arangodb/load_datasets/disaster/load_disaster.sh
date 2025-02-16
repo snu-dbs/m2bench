@@ -10,46 +10,53 @@ arangosh --server.username $USERNAME --server.password $PASSWORD --javascript.ex
 # LOAD TABLE
 arangoimport --overwrite true --file "$DATASET_PATH/disaster/table/Earthquake.csv" \
     --type csv --collection "Earthquake" --server.username $USERNAME --server.password "$PASSWORD" \
-    --create-collection true --threads 4 --server.database Disaster
+    --create-collection true --threads 4 --server.database Disaster \
+    --server.request-timeout 7200
 
 arangoimport --overwrite true --file "$DATASET_PATH/disaster/table/Gps.csv" \
     --type csv --collection "Gps" --server.username $USERNAME --server.password "$PASSWORD" \
-    --create-collection true --threads 4 --server.database Disaster
+    --create-collection true --threads 4 --server.database Disaster \
+    --server.request-timeout 7200
 
 arangoimport --overwrite true --file "$DATASET_PATH/disaster/table/Shelter.csv" \
     --type csv --separator "|" --collection "Shelter" \
     --server.username $USERNAME --server.password "$PASSWORD" \
-    --create-collection true --threads 4 --server.database Disaster
+    --create-collection true --threads 4 --server.database Disaster \
+    --server.request-timeout 7200
 
 # LOAD JSON
-arangoimport --overwrite true --file "$DATASET_PATH/disaster/json/Site.json" \
-    --type json --collection "Site" --server.username $USERNAME --server.password "$PASSWORD" \
-    --create-collection true --threads 4 --server.database Disaster
+#arangoimport --overwrite true --file "$DATASET_PATH/disaster/json/Site.json" \
+#    --type json --collection "Site" --server.username $USERNAME --server.password "$PASSWORD" \
+#    --create-collection true --threads 4 --server.database Disaster
 
-arangoimport --overwrite true --file "$DATASET_PATH/disaster/json/Site_centroid.json" \
-    --type json --collection "Site_centroid" --server.username $USERNAME --server.password "$PASSWORD" \
-    --create-collection true --threads 4 --server.database Disaster
+#arangoimport --overwrite true --file "$DATASET_PATH/disaster/json/Site_centroid.json" \
+#    --type json --collection "Site_centroid" --server.username $USERNAME --server.password "$PASSWORD" \
+#    --create-collection true --threads 4 --server.database Disaster
 
 # LOAD GRAPH
 arangoimport --overwrite true --file "$DATASET_PATH/disaster/property_graph/Roadnode.csv" \
     --type csv --translate "roadnode_id=_key" --collection "Roadnode" \
     --server.username $USERNAME --server.password "$PASSWORD" \
-    --create-collection true --threads 4 --server.database Disaster
+    --create-collection true --threads 4 --server.database Disaster \
+    --server.request-timeout 7200
 
 arangoimport --overwrite true --file "$DATASET_PATH/disaster/property_graph/Road.csv" \
     --type csv --translate "from=_from" --translate "to=_to" \
     --collection "Road" --from-collection-prefix Roadnode --to-collection-prefix Roadnode \
     --server.username $USERNAME --server.password "$PASSWORD" \
-    --create-collection true --create-collection-type edge --threads 4 --server.database Disaster
+    --create-collection true --create-collection-type edge --threads 4 --server.database Disaster \
+    --server.request-timeout 7200
 
 # LOAD ARRAY
 arangoimport --overwrite true --file "$DATASET_PATH/disaster/array/Finedust_idx.csv" \
     --type csv --collection "Finedust_idx" --server.username $USERNAME --server.password "$PASSWORD" \
-    --create-collection true --threads 4 --server.database Disaster
+    --create-collection true --threads 4 --server.database Disaster \
+    --server.request-timeout 7200
 
 arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD \
     --javascript.execute $DATASET_PATH/../Impl/arangodb/load_datasets/disaster/create_index.js \
     --server.request-timeout 172800 # high timeout is set since indexing takes time
 
 arangosh --server.database Disaster --server.username $USERNAME --server.password $PASSWORD \
-    --javascript.execute $DATASET_PATH/../Impl/arangodb/load_datasets/disaster/create_graph.js
+    --javascript.execute $DATASET_PATH/../Impl/arangodb/load_datasets/disaster/create_graph.js \
+    --server.request-timeout 7200
