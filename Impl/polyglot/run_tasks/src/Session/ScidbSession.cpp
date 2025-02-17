@@ -53,8 +53,7 @@ ScidbSession::~ScidbSession() {
 
     // remove tempfiles
     for (auto& filename: tmpfiles) {
-        std::remove(filename.c_str());
-    //     if (std::remove(filename.c_str())) cerr << filename << " is not deleted!" << endl;
+        if (std::remove(filename.c_str())) cerr << filename << " is not deleted!" << endl;
     }
 }
 
@@ -162,7 +161,12 @@ string ScidbSession::pull() {       // get latest
 string ScidbSession::pullToFile() {
     // gen tmpfile name
     char *tmpname = strdup("/tmp/dbs-scidbconnector-tempfile-XXXXXX");
-    mkstemp(tmpname);
+    int fd = mkstemp(tmpname);
+    if (fd == -1) {
+	cerr << strerror(errno) << endl;
+	return "";
+    }
+
     ofstream ofs(tmpname);
 
     // to delete 
@@ -171,7 +175,7 @@ string ScidbSession::pullToFile() {
     // data fetching
     string reqUrl = "http://" + url + "/read_lines?id=" + this->sessionId;
     cpr::Response r = cpr::Get(cpr::Url{reqUrl},
-        cpr::WriteCallback([&ofs](const string_view& data, intptr_t) -> bool {
+        cpr::WriteCallback([&ofs](string data, intptr_t) -> bool {
             ofs << data;
             return true;
         })
