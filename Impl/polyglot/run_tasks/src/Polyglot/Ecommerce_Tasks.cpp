@@ -255,7 +255,7 @@ void T0(int brand_id)
         // Append to array for upload
         ScidbLineType line;
         line.push_back(person_id);
-        line.push_back(favorite_brand_id == brand_id ? 1.0 : 0.0);
+        line.push_back(favorite_brand_id == brand_id ? (double)1 : (double)0);
 
         coo2->add(line);
     }
@@ -324,7 +324,7 @@ void T2()
     mysql.mysess->sql("USE Ecommerce").execute();
     mysql.mysess->sql("CREATE TEMPORARY TABLE Rating_history ("
                       "customer_id VARCHAR(20),"
-                      "product_id CHAR(10),"
+                      "product_id CHAR(11),"
                       "rating INT)").execute();
 
     auto Rating_history = mysql.mysess->getSchema("Ecommerce")

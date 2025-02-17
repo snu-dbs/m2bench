@@ -163,8 +163,8 @@ string ScidbSession::pullToFile() {
     char *tmpname = strdup("/tmp/dbs-scidbconnector-tempfile-XXXXXX");
     int fd = mkstemp(tmpname);
     if (fd == -1) {
-	cerr << strerror(errno) << endl;
-	return "";
+        cerr << strerror(errno) << endl;
+        return "";
     }
 
     ofstream ofs(tmpname);

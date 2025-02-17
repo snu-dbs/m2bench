@@ -1,6 +1,6 @@
 let res = db._query(`
-    LET Z1 = 5  
-    LET Z2 = 10  
+    LET Z1 = 10
+    LET Z2 = 20  
 
     LET AB = (
         FOR cell IN Finedust_idx

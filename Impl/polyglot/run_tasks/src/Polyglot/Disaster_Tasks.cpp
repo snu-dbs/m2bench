@@ -306,5 +306,4 @@ void T16(long timestamp)
     // csv_file.close();
 
     cout << "[TASK 16]: TOTAL " << nrow << " ROWS ARE REPORTED" << endl;
-    // cout << "[TASK 16]: TASK COMPLETED" << endl;
 }

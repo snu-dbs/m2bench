@@ -67,7 +67,7 @@ SELECT COUNT(*) FROM (
     WITH A AS (
         SELECT DISTINCT drug_id AS drug 
         FROM Prescription 
-        WHERE patient_id = 9
+        WHERE patient_id = :X
     )
     SELECT drug_1, drug_2, val  
     FROM drug_similarity, A 
@@ -79,7 +79,7 @@ SELECT COUNT(*) FROM (
 --     WITH A AS (
 --         SELECT DISTINCT drug_id AS drug 
 --         FROM Prescription 
---         WHERE patient_id = 9
+--         WHERE patient_id = :X
 --     )
 --     SELECT drug_1, drug_2, val  
 --     FROM drug_similarity, A 

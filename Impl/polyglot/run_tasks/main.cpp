@@ -21,6 +21,7 @@ void timer(void (*f)(Args...), Args... args)
 
 int main(int argc, char* argv[]) {
     int task_num = atoi(argv[1]);
+    int sf = atoi(argv[2]);
 
     switch (task_num) {
         case 0:
@@ -29,22 +30,27 @@ int main(int argc, char* argv[]) {
         case 2:
             timer(T2);
             break;
-        case 9:
-            timer(T9, 9);
+        case 9: {
+            int x = 9 * sf;
+            timer(T9, x);
             break;
-        case 14:
-            timer(T14, 5, 10);
+        }
+        case 14: {
+            int z1 = 5 * sf, z2 = 10 * sf;
+            timer(T14, z1, z2);
             break;
+        }
         case 15: {
-	    double CLON = -118.0614431, CLAT = 34.068509;
-            timer(T15, 5, 10, CLON, CLAT);
+            int z1 = 5 * sf, z2 = 10 * sf;
+	        double CLON = -118.0614431, CLAT = 34.068509;
+            timer(T15, z1, z2, CLON, CLAT);
             break;
-	}
+	    }
         case 16: {
-	    long ts = 1600182000 + 10800 * 3.5;
+	        long ts = 1600182000 + 10800 * 3.5;
             timer(T16, ts);
             break;
-	}
+	    }
         default:
             return 1;
     }

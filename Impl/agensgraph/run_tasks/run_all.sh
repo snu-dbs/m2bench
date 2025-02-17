@@ -11,7 +11,7 @@ echo "========== Task 2 Completed =========="
 echo
 
 echo "=============== Task 9 ==============="
-time agens -d healthcare -f Task9.sql
+time agens -d healthcare -v $X=9 -f Task9.sql
 echo "========== Task 9 Completed =========="
 echo
 
@@ -28,6 +28,6 @@ echo "========== Task 15 Completed =========="
 echo
 
 echo "=============== Task 16 ==============="
-time agens -d disaster -f Task16.sql
+time agens -d disaster -v Z1=3 -v Z2=4 -f Task16.sql
 echo "========== Task 16 Completed =========="
 echo

@@ -5,8 +5,8 @@ CREATE TEMPORARY TABLE A AS (
            longitude, 
            AVG(pm10) AS pm10
     FROM finedust_idx
-    WHERE timestamp >= 3 /* SF1 = 3*/
-      AND timestamp <= 4 /* SF1 = 4*/
+    WHERE (timestamp >= :Z1)
+      AND (timestamp <= :Z2)
     GROUP BY latitude, longitude
 );
 
