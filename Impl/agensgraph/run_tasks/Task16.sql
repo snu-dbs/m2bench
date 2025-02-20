@@ -1,6 +1,6 @@
 \timing
 
-CREATE TEMPORARY TABLE A AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE A AS (
     SELECT latitude, 
            longitude, 
            AVG(pm10) AS pm10
@@ -10,7 +10,7 @@ CREATE TEMPORARY TABLE A AS (
     GROUP BY latitude, longitude
 );
 
-CREATE TEMPORARY TABLE B AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE B AS (
     SELECT site_id, 
            SUM((coo->>0)::FLOAT) / COUNT(site_id) AS longitude, 
            SUM((coo->>1)::FLOAT) / COUNT(site_id) AS latitude
@@ -24,7 +24,7 @@ CREATE TEMPORARY TABLE B AS (
     GROUP BY site_id
 );
 
-SELECT COUNT(*) 
+EXPLAIN ANALYZE SELECT COUNT(*) 
 FROM (
     SELECT site_id, pm10
     FROM A, B
@@ -51,4 +51,3 @@ FROM (
 --       AND A.longitude <= (B.longitude - (-118.3450100223)) / 0.000216636
 --       AND (B.longitude - (-118.3450100223)) / 0.000216636 <= A.longitude + 1
 -- ) TO '/tmp/t16.csv' DELIMITER ',' CSV HEADER;
-
