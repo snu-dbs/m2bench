@@ -136,7 +136,7 @@ void T14(int z1, int z2)
         
         // Get location of value
         auto maxArr = scidb->download("sort(redimension(filter(t14t1, abs(pm10_avg - "
-                                    + to_string(maxVal) + ") < 1 and timestamp / 8 = "
+                                    + to_string(maxVal) + ") < 1e-6 and timestamp / 8 = "
                                     + to_string(date) + "), "
                                     "<pm10_avg:double, latitude:int64, longitude:int64, timestamp:int64>[i=0:*:0:1000]), pm10_avg)", maxSchema);
         auto maxArrVal = maxArr->readcell();
@@ -144,13 +144,17 @@ void T14(int z1, int z2)
         if (maxArrVal.empty())
             throw std::runtime_error("Equality check for floating point failed!");
 
-        auto closestValue = ST_ClosestObject_Map_building_centroid(mapCentroidCollection,
-                                                                   34.011898718557454 + static_cast<double>(get<long long>(maxArrVal.at(2))) * 0.000172998,
-                                                                   -118.34501002237936 + static_cast<double>(get<long long>(maxArrVal.at(3))) * 0.000216636);
+	while (!maxArrVal.empty()) {
+            auto closestValue = ST_ClosestObject_Map_building_centroid(mapCentroidCollection,
+                                                                       34.011898718557454 + static_cast<double>(get<long long>(maxArrVal.at(2))) * 0.000172998,
+                                                                       -118.34501002237936 + static_cast<double>(get<long long>(maxArrVal.at(3))) * 0.000216636);
         // csv_file << date << "," << get<long long>(maxArrVal.at(4)) << "," << to_string(closestValue) << "\n";
+	    
+	    maxArrVal = maxArr->readcell();
+            nrow++;
+	}
 
-        t2arrVal = t2arr->readcell();
-        nrow++;
+	t2arrVal = t2arr->readcell();
     }
 
     /* save result matrix to csv */
