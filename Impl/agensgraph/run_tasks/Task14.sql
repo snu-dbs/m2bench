@@ -1,4 +1,5 @@
-\timing 
+\timing
+\o /tmp/t14_explain
 
 CREATE TEMPORARY TABLE T14A (
     date       INTEGER, 

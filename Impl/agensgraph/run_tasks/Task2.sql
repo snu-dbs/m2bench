@@ -1,4 +1,5 @@
 \timing
+\o /tmp/t2_explain
 
 CREATE TEMPORARY TABLE V AS (
     WITH temp AS (
