@@ -1,6 +1,6 @@
 \timing
 
-EXPLAIN ANALYZE CREATE TEMPORARY TABLE A AS (
+CREATE TEMPORARY TABLE A AS (
     SELECT latitude, 
            longitude, 
            AVG(pm10) AS pm10
@@ -10,7 +10,7 @@ EXPLAIN ANALYZE CREATE TEMPORARY TABLE A AS (
     GROUP BY latitude, longitude
 );
 
-EXPLAIN ANALYZE CREATE TEMPORARY TABLE B AS (
+CREATE TEMPORARY TABLE B AS (
     SELECT site_id, 
            SUM((coo->>0)::FLOAT) / COUNT(site_id) AS longitude, 
            SUM((coo->>1)::FLOAT) / COUNT(site_id) AS latitude

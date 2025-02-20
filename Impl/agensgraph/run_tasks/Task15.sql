@@ -1,13 +1,13 @@
 \timing
 
-EXPLAIN ANALYZE CREATE TEMPORARY TABLE T15A (
+CREATE TEMPORARY TABLE T15A (
     longitude  INT, 
     latitude   INT, 
     pm10_sum   DOUBLE PRECISION, 
     pm10_count INT
 );
 
-EXPLAIN ANALYZE CREATE TEMPORARY TABLE T15B (
+CREATE TEMPORARY TABLE T15B (
     coordinates	GEOMETRY, 
     pm10_avg	DOUBLE PRECISION
 );
@@ -23,7 +23,7 @@ WHERE (:Z1 <= timestamp)
   AND (timestamp <= :Z2)
 GROUP BY longitude, latitude;
 
-CREATE INDEX t15a_latlon 
+EXPLAIN ANALYZE CREATE INDEX t15a_latlon 
 ON T15A (latitude, longitude);
 
 EXPLAIN ANALYZE INSERT INTO T15B
