@@ -16,7 +16,7 @@ CREATE TEMPORARY TABLE V AS (
 );
 
 CREATE TEMPORARY TABLE feature_size AS 
-EXPLAIN ANALYZE SELECT generate_series(1, 50) AS feature_id;
+SELECT generate_series(1, 50) AS feature_id;
 
 CREATE TEMPORARY TABLE W AS (
     -- SELECT customer_id, feature_id, random()::FLOAT AS val

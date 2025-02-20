@@ -1,4 +1,5 @@
 \timing
+\o /tmp/t0_explain
 
 SET graph_path = social_network;
 
@@ -18,7 +19,7 @@ CREATE TEMPORARY TABLE TNEW_E (
 CREATE INDEX ON TNEW_E(person_id);
 
 DROP TABLE IF EXISTS TEMP_w;
-EXPLAIN ANALYZE CREATE TABLE TEMP_w (
+CREATE TABLE TEMP_w (
     i INT, 
     val DOUBLE PRECISION
 );

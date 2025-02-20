@@ -31,7 +31,9 @@ WHERE (:Z1 <= t1.timestamp)
   AND (t2.longitude <= (t1.longitude + 2))
 GROUP BY t1.timestamp / 8, t1.timestamp, t1.latitude, t1.longitude;
 
-EXPLAIN ANALYZE WITH Ranked AS (
+EXPLAIN ANALYZE INSERT INTO T14C
+SELECT date, timestamp, coordinates
+FROM (
     SELECT 
         t1.date, 
         t1.timestamp, 
@@ -41,16 +43,12 @@ EXPLAIN ANALYZE WITH Ranked AS (
             PARTITION BY t1.date 
             ORDER BY t1.timestamp ASC, t1.latitude ASC, t1.longitude ASC
         ) AS rn
-    FROM T14A AS t1, 
-        (SELECT date, MAX(pm10_avg) AS pm10_max FROM T14A GROUP BY date) AS t2
-    WHERE (t1.pm10_avg = t2.pm10_max)
-    AND (t1.date = t2.date)
-)
-
-EXPLAIN ANALYZE INSERT INTO T14C
-SELECT date, timestamp, coordinates
-FROM Ranked
+    FROM T14A AS t1
+    JOIN (SELECT date, MAX(pm10_avg) AS pm10_max FROM T14A GROUP BY date) AS t2
+    ON t1.date = t2.date AND t1.pm10_avg = t2.pm10_max
+) AS Ranked
 WHERE rn = 1;
+
 
 EXPLAIN ANALYZE SELECT COUNT(site_id)
 FROM (
