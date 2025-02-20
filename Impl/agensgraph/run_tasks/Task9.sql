@@ -9,8 +9,8 @@ EXPLAIN ANALYZE CREATE TEMPORARY TABLE drug_matrix AS (
     GROUP BY drug, adverse_effect
 );
 
-EXPLAIN ANALYZE CREATE INDEX ON drug_matrix (drug);
-EXPLAIN ANALYZE CREATE INDEX ON drug_matrix (adverse_effect);
+CREATE INDEX ON drug_matrix (drug);
+CREATE INDEX ON drug_matrix (adverse_effect);
 
 EXPLAIN ANALYZE CREATE TEMPORARY TABLE similarity1 AS (
     SELECT 
@@ -22,8 +22,8 @@ EXPLAIN ANALYZE CREATE TEMPORARY TABLE similarity1 AS (
     GROUP BY drug1, drug2
 );
 
-EXPLAIN ANALYZE CREATE INDEX ON similarity1 (drug1);
-EXPLAIN ANALYZE CREATE INDEX ON similarity1 (drug2);
+CREATE INDEX ON similarity1 (drug1);
+CREATE INDEX ON similarity1 (drug2);
 
 EXPLAIN ANALYZE CREATE TEMPORARY TABLE inv_norm AS (
     SELECT 
@@ -34,8 +34,8 @@ EXPLAIN ANALYZE CREATE TEMPORARY TABLE inv_norm AS (
     WHERE drug1 = drug2
 );
 
-EXPLAIN ANALYZE CREATE INDEX ON inv_norm (drug1);
-EXPLAIN ANALYZE CREATE INDEX ON inv_norm (drug2);
+CREATE INDEX ON inv_norm (drug1);
+CREATE INDEX ON inv_norm (drug2);
 
 EXPLAIN ANALYZE CREATE TEMPORARY TABLE similarity2 AS (
     SELECT 
@@ -47,8 +47,8 @@ EXPLAIN ANALYZE CREATE TEMPORARY TABLE similarity2 AS (
     GROUP BY d1, d2
 );
 
-EXPLAIN ANALYZE CREATE INDEX ON similarity2 (d1);
-EXPLAIN ANALYZE CREATE INDEX ON similarity2 (d2);
+CREATE INDEX ON similarity2 (d1);
+CREATE INDEX ON similarity2 (d2);
 
 EXPLAIN ANALYZE CREATE TEMPORARY TABLE drug_similarity AS (
     SELECT 
@@ -60,8 +60,8 @@ EXPLAIN ANALYZE CREATE TEMPORARY TABLE drug_similarity AS (
     GROUP BY drug_1, drug_2
 );
 
-EXPLAIN ANALYZE CREATE INDEX ON drug_similarity (drug_1);
-EXPLAIN ANALYZE CREATE INDEX ON drug_similarity (drug_2);
+CREATE INDEX ON drug_similarity (drug_1);
+CREATE INDEX ON drug_similarity (drug_2);
 
 EXPLAIN ANALYZE SELECT COUNT(*) FROM (
     WITH A AS (

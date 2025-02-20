@@ -23,7 +23,7 @@ WHERE (:Z1 <= timestamp)
   AND (timestamp <= :Z2)
 GROUP BY longitude, latitude;
 
-EXPLAIN ANALYZE CREATE INDEX t15a_latlon 
+CREATE INDEX t15a_latlon 
 ON T15A (latitude, longitude);
 
 EXPLAIN ANALYZE INSERT INTO T15B
