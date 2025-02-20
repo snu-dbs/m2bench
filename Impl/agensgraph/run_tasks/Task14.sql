@@ -31,16 +31,26 @@ WHERE (:Z1 <= t1.timestamp)
   AND (t2.longitude <= (t1.longitude + 2))
 GROUP BY t1.timestamp / 8, t1.timestamp, t1.latitude, t1.longitude;
 
+WITH Ranked AS (
+    SELECT 
+        t1.date, 
+        t1.timestamp, 
+        ST_Point(-118.34501002237936 + (t1.longitude * 0.000216636), 
+                34.011898718557454 + (t1.latitude * 0.000172998)) AS coordinates
+        ROW_NUMBER() OVER (
+            PARTITION BY t1.date 
+            ORDER BY t1.timestamp ASC, t1.latitude ASC, t1.longitude ASC
+        ) AS rn
+    FROM T14A AS t1, 
+        (SELECT date, MAX(pm10_avg) AS pm10_max FROM T14A GROUP BY date) AS t2
+    WHERE (t1.pm10_avg = t2.pm10_max)
+    AND (t1.date = t2.date)
+)
+
 INSERT INTO T14C
-SELECT 
-    t1.date, 
-    t1.timestamp, 
-    ST_Point(-118.34501002237936 + (t1.longitude * 0.000216636), 
-             34.011898718557454 + (t1.latitude * 0.000172998)) AS coordinates
-FROM T14A AS t1, 
-     (SELECT date, MAX(pm10_avg) AS pm10_max FROM T14A GROUP BY date) AS t2
-WHERE (t1.pm10_avg = t2.pm10_max)
-  AND (t1.date = t2.date);
+SELECT date, timestamp, coordinates
+FROM Ranked
+WHERE rn = 1;
 
 SELECT COUNT(site_id)
 FROM (
@@ -59,18 +69,18 @@ FROM (
 ) AS T14;
 
 -- Answer Validation
--- COPY (
---     SELECT 
---         T14C.date, 
---         T14C.timestamp, 
---         (
---             SELECT Site_centroid.data->>'site_id'
---             FROM Site_centroid
---             WHERE data->'properties'->>'type' = 'building'
---             ORDER BY ST_GeomFromGeoJSON(Site_centroid.data->>'centroid') <-> T14C.coordinates::geography ASC
---             LIMIT 1
---         ) AS site_id
---     FROM T14C
---     ORDER BY T14C.date ASC
--- ) TO '/tmp/t14.csv' DELIMITER ',' CSV HEADER;
+COPY (
+    SELECT 
+        T14C.date, 
+        T14C.timestamp, 
+        (
+            SELECT Site_centroid.data->>'site_id'
+            FROM Site_centroid
+            WHERE data->'properties'->>'type' = 'building'
+            ORDER BY ST_GeomFromGeoJSON(Site_centroid.data->>'centroid') <-> T14C.coordinates::geography ASC
+            LIMIT 1
+        ) AS site_id
+    FROM T14C
+    ORDER BY T14C.date ASC
+) TO '/tmp/t14.csv' DELIMITER ',' CSV HEADER;
 
