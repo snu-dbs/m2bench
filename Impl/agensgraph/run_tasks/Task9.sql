@@ -1,5 +1,4 @@
 \timing
-\o /tmp/t9_explain
 
 EXPLAIN ANALYZE CREATE TEMPORARY TABLE drug_matrix AS (
     SELECT 

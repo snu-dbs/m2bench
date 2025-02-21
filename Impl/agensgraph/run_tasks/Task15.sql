@@ -1,5 +1,4 @@
 \timing
-\o /tmp/t15_explain
 
 CREATE TEMPORARY TABLE T15A (
     longitude  INT, 

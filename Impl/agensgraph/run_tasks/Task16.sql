@@ -1,5 +1,4 @@
 \timing
-\o /tmp/t16_explain
 
 EXPLAIN ANALYZE CREATE TEMPORARY TABLE A AS (
     SELECT latitude, 

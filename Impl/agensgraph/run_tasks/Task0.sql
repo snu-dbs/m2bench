@@ -1,5 +1,4 @@
 \timing
-\o /tmp/t0_explain
 
 SET graph_path = social_network;
 
