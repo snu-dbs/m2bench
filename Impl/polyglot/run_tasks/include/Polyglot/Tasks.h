@@ -1,6 +1,7 @@
-//
-// Created by mxmdb on 21. 8. 11..
-//
+/**
+ * Created: Aug 11, 2021
+ * Updated: February 2025
+ */
 
 #ifndef __M2BENCH_TASKS__H__
 #define __M2BENCH_TASKS__H__
@@ -27,6 +28,6 @@ void T12(string Z1, string Z2);
 void T13();
 void T14(int z1, int z2);
 void T15(int z1, int z2, double lon, double lat);
-void T16(long timestamp);
+void T16(int z1, int z2);
 
 #endif // __M2BENCH_TASKS__H__

@@ -47,8 +47,8 @@ int main(int argc, char* argv[]) {
             break;
 	    }
         case 16: {
-	        long ts = 1600182000 + 10800 * 3.5;
-            timer(T16, ts);
+            int z1 = 3 * sf, z2 = 4 * sf;
+            timer(T16, z1, z2);
             break;
 	    }
         default:

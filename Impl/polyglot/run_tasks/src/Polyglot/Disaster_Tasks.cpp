@@ -219,13 +219,10 @@ void T15(int z1, int z2, double lon, double lat)
  *          WITHIN(Box(lat, lon, lat+e1, lon+e2), ST_Centroid(Map.geometry))
  *          Map.properties.building = 'school' //Document
  */
-void T16(long timestamp)
+void T16(int z1, int z2)
 {
     mongodb_connector mongodb("Disaster");
     auto map = mongodb.db["Site"];
-
-    int arrayinfo_time_offset = 1600182000;
-    int arrayinfo_time_grid_interval = 10800;
 
     double arrayinfo_lat_offset = 34.01189870;
     double arrayinfo_lat_grid_interval = 0.000172998;
@@ -236,14 +233,11 @@ void T16(long timestamp)
     double lat_max = arrayinfo_lat_grid_interval * 522 + arrayinfo_lat_offset;
     double lon_max = arrayinfo_lon_grid_interval * 522 + arrayinfo_lon_offset;
 
-    int normZ1 = (timestamp - arrayinfo_time_offset) / arrayinfo_time_grid_interval;
-    int normZ2 = (timestamp - arrayinfo_time_offset + arrayinfo_time_grid_interval - 1) / arrayinfo_time_grid_interval;
-
     unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_DISASTER + string(":8080")));
 
     conn->exec("remove(finedust_temp)");
-    conn->exec("store(aggregate(between(Finedust," + to_string(normZ1) + ",null,null," 
-                + to_string(normZ2) + ",null,null), avg(pm10), latitude, longitude), finedust_temp)");
+    conn->exec("store(aggregate(between(Finedust," + to_string(z1) + ",null,null," 
+                + to_string(z2) + ",null,null), avg(pm10), latitude, longitude), finedust_temp)");
 
     mongocxx::pipeline stages;
     stages.match(make_document(kvp("properties.type", "building")));
