@@ -39,7 +39,6 @@ add_executable(m2bench main.cpp
     src/Polyglot/Ecommerce_Tasks.cpp
     src/Polyglot/Healthcare_Tasks.cpp
     src/Polyglot/Disaster_Tasks.cpp
-    src/Polyglot/Latency_Check.cpp
 
     src/Cursor.cpp
     src/Session/ScidbSession.cpp

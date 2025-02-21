@@ -2,7 +2,6 @@
 #include <chrono>
 
 #include "Polyglot/Tasks.h"
-#include "Polyglot/Latency_Check.h"
 
 using namespace std;
 using std::chrono::duration_cast;
