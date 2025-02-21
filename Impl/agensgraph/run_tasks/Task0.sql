@@ -35,7 +35,7 @@ SELECT SEQ.i AS i, 1 AS val
 FROM (SELECT generate_series(0, 300 - 1) AS i) AS SEQ;
 
 -- Create A
-CREATE TEMPORARY TABLE TNEW_A AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE TNEW_A AS (
     SELECT CAST(CAST(person_id AS VARCHAR(20)) AS INT), 
            CAST(CAST(tag_id AS VARCHAR(20)) AS INT) 
     FROM (
@@ -46,7 +46,7 @@ CREATE TEMPORARY TABLE TNEW_A AS (
 );
 
 -- Create C
-CREATE TEMPORARY TABLE TNEW_C AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE TNEW_C AS (
     WITH B AS (
         SELECT customer.person_id, 
                product.brand_id, 
@@ -107,7 +107,7 @@ ON TNEW_C.person_id = DENSE.person_id;
 SET enable_mergejoin = off;
 SET enable_nestloop = off;
 
-CREATE TEMPORARY TABLE Xw AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE Xw AS (
     SELECT TNEW_D.person_id AS person_id, 
            SUM(TNEW_D.val * TEMP_w.val) AS val
     FROM TNEW_D, TEMP_w

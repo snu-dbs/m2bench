@@ -1,7 +1,7 @@
 \timing
 \o /tmp/t9_explain
 
-CREATE TEMPORARY TABLE drug_matrix AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE drug_matrix AS (
     SELECT 
         data->'drug_id' AS drug, 
         jsonb_array_elements(data->'adverse_effect_list')->'adverse_effect_name' AS adverse_effect, 
@@ -13,7 +13,7 @@ CREATE TEMPORARY TABLE drug_matrix AS (
 CREATE INDEX ON drug_matrix (drug);
 CREATE INDEX ON drug_matrix (adverse_effect);
 
-CREATE TEMPORARY TABLE similarity1 AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE similarity1 AS (
     SELECT 
         a.drug AS drug1, 
         b.drug AS drug2, 
@@ -26,7 +26,7 @@ CREATE TEMPORARY TABLE similarity1 AS (
 CREATE INDEX ON similarity1 (drug1);
 CREATE INDEX ON similarity1 (drug2);
 
-CREATE TEMPORARY TABLE inv_norm AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE inv_norm AS (
     SELECT 
         drug1, 
         drug2, 
@@ -38,7 +38,7 @@ CREATE TEMPORARY TABLE inv_norm AS (
 CREATE INDEX ON inv_norm (drug1);
 CREATE INDEX ON inv_norm (drug2);
 
-CREATE TEMPORARY TABLE similarity2 AS (
+CEXPLAIN ANALYZE REATE TEMPORARY TABLE similarity2 AS (
     SELECT 
         similarity1.drug1 AS d1, 
         inv_norm.drug2 AS d2, 
@@ -51,7 +51,7 @@ CREATE TEMPORARY TABLE similarity2 AS (
 CREATE INDEX ON similarity2 (d1);
 CREATE INDEX ON similarity2 (d2);
 
-CREATE TEMPORARY TABLE drug_similarity AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE drug_similarity AS (
     SELECT 
         similarity2.d2 AS drug_1, 
         inv_norm.drug2 AS drug_2, 
