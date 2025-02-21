@@ -1,4 +1,5 @@
 \timing
+\pset pager off
 
 CREATE TEMPORARY TABLE T15A (
     longitude  INT, 

@@ -1,4 +1,5 @@
 \timing
+\pset pager off
 
 EXPLAIN ANALYZE CREATE TEMPORARY TABLE V AS (
     WITH temp AS (

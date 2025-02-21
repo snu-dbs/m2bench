@@ -1,4 +1,5 @@
 \timing
+\pset pager off
 
 SET graph_path = social_network;
 
