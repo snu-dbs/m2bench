@@ -38,7 +38,7 @@ EXPLAIN ANALYZE CREATE TEMPORARY TABLE inv_norm AS (
 CREATE INDEX ON inv_norm (drug1);
 CREATE INDEX ON inv_norm (drug2);
 
-CEXPLAIN ANALYZE REATE TEMPORARY TABLE similarity2 AS (
+EXPLAIN ANALYZE CREATE TEMPORARY TABLE similarity2 AS (
     SELECT 
         similarity1.drug1 AS d1, 
         inv_norm.drug2 AS d2, 
