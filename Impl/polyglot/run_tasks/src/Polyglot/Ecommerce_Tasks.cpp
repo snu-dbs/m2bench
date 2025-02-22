@@ -314,6 +314,7 @@ void T0(int brand_id)
         ScidbLineType line;
         line.push_back(person_id);
         line.push_back(tag_id);
+
         coo->add(line);
         end_scidb = high_resolution_clock::now();
         time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);

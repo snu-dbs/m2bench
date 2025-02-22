@@ -130,33 +130,27 @@ void T14(int z1, int z2)
     maxSchema.attrs.push_back(ScidbAttr("latitude", INT64));
     maxSchema.attrs.push_back(ScidbAttr("longitude", INT64));
     maxSchema.attrs.push_back(ScidbAttr("timestamp", INT64));
-    auto end_scidb = high_resolution_clock::now();
-    auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
-    auto start_comm = high_resolution_clock::now();
     auto t2arr = scidb->download("sort(redimension(aggregate(t14t1, max(pm10_avg), date), "
                                  "<pm10_avg_max: double, date: int64>[i=0:*:0:1000]), date)",
                                  t2Schema);
-    auto t2arrVal = t2arr->readcell();
-    auto end_comm = high_resolution_clock::now();
-    auto time_comm = duration_cast<milliseconds>(end_comm - start_comm);
+    auto end_scidb = high_resolution_clock::now();
+    auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
     // std::ofstream csv_file("/tmp/t14.csv");
     // csv_file << "date,timestamp,site_id\n";
 
     start_comm = high_resolution_clock::now();
     milliseconds time_loop = milliseconds(0);
+    auto t2arrVal = t2arr->readcell();
     int nrow = 0;
     while (!t2arrVal.empty())
     {
-        start_scidb = high_resolution_clock::now();
         long long date = get<long long>(t2arrVal.at(2));
         double maxVal = get<double>(t2arrVal.at(1));
-        end_scidb = high_resolution_clock::now();
-        time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
-        time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
 
         // Get location of value
+        start_scidb = high_resolution_clock::now();
         auto maxArr = scidb->download("sort(redimension(filter(t14t1, abs(pm10_avg - " + to_string(maxVal) + ") < 1e-6 and timestamp / 8 = " + to_string(date) + "), "
                                                                                                                                                                  "<pm10_avg:double, latitude:int64, longitude:int64, timestamp:int64>[i=0:*:0:1000]), pm10_avg, timestamp, latitude, longitude)",
                                       maxSchema);
@@ -164,6 +158,9 @@ void T14(int z1, int z2)
 
         if (maxArrVal.empty())
             throw std::runtime_error("Equality check for floating point failed!");
+        end_scidb = high_resolution_clock::now();
+        time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
+        time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
 
         start_mongo = high_resolution_clock::now();
         auto closestValue = ST_ClosestObject_Map_building_centroid(mapCentroidCollection,
@@ -221,21 +218,14 @@ void T15(int z1, int z2, double lon, double lat)
     hotspotSchema.attrs.push_back(ScidbAttr("pm10_avg", DOUBLE));
     hotspotSchema.attrs.push_back(ScidbAttr("latitude", INT64));
     hotspotSchema.attrs.push_back(ScidbAttr("longitude", INT64));
-    auto end_scidb = high_resolution_clock::now();
-    auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
-    auto start_comm = high_resolution_clock::now();
     auto hotspot = scidb->download("limit(sort(redimension(apply(window(aggregate(between(Finedust, " + to_string(z1) + ", 0, 0, " + to_string(z2) + ", 522, 522), sum(pm10), count(pm10), latitude, longitude), "
                                                                                                                                                      "2, 2, 2, 2, sum(pm10_sum), sum(pm10_count)), "
                                                                                                                                                      "pm10_avg, pm10_sum_sum / pm10_count_sum), "
                                                                                                                                                      "<pm10_avg:double, latitude:int64, longitude:int64>[i=0:*:0:100000000]), pm10_avg desc), 1)",
                                    hotspotSchema);
-
     auto hotspotCells = hotspot->readcell();
-    auto end_comm = high_resolution_clock::now();
-    auto time_comm = duration_cast<milliseconds>(end_comm - start_comm);
 
-    start_scidb = high_resolution_clock::now();
     double targetLat = 34.011898718557454 + static_cast<double>(get<long long>(hotspotCells.at(2))) * 0.000172998;
     double targetLon = -118.34501002237936 + static_cast<double>(get<long long>(hotspotCells.at(3))) * 0.000216636;
     end_scidb = high_resolution_clock::now();
@@ -354,21 +344,14 @@ void T16(int z1, int z2)
 
             start_scidb = high_resolution_clock::now();
             string query = "between(finedust_temp," + to_string(school_lat_norm) + "," + to_string(school_lon_norm) + "," + to_string(school_lat_norm) + "," + to_string(school_lon_norm) + ")";
-            end_scidb = high_resolution_clock::now();
-            time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
-            time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
 
             auto download = conn->download(query, schema);
             auto cell = download->readcell();
             while (cell.size() != 0)
             {
-                start_scidb = high_resolution_clock::now();
                 double lat = get<int>(cell.at(0));
                 double lon = get<int>(cell.at(1));
                 float pm10 = get<float>(cell.at(2));
-                end_scidb = high_resolution_clock::now();
-                time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
-                time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
 
                 double cell_lat = lat * arrayinfo_lat_grid_interval + arrayinfo_lat_offset;
                 double cell_lon = lon * arrayinfo_lon_grid_interval + arrayinfo_lon_offset;
@@ -378,6 +361,9 @@ void T16(int z1, int z2)
                 nrow++;
                 cell = download->readcell();
             }
+            end_scidb = high_resolution_clock::now();
+            time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
+            time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
         }
     }
     auto end_comm = high_resolution_clock::now();

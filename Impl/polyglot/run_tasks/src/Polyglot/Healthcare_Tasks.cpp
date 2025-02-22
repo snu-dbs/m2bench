@@ -255,8 +255,8 @@ void T9(int patient_id)
         time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
         time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
 
+        start_scidb = high_resolution_clock::now();
         auto download = conn->download("slice(drug_similarity,drug2," + to_string(drug1) + ")", schema);
-
         auto line = download->readcell();
         while (line.size() != 0)
         {
@@ -267,6 +267,9 @@ void T9(int patient_id)
             line = download->readcell();
             nrow++;
         }
+        end_scidb = high_resolution_clock::now();
+        time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
+        time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
     }
     end_comm = high_resolution_clock::now();
     time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
