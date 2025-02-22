@@ -299,7 +299,7 @@ void T0(int brand_id)
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
     start_comm = high_resolution_clock::now();
-    time_loop = milliseconds(0);
+    milliseconds time_loop = milliseconds(0);
     for (const auto &row : res_d)
     {
         start_mysql = high_resolution_clock::now();
