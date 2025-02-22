@@ -29,6 +29,10 @@ using std::chrono::milliseconds;
  */
 void T0(int brand_id)
 {
+    auto time_comm = milliseconds(0);
+    auto start_comm = milliseconds(0);
+    auto end_comm = milliseconds(0);
+
     // A
     auto start_mysql = high_resolution_clock::now();
     auto mysql = mysql_connector();
@@ -90,7 +94,7 @@ void T0(int brand_id)
         end_mongo = high_resolution_clock::now();
         time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
 
-        auto start_comm = high_resolution_clock::now();
+        start_comm = high_resolution_clock::now();
         milliseconds time_loop = milliseconds(0);
         for (const auto &doc : cursor)
         {
@@ -118,8 +122,8 @@ void T0(int brand_id)
             time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
             time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
         }
-        auto end_comm = high_resolution_clock::now();
-        auto time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+        end_comm = high_resolution_clock::now();
+        time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
 
         start_mysql = high_resolution_clock::now();
         insert_temptbl_b.execute();
