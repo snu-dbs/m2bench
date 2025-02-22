@@ -181,7 +181,7 @@ void T14(int z1, int z2)
         nrow++;
     }
     auto end_comm = high_resolution_clock::now();
-    auto time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    auto time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
 
     /* save result matrix to csv */
     // csv_file.close();
