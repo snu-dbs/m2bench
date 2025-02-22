@@ -143,7 +143,7 @@ void T14(int z1, int z2)
     // std::ofstream csv_file("/tmp/t14.csv");
     // csv_file << "date,timestamp,site_id\n";
 
-    start_comm = high_resolution_clock::now();
+    auto start_comm = high_resolution_clock::now();
     milliseconds time_loop = milliseconds(0);
     auto t2arr = scidb->download("t2arr", t2Schema);
     auto t2arrVal = t2arr->readcell();
@@ -180,8 +180,8 @@ void T14(int z1, int z2)
         t2arrVal = t2arr->readcell();
         nrow++;
     }
-    end_comm = high_resolution_clock::now();
-    time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    auto end_comm = high_resolution_clock::now();
+    auto time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
 
     /* save result matrix to csv */
     // csv_file.close();
