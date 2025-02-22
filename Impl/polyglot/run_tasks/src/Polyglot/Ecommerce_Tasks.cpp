@@ -28,7 +28,11 @@ using bsoncxx::builder::basic::make_document;
  */
 void T0(int brand_id)
 {
+    auto time_mysql, time_mongo, time_scidb, time_comm;
+    auto start_mysql, end_mysql, start_mongo, end_mongo, start_scidb, end_scidb, start_comm, end_comm;
+
     // A
+    start_mysql = high_resolution_clock::now();
     auto mysql = mysql_connector();
     mysql.mysess->sql("USE Ecommerce").execute();
     mysql.mysess->sql("DROP TABLE IF EXISTS TASK_NEW_B2_TEMPTABLE").execute();
@@ -37,14 +41,20 @@ void T0(int brand_id)
                       "FROM Person p "
                       "JOIN Interested_in i ON p.person_id = i._from "
                       "JOIN Hashtag h ON i._to = h.tag_id").execute();
+    end_mysql = high_resolution_clock::now();
+    time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
 
     // B
+    start_mongo = high_resolution_clock::now();
     mongodb_connector mongodb("Ecommerce");
     bool mmjoin_optimized = false;
     int buffer_cnt = 0;
+    end_mongo = high_resolution_clock::now();
+    time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
 
     if (mmjoin_optimized) {
         // Get pairs of customer_id and product_id where the customer gives the highest rating score.
+        start_mongo = high_resolution_clock::now();
         mongocxx::pipeline stages;
         stages.match(make_document(kvp("rating", 5)));
         stages.lookup(make_document(
@@ -57,7 +67,10 @@ void T0(int brand_id)
             kvp("_id", 0),
             kvp("customer_id", "$orders.customer_id"),
             kvp("product_id", "$product_id")));
+        end_mongo = high_resolution_clock::now();
+        time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
 
+        start_mysql = high_resolution_clock::now();
         mysql.mysess->sql("USE Ecommerce").execute();
         mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_B1_TEMPTABLE ("
                         "customer_id CHAR(20), "
@@ -68,13 +81,26 @@ void T0(int brand_id)
         auto insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
                                     .getTable("TASK_NEW_B1_TEMPTABLE")
                                     .insert("customer_id", "product_id");
+        end_mysql = high_resolution_clock::now();
+        time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
+        start_mongo = high_resolution_clock::now();
         auto cursor = mongodb.db["Review"].aggregate(stages);
+        end_mongo = high_resolution_clock::now();
+        time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
+
+        start_comm = high_resolution_clock::now();
+        auto time_loop = 0;
         for (const auto& doc : cursor) {
+            start_mongo = high_resolution_clock::now();
             auto json = Json::parse(bsoncxx::to_json(doc));
             std::string customer_id = json["customer_id"].get<std::string>();
             std::string product_id = json["product_id"].get<std::string>();
+            end_mongo = high_resolution_clock::now();
+            time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
+            time_loop += duration_cast<milliseconds>(end_mongo - start_mongo);
 
+            start_mysql = high_resolution_clock::now();
             insert_temptbl_b.values(customer_id, product_id);
             buffer_cnt++;
 
@@ -85,7 +111,14 @@ void T0(int brand_id)
                                     .insert("customer_id", "product_id");
                 buffer_cnt = 0;
             }
+            end_mysql = high_resolution_clock::now();
+            time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+            time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
         }
+        end_comm = high_resolution_clock::now();
+        time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+
+        start_mysql = high_resolution_clock::now();
         insert_temptbl_b.execute();
         buffer_cnt = 0;
 
@@ -101,8 +134,11 @@ void T0(int brand_id)
                           "WHERE t.product_id = Product.product_id "
                           "AND Customer.customer_id = t.customer_id "
                           "GROUP BY person_id, Product.brand_id").execute();
+        end_mysql = high_resolution_clock::now();
+        time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
     } else {
         // Get pairs of customer_id and product_id that the customer gives the highest rating score.
+        start_mongo = high_resolution_clock::now();
         mongocxx::pipeline stages;
         stages.match(make_document(kvp("rating", 5)));
         stages.lookup(make_document(
@@ -115,7 +151,10 @@ void T0(int brand_id)
             kvp("_id", 0),
             kvp("customer_id", "$orders.customer_id"),
             kvp("product_id", "$product_id")));
+        end_mongo = high_resolution_clock::now();
+        time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
 
+        start_mysql = high_resolution_clock::now();
         mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_B2_TEMPTABLE_2 ("
                           "person_id INT, "
                           "brand_id INT)").execute();
@@ -123,13 +162,26 @@ void T0(int brand_id)
         auto insert_temptbl_b = mysql.mysess->getSchema("Ecommerce")
                                     .getTable("TASK_NEW_B2_TEMPTABLE_2")
                                     .insert("person_id", "brand_id");
+        end_mysql = high_resolution_clock::now();
+        time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
+        start_mongo = high_resolution_clock::now();
         auto cursor = mongodb.db["Review"].aggregate(stages);
+        end_mongo = high_resolution_clock::now();
+        time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
+
+        start_comm = high_resolution_clock::now();
+        auto time_loop = 0;
         for (const auto& doc : cursor) {
+            start_mongo = high_resolution_clock::now();
             auto json = Json::parse(bsoncxx::to_json(doc));
             std::string customer_id = json["customer_id"].get<std::string>();
             std::string product_id = json["product_id"].get<std::string>();
+            end_mongo = high_resolution_clock::now();
+            time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
+            time_loop += duration_cast<milliseconds>(end_mongo - start_mongo);
 
+            start_mysql = high_resolution_clock::now();
             auto c_cursor = mysql.mysess->getSchema("Ecommerce")
                                 .getTable("Customer")
                                 .select("person_id")
@@ -154,7 +206,14 @@ void T0(int brand_id)
                                     .insert("person_id", "brand_id");
                 buffer_cnt = 0;
             }
+            end_mysql = high_resolution_clock::now();
+            time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+            time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
         }
+        end_comm = high_resolution_clock::now();
+        time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+
+        start_mysql = high_resolution_clock::now();
         insert_temptbl_b.execute();
         buffer_cnt = 0;
 
@@ -168,9 +227,12 @@ void T0(int brand_id)
                           "SELECT person_id, brand_id, COUNT(*) "
                           "FROM TASK_NEW_B2_TEMPTABLE_2 "
                           "GROUP BY person_id, brand_id").execute();
+        end_mysql = high_resolution_clock::now();
+        time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
     }
 
     // C: Find favorite brand per customer
+    start_mysql = high_resolution_clock::now();
     mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_C_TEMPTABLE ("
                       "person_id INT, "
                       "brand_id INT)").execute();
@@ -185,8 +247,11 @@ void T0(int brand_id)
                       "WHERE t1.person_id = t2.person_id "
                       "AND t1.cnt = t2.max_cnt "
                       "GROUP BY t1.person_id").execute();
+    end_mysql = high_resolution_clock::now();
+    time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
     // D
+    start_scidb = high_resolution_clock::now();
     unique_ptr<ScidbConnection> scidb(new ScidbConnection(SCIDB_HOST_ECOMMERCE + string(":8080")));
     scidb->exec("remove(tnew_d)");
     
@@ -204,22 +269,41 @@ void T0(int brand_id)
     schema.attrs.push_back(ScidbAttr("tag_id", INT32));
 
     shared_ptr<ScidbArrFile> coo(new ScidbArrFile(schema));
+    end_scidb = high_resolution_clock::now();
+    time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
+    start_mysql = high_resolution_clock::now();
     auto res_d = mysql.mysess->getSchema("Ecommerce")
                     .getTable("TASK_NEW_A_TEMPTABLE")
                     .select("person_id", "tag_id")
                     .execute();
+    end_mysql = high_resolution_clock::now();
+    time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
+    start_comm = high_resolution_clock::now();
+    time_loop = 0;
     for (const auto& row : res_d) {
+        start_mysql = high_resolution_clock::now();
         int person_id = row[0].get<int>();
         int tag_id = row[1].get<int>();
+        end_mysql = high_resolution_clock::now();
+        time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+        time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
 
         // Append to array for upload
+        start_scidb = high_resolution_clock::now();
         ScidbLineType line;
         line.push_back(person_id);
         line.push_back(tag_id);
         coo->add(line);
+        end_scidb = high_resolution_clock::now();
+        time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
+        time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
     }
+    end_comm = high_resolution_clock::now();
+    time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+
+    start_scidb = high_resolution_clock::now();
     scidb->upload("tnew_d_temp", coo);
 
     // Densify
@@ -242,23 +326,42 @@ void T0(int brand_id)
     schema2.attrs.push_back(ScidbAttr("brand_id", DOUBLE));
 
     shared_ptr<ScidbArrFile> coo2(new ScidbArrFile(schema2));
+    end_scidb = high_resolution_clock::now();
+    time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
 
+    start_mysql = high_resolution_clock::now();
     auto res_e = mysql.mysess->getSchema("Ecommerce")
                     .getTable("TASK_NEW_C_TEMPTABLE")
                     .select("person_id", "brand_id")
                     .execute();
+    end_mysql = high_resolution_clock::now();
+    time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
+    start_comm = high_resolution_clock::now();
+    time_loop = 0;
     for (const auto& row : res_e) {
+        start_mysql = high_resolution_clock::now();
         int person_id = row[0].get<int>();
         int favorite_brand_id = row[1].get<int>();
+        end_mysql = high_resolution_clock::now();
+        time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+        time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
 
         // Append to array for upload
+        start_scidb = high_resolution_clock::now();
         ScidbLineType line;
         line.push_back(person_id);
         line.push_back(favorite_brand_id == brand_id ? (double)1 : (double)0);
 
         coo2->add(line);
+        end_scidb = high_resolution_clock::now();
+        time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
+        time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
     }
+    end_comm = high_resolution_clock::now();
+    time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+
+    start_scidb = high_resolution_clock::now();
     scidb->upload("tnew_e_temp", coo2);
 
     // Densify
@@ -290,14 +393,27 @@ void T0(int brand_id)
         scidb->exec("store(project(apply(tnew_w2, val, res), val), tnew_w)");
         scidb->exec("remove(tnew_w2)");
     }
-    mysql.mysess->sql("DROP TABLE TASK_NEW_B2_TEMPTABLE").execute();
+    end_scidb = high_resolution_clock::now();
+    time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
 
+    start_mysql = high_resolution_clock::now();
+    mysql.mysess->sql("DROP TABLE TASK_NEW_B2_TEMPTABLE").execute();
+    end_mysql = high_resolution_clock::now();
+    time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+
+    start_comm = high_resolution_clock::now();
     auto result = scidb->download("tnew_w");
+    end_comm = high_resolution_clock::now();
+    time_comm += duration_cast<milliseconds>(end_comm - start_comm);
+
+    start_scidb = high_resolution_clock::now();
     auto cell = result->readcell();
     while(cell.size() != 0) {
         nrow++;
         cell = result->readcell();
     }
+    end_scidb = high_resolution_clock::now();
+    time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
 
     /* save result matrix to csv */
     // scidb->exec("save(tnew_w, '/tmp/t0.csv', -2, 'csv')");
