@@ -95,7 +95,7 @@ void T9(int patient_id)
     auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
 
     auto start_comm = high_resolution_clock::now();
-    auto time_loop = 0;
+    milliseconds time_loop = milliseconds(0);
     int buffer = 0;
     for (auto row : cursor)
     {
@@ -182,7 +182,7 @@ void T9(int patient_id)
     auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
     start_comm = high_resolution_clock::now();
-    time_loop = 0;
+    time_loop = milliseconds(0);
     for (auto row : rows)
     {
         start_mysql = high_resolution_clock::now();
@@ -245,7 +245,7 @@ void T9(int patient_id)
     // csv_file << "drug_1,drug_2,val\n";
 
     start_comm = high_resolution_clock::now();
-    time_loop = 0;
+    time_loop = milliseconds(0);
     int nrow = 0;
     for (auto row : prescribed_drugs)
     {

@@ -91,7 +91,7 @@ void T0(int brand_id)
         time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
 
         auto start_comm = high_resolution_clock::now();
-        auto time_loop = 0;
+        milliseconds time_loop = milliseconds(0);
         for (const auto &doc : cursor)
         {
             start_mongo = high_resolution_clock::now();
@@ -179,7 +179,7 @@ void T0(int brand_id)
         time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
 
         start_comm = high_resolution_clock::now();
-        auto time_loop = 0;
+        milliseconds time_loop = milliseconds(0);
         for (const auto &doc : cursor)
         {
             start_mongo = high_resolution_clock::now();
@@ -295,7 +295,7 @@ void T0(int brand_id)
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
     start_comm = high_resolution_clock::now();
-    time_loop = 0;
+    time_loop = milliseconds(0);
     for (const auto &row : res_d)
     {
         start_mysql = high_resolution_clock::now();
@@ -352,7 +352,7 @@ void T0(int brand_id)
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
     start_comm = high_resolution_clock::now();
-    time_loop = 0;
+    time_loop = milliseconds(0);
     for (const auto &row : res_e)
     {
         start_mysql = high_resolution_clock::now();
@@ -491,7 +491,7 @@ void T2()
     auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
 
     auto start_comm = high_resolution_clock::now();
-    auto time_loop = 0;
+    milliseconds time_loop = milliseconds(0);
     int buffer = 0;
     for (auto history : cursor)
     {
@@ -571,7 +571,7 @@ void T2()
     auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
     start_comm = high_resolution_clock::now();
-    time_loop = 0;
+    time_loop = milliseconds(0);
     for (auto row : rows)
     {
         start_mysql = high_resolution_clock::now();
@@ -692,7 +692,7 @@ void T2()
     // string newV = "store(join(gemm(W, H, zeroV), V), newV)";
     // string agg = "store(aggregate(apply(newV, diff, abs(gemm-val)), sum(diff)), L)";
 
-    time_loop = 0;
+    time_loop = milliseconds(0);
     int nrow = 0;
     for (int iter = 0; iter < 1; iter++)
     {

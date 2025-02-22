@@ -145,7 +145,7 @@ void T14(int z1, int z2)
     // csv_file << "date,timestamp,site_id\n";
 
     start_comm = high_resolution_clock::now();
-    auto time_loop = 0;
+    milliseconds time_loop = milliseconds(0);
     int nrow = 0;
     while (!t2arrVal.empty())
     {
@@ -331,7 +331,7 @@ void T16(int z1, int z2)
     // csv_file << "site_id,pm10\n";
 
     auto start_comm = high_resolution_clock::now();
-    auto time_loop = 0;
+    milliseconds time_loop = milliseconds(0);
     int nrow = 0;
     for (auto school : cursor)
     {
@@ -381,7 +381,7 @@ void T16(int z1, int z2)
         }
     }
     auto end_comm = high_resolution_clock::now();
-    auto time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    auto time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
 
     /* save result matrix to csv */
     // csv_file.close();
