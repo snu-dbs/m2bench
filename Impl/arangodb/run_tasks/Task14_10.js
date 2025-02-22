@@ -30,22 +30,31 @@ let res = db._query(`
             RETURN { date: date, pm10_max: pm10_max }
     )
 
-    LET C = (
+    LET Ranked = (
         FOR t1 IN AB
             FOR t2 IN Ct2
                 FILTER t1.pm10_avg == t2.pm10_max AND t1.date == t2.date
-                SORT t1.timestamp ASC, t1.latitude ASC, t1.longitude ASC
+                RETURN t1
+    )
 
-                COLLECT date = t1.date INTO groupData
-                LET selected = SLICE(groupData, 0, 1)
+    LET SRanked = (
+        FOR r IN Ranked
+            SORT r.timestamp ASC, r.latitude ASC, r.longitude ASC
+            RETURN r
+    )
 
-                RETURN {
-                    m: selected[0].pm10_avg,
-                    date: selected[0].date,
-                    latitude: selected[0].latitude,
-                    longitude: selected[0].longitude,
-                    timestamp: selected[0].timestamp
-                }
+    LET C = (
+        FOR r IN SRanked
+            COLLECT date = r.date INTO groupData
+            LET selected = SLICE(groupData[*].r, 0, 1)[0]
+
+            RETURN {
+                m: selected.pm10_avg,
+                date: selected.date,
+                latitude: selected.latitude,
+                longitude: selected.longitude,
+                timestamp: selected.timestamp
+            }
     )
 
     LET D = (
