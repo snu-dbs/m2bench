@@ -170,6 +170,7 @@ void T9(int patient_id)
     conn->exec("remove(similarity2)");
     conn->exec("remove(inv_norm)");
     conn->exec("remove(drug_similarity)");
+    conn->exec("remove(download_matrix)");
     conn->exec("create array temp<drug:int64 NOT NULL, adverse_effect:int64 NOT NULL, is_adverse_effect:double NOT NULL> [i=0:" + to_string(dim1 * dim2 - 1) + ":0:1000000]");
 
     ScidbSchema sschema;
@@ -256,7 +257,12 @@ void T9(int patient_id)
         time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
 
         start_scidb = high_resolution_clock::now();
-        auto download = conn->download("slice(drug_similarity,drug2," + to_string(drug1) + ")", schema);
+        conn->exec("store(slice(drug_similarity,drug1," + to_string(drug1) + "),download_matrix)");
+        end_scidb = high_resolution_clock::now();
+        time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
+        time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
+
+        auto download = conn->download("download_matrix", schema);
         auto line = download->readcell();
         while (line.size() != 0)
         {
@@ -267,9 +273,6 @@ void T9(int patient_id)
             line = download->readcell();
             nrow++;
         }
-        end_scidb = high_resolution_clock::now();
-        time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
-        time_loop += duration_cast<milliseconds>(end_scidb - start_scidb);
     }
     end_comm = high_resolution_clock::now();
     time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
