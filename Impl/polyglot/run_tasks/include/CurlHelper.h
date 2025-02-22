@@ -13,11 +13,11 @@
 
 using namespace std;
 
-class CurlHelper {
+class CurlHelper
+{
 public:
     static string spaceReplace(const string &input);
     static string replace(const string &input);
 };
 
-
-#endif //M2BENCH_AO_CURLHELPER_H
+#endif // M2BENCH_AO_CURLHELPER_H

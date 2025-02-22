@@ -3,7 +3,9 @@
  */
 
 /* 1-1. Initialize TEMP_A (Step D in task) */
-res1 = db._query(`
+res1 = db
+  ._query(
+    `
     FOR person_id IN 0..9948
     FOR tag_id IN 0..299
     INSERT {
@@ -12,30 +14,42 @@ res1 = db._query(`
         tag_id: tag_id,
         val: 0
     } INTO TEMP_A
-`).getExtra();
+`
+  )
+  .getExtra();
 
 /* 1-2. Create TEMP_A (Step A and D in task) */
-res2 = db._query(`
+res2 = db
+  ._query(
+    `
     FOR person IN Person
     FOR hashtag IN 1..1 OUTBOUND person Interested_in
     COLLECT person_id_str = person._key, tag_id_str = hashtag._key
     UPDATE {
         _key: CONCAT(person_id_str, ",", tag_id_str)
     } WITH { val: 1 } INTO TEMP_A
-`).getExtra();
+`
+  )
+  .getExtra();
 
 /* 1-3. Initialize TEMP_C (Step E in task) */
-res3 = db._query(`
+res3 = db
+  ._query(
+    `
     FOR person_id IN 0..9948
     INSERT {
         _key: TO_STRING(person_id),
         person_id: person_id,
         val: 0
     } INTO TEMP_C
-`).getExtra();
+`
+  )
+  .getExtra();
 
 /* 1-4. Create TEMP_C (Step B, C, and E in task) */
-res4 = db._query(`
+res4 = db
+  ._query(
+    `
     LET B = (
         FOR customer IN Customer
         FOR order IN Order
@@ -64,18 +78,26 @@ res4 = db._query(`
     UPDATE {
         _key: TO_STRING(person_id)
     } WITH { val: brand_id == 50 ? 1 : 0 } INTO TEMP_C
-`).getExtra();
+`
+  )
+  .getExtra();
 
 /* 1-5. Initialize LR_w */
-res5 = db._query(`
+res5 = db
+  ._query(
+    `
     FOR i IN 0..299
     INSERT { i: i, val: 1 } INTO LR_w
-`).getExtra();
+`
+  )
+  .getExtra();
 
 /**
  * 2. Logistic Regression
  */
-res6 = db._query(`
+res6 = db
+  ._query(
+    `
     LET Xw = (
         FOR x IN TEMP_A
         FOR y IN LR_w
@@ -106,7 +128,9 @@ res6 = db._query(`
     FOR w IN LR_w
         FILTER x.i == w.i
     INSERT { i: x.i, val: w.val - x.val } INTO LR_w_new
-`).getExtra();
+`
+  )
+  .getExtra();
 
 res7 = db._query(`FOR row IN LR_w REMOVE row IN LR_w`).getExtra();
 res8 = db._query(`FOR row IN LR_w_new INSERT row INTO LR_w`).getExtra();
@@ -116,17 +140,18 @@ res10 = db._query(`RETURN COUNT(LR_w)`);
 
 /* Print result and execution time */
 print(res10.next());
-print('Elapsed Time: ',
-    res1['stats']['executionTime'] +
-    res2['stats']['executionTime'] +
-    res3['stats']['executionTime'] +
-    res4['stats']['executionTime'] +
-    res5['stats']['executionTime'] +
-    res6['stats']['executionTime'] +
-    res7['stats']['executionTime'] +
-    res8['stats']['executionTime'] +
-    res9['stats']['executionTime'] +
-    res10.getExtra()['stats']['executionTime']
+print(
+  "Elapsed Time: ",
+  res1["stats"]["executionTime"] +
+    res2["stats"]["executionTime"] +
+    res3["stats"]["executionTime"] +
+    res4["stats"]["executionTime"] +
+    res5["stats"]["executionTime"] +
+    res6["stats"]["executionTime"] +
+    res7["stats"]["executionTime"] +
+    res8["stats"]["executionTime"] +
+    res9["stats"]["executionTime"] +
+    res10.getExtra()["stats"]["executionTime"]
 );
 
 // Answer Validation

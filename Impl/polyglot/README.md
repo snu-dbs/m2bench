@@ -2,6 +2,7 @@
 
 Polyglot persistence consists of MySQL, MongoDB, and SciDB to support each data model with their native database system.
 Please make sure that you have already installed each DBMS on your machine with the appropriate versions.
+
 - MySQL 9.2.0
 - MongoDB 8.0.4
 - SciDB 19.11.5
@@ -15,25 +16,28 @@ Please make sure that you have configured each system.
 
 ### Data Loading
 
-Before running tasks, you need to load the generated data to each database system. 
+Before running tasks, you need to load the generated data to each database system.
 In the `load_datasets` directory, you can find directories for each scenario in M2Bench.
 These directories contain scripts for data loading and creating indexes.
 
 We provide a script named `load_all.sh` in the `load_datasets` directory.
 This script is configured to use the database configurations below.
 If your database instance has a different configuration, please modify files in each scenario directory to match your configuration.
+
 - MySQL: the connection port is `3306` and a password should not be required.
 - MongoDB: the connection port is `27017` and a password should not be required.
 - SciDB: the connection port to SciDB Shim is `8080`.
 
 Before you run the script, please read the below:
+
 - Make sure that you are able to call `mysql` (for MySQL), `mongoimport` (for MongoDB), and `iquery` (for SciDB).
 - If you do not have `iquery`, the script will import data to SciDB inside the docker container.
-You will be asked for the name of the container in this case.
-In such a case, you need permission to run the `docker` command.
-- If you are going to run SciDB inside a docker container, please allocate enough shared memory size (i.e., `/dev/shm`) when you create a container. 
+  You will be asked for the name of the container in this case.
+  In such a case, you need permission to run the `docker` command.
+- If you are going to run SciDB inside a docker container, please allocate enough shared memory size (i.e., `/dev/shm`) when you create a container.
 
-In order to import data, navigate to the `/Impl/polyglot/load_datasets` directory and run the following command. 
+In order to import data, navigate to the `/Impl/polyglot/load_datasets` directory and run the following command.
+
 ```bash
 $ bash load_all.sh
 ```

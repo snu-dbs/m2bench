@@ -4,34 +4,41 @@
 
 #include "../include/CurlHelper.h"
 
-string CurlHelper::spaceReplace(const string &input) {
+string CurlHelper::spaceReplace(const string &input)
+{
     // curl with url having whitespace causes error..
     ostringstream res;
 
     string::const_iterator end = input.end();
-    for (string::const_iterator i = input.begin(); i != end; i++) {
+    for (string::const_iterator i = input.begin(); i != end; i++)
+    {
         string::value_type c = *i;
-        if (c == ' ') res << "%20";
-        else res << c;
+        if (c == ' ')
+            res << "%20";
+        else
+            res << c;
     }
 
     return res.str();
 }
 
-string CurlHelper::replace(const string &input) {
+string CurlHelper::replace(const string &input)
+{
     // curl with url having whitespace causes error..
     ostringstream res;
 
     string::const_iterator end = input.end();
-    for (string::const_iterator i = input.begin(); i != end; i++) {
+    for (string::const_iterator i = input.begin(); i != end; i++)
+    {
         string::value_type c = *i;
-        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~') {
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+        {
             res << c;
             continue;
         }
 
         // Any other characters are percent-encoded
-        res << uppercase << '%' << setw(2) << int((unsigned char) c) << nouppercase;
+        res << uppercase << '%' << setw(2) << int((unsigned char)c) << nouppercase;
     }
 
     return res.str();

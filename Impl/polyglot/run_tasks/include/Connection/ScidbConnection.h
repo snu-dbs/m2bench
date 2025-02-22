@@ -12,13 +12,14 @@
 #include "Connection.h"
 #include "ScidbPrimitives.h"
 
-class ScidbConnection: Connection {
+class ScidbConnection : Connection
+{
 public:
-    explicit ScidbConnection(const string& url);
+    explicit ScidbConnection(const string &url);
     unique_ptr<Cursor> exec(string query) override;
-    unique_ptr<ScidbArr> download(const string& arrayName);
-    unique_ptr<ScidbArr> download(const string& query, const ScidbSchema& schema);
-    void upload(const string& arrayName, const shared_ptr<ScidbArr> arr);
+    unique_ptr<ScidbArr> download(const string &arrayName);
+    unique_ptr<ScidbArr> download(const string &query, const ScidbSchema &schema);
+    void upload(const string &arrayName, const shared_ptr<ScidbArr> arr);
 };
 
-#endif //M2BENCH_AO_SCIDBCONNECTION_H
+#endif // M2BENCH_AO_SCIDBCONNECTION_H

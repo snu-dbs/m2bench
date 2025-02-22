@@ -14,17 +14,18 @@
 using json = nlohmann::json;
 using namespace std;
 
-class Cursor {
+class Cursor
+{
 public:
     Cursor(unique_ptr<Session> session);
     bool hasNext();
     json next();
+
 private:
     unique_ptr<Session> session;
     queue<json> q;
 
-    void push_vector(const vector<json>& v);
+    void push_vector(const vector<json> &v);
 };
 
-
-#endif //M2BENCH_AO_CURSOR_H
+#endif // M2BENCH_AO_CURSOR_H

@@ -10,13 +10,14 @@
 #include "include/Connection/OrientConnection.h"
 #include "include/Connection/ScidbConnection.h"
 
-using json = nlohmann::json;         // for convenience
+using json = nlohmann::json; // for convenience
 
-#define ARANGO_HOST    "192.168.0.1"
-#define ARANGO_ID      ""
-#define ARANGO_PW      ""
+#define ARANGO_HOST "192.168.0.1"
+#define ARANGO_ID ""
+#define ARANGO_PW ""
 
-int arangoTest() {
+int arangoTest()
+{
     std::cout << "ArangoDB Test" << std::endl;
 
     // sample query
@@ -24,10 +25,11 @@ int arangoTest() {
     auto cursor = conn->exec("FOR doc IN Customer RETURN doc");
 
     int count = 0;
-    while (cursor->hasNext()) {
+    while (cursor->hasNext())
+    {
         json row = cursor->next();
         std::cout << to_string(row) << std::endl;
-        count ++;
+        count++;
         // TODO:
     }
 
@@ -36,4 +38,3 @@ int arangoTest() {
 
     return 0;
 }
-

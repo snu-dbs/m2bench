@@ -10,13 +10,14 @@
 #include "include/Connection/OrientConnection.h"
 #include "include/Connection/ScidbConnection.h"
 
-using json = nlohmann::json;         // for convenience
+using json = nlohmann::json; // for convenience
 
-#define ORIENT_HOST    "192.168.0.1"
-#define ORIENT_ID      ""
-#define ORIENT_PW      ""
+#define ORIENT_HOST "192.168.0.1"
+#define ORIENT_ID ""
+#define ORIENT_PW ""
 
-int orientTest() {
+int orientTest()
+{
     std::cout << "OrientDB Test" << std::endl;
 
     // sample query
@@ -24,7 +25,8 @@ int orientTest() {
     auto cursor = conn->exec("SELECT * FROM customer");
 
     int count = 0;
-    while (cursor->hasNext()) {
+    while (cursor->hasNext())
+    {
         json row = cursor->next();
         std::cout << to_string(row) << std::endl;
         count++;

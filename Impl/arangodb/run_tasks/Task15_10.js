@@ -62,7 +62,7 @@ let res3 = res1.getExtra();
 let res4 = res2.getExtra();
 
 print(res1, res2);
-print(res3['stats']['executionTime'] + res4['stats']['executionTime']);
+print(res3["stats"]["executionTime"] + res4["stats"]["executionTime"]);
 
 // Answer Validation
 // const fs = require("fs");

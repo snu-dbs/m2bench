@@ -13,24 +13,24 @@
 #include "Session.h"
 #include "Connection/ScidbPrimitives.h"
 
-
-class ScidbSession : public Session {
+class ScidbSession : public Session
+{
 public:
-    explicit ScidbSession(const string& url, bool isFileBased = true);
+    explicit ScidbSession(const string &url, bool isFileBased = true);
     ~ScidbSession();
 
-    void exec(const string& query, bool save=false);
-    unique_ptr<ScidbArr> download(const string& query);
-    unique_ptr<ScidbArr> download(const string& query, const ScidbSchema& schema);
-    void upload(const string& arrayName, shared_ptr<ScidbArr> data);
+    void exec(const string &query, bool save = false);
+    unique_ptr<ScidbArr> download(const string &query);
+    unique_ptr<ScidbArr> download(const string &query, const ScidbSchema &schema);
+    void upload(const string &arrayName, shared_ptr<ScidbArr> data);
 
     vector<json> fetch() override;
     bool isDone() override;
 
 private:
-    bool isFileBased = true;        // If true, the session maintain the array in a file.
+    bool isFileBased = true; // If true, the session maintain the array in a file.
 
-    vector<string> tmpfiles;        // Temporary files. The session maintains it so that it can be deleted.
+    vector<string> tmpfiles; // Temporary files. The session maintains it so that it can be deleted.
 
     string url, sessionId, fileId;
 
@@ -43,9 +43,8 @@ private:
     string pullToFile();
 
     // Other functions
-    ScidbSchema schema(const string& arrayName);
-    static ScidbSchema parsingSchema(const string& basicString);
+    ScidbSchema schema(const string &arrayName);
+    static ScidbSchema parsingSchema(const string &basicString);
 };
 
-
-#endif //M2BENCH_AO_SCIDBSESSION_H
+#endif // M2BENCH_AO_SCIDBSESSION_H

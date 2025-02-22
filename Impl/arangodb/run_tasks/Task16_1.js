@@ -57,8 +57,8 @@ res = db._query(`
 
 res2 = res.getExtra();
 
-print(res)
-print(res2['stats']['executionTime']);
+print(res);
+print(res2["stats"]["executionTime"]);
 
 // Answer Validation
 // const fs = require("fs");

@@ -4,25 +4,33 @@
 
 #include "Cursor.h"
 
-void Cursor::push_vector(const vector<json>& v) {
+void Cursor::push_vector(const vector<json> &v)
+{
     // push all vector values to the queue
-    for (auto & it : v) q.push(it);
+    for (auto &it : v)
+        q.push(it);
 }
 
-Cursor::Cursor(unique_ptr<Session> session) {
+Cursor::Cursor(unique_ptr<Session> session)
+{
     auto firstData = session->fetch();
     push_vector(firstData);
     this->session = move(session);
 }
 
-bool Cursor::hasNext() {
-    if (q.empty() && session->isDone()) return false;
+bool Cursor::hasNext()
+{
+    if (q.empty() && session->isDone())
+        return false;
     return true;
 }
 
-json Cursor::next() {
-    if (!hasNext()) return "{}"_json;
-    if (q.empty()) {        // TODO: duplicated
+json Cursor::next()
+{
+    if (!hasNext())
+        return "{}"_json;
+    if (q.empty())
+    { // TODO: duplicated
         auto data = session->fetch();
         push_vector(data);
     }
@@ -31,4 +39,3 @@ json Cursor::next() {
     q.pop();
     return ret;
 }
-

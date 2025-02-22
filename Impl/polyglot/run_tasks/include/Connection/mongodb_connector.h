@@ -17,18 +17,19 @@
 #define MONGODB_ID ""
 #define MONGODB_PW ""
 
-class mongodb_connector {
+class mongodb_connector
+{
 public:
     static mongocxx::instance instance;
 
     mongocxx::database db;
     std::unique_ptr<mongocxx::client> client;
 
-    explicit mongodb_connector(const std::string& dbname = "mxmdb")
+    explicit mongodb_connector(const std::string &dbname = "mxmdb")
     {
         std::string uri_string = MONGODB_ID[0] == '\0' && MONGODB_PW[0] == '\0'
-            ? "mongodb://" + std::string(MONGODB_HOST) + ":27017/" + dbname
-            : "mongodb://" + std::string(MONGODB_ID) + ":" + std::string(MONGODB_PW) + "@" + MONGODB_HOST + ":27017/?authSource=" + dbname;
+                                     ? "mongodb://" + std::string(MONGODB_HOST) + ":27017/" + dbname
+                                     : "mongodb://" + std::string(MONGODB_ID) + ":" + std::string(MONGODB_PW) + "@" + MONGODB_HOST + ":27017/?authSource=" + dbname;
 
         client = std::make_unique<mongocxx::client>(mongocxx::uri(uri_string));
         db = (*client)[dbname];
