@@ -20,10 +20,12 @@ db.Roadnode.ensureIndex({ type: "persistent", fields: ["site_id"] });
 db.Shelter.ensureIndex({ type: "persistent", fields: ["shelter_id"] });
 db.Shelter.ensureIndex({ type: "persistent", fields: ["site_id"] });
 
-//db.Site.ensureIndex({ type: "persistent", fields: ["site_id"] })
-//db.Site.ensureIndex({ type: "persistent", fields: ["properties.type"] })
-//db.Site.ensureIndex({ type: "geo", fields: ["geometry"], geoJson: true })
+/*
+db.Site.ensureIndex({ type: "persistent", fields: ["site_id"] })
+db.Site.ensureIndex({ type: "persistent", fields: ["properties.type"] })
+db.Site.ensureIndex({ type: "geo", fields: ["geometry"], geoJson: true })
 
-//db.Site_centroid.ensureIndex({ type: "persistent", fields: ["site_id"] })
-//db.Site_centroid.ensureIndex({ type: "persistent", fields: ["properties.type"] })
-//db.Site_centroid.ensureIndex({ type: "geo", fields: ["centroid"], geoJson: true })
+db.Site_centroid.ensureIndex({ type: "persistent", fields: ["site_id"] })
+db.Site_centroid.ensureIndex({ type: "persistent", fields: ["properties.type"] })
+db.Site_centroid.ensureIndex({ type: "geo", fields: ["centroid"], geoJson: true })
+*/

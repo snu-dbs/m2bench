@@ -25,13 +25,15 @@ arangoimport --overwrite true --file "$DATASET_PATH/disaster/table/Shelter.csv" 
     --server.request-timeout 7200
 
 # LOAD JSON
-#arangoimport --overwrite true --file "$DATASET_PATH/disaster/json/Site.json" \
-#    --type json --collection "Site" --server.username $USERNAME --server.password "$PASSWORD" \
-#    --create-collection true --threads 4 --server.database Disaster
+: <<EOF
+arangoimport --overwrite true --file "$DATASET_PATH/disaster/json/Site.json" \
+    --type json --collection "Site" --server.username $USERNAME --server.password "$PASSWORD" \
+    --create-collection true --threads 4 --server.database Disaster
 
-#arangoimport --overwrite true --file "$DATASET_PATH/disaster/json/Site_centroid.json" \
-#    --type json --collection "Site_centroid" --server.username $USERNAME --server.password "$PASSWORD" \
-#    --create-collection true --threads 4 --server.database Disaster
+arangoimport --overwrite true --file "$DATASET_PATH/disaster/json/Site_centroid.json" \
+    --type json --collection "Site_centroid" --server.username $USERNAME --server.password "$PASSWORD" \
+    --create-collection true --threads 4 --server.database Disaster
+EOF
 
 # LOAD GRAPH
 arangoimport --overwrite true --file "$DATASET_PATH/disaster/property_graph/Roadnode.csv" \
