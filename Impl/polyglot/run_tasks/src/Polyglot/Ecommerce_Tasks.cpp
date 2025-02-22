@@ -29,9 +29,9 @@ using std::chrono::milliseconds;
  */
 void T0(int brand_id)
 {
-    auto time_comm = milliseconds(0);
-    auto start_comm = milliseconds(0);
-    auto end_comm = milliseconds(0);
+    auto time_comm = high_resolution_clock::now();
+    auto start_comm = high_resolution_clock::now();
+    auto end_comm = high_resolution_clock::now();
 
     // A
     auto start_mysql = high_resolution_clock::now();
