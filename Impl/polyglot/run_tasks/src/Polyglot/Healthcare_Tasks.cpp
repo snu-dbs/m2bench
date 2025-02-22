@@ -13,6 +13,10 @@
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+using std::chrono::milliseconds;
+
 #define SCIDB_HOST_HEALTHCARE "127.0.0.1"
 #define BUFFER 1000
 
@@ -62,10 +66,7 @@ using bsoncxx::builder::basic::make_document;
  */
 void T9(int patient_id)
 {
-    auto time_mysql, time_mongo, time_scidb, time_comm;
-    auto start_mysql, end_mysql, start_mongo, end_mongo, start_scidb, end_scidb, start_comm, end_comm;
-
-    start_mysql = high_resolution_clock::now();
+    auto start_mysql = high_resolution_clock::now();
     auto mysql = mysql_connector();
     mysql.mysess->sql("USE Healthcare").execute();
     mysql.mysess->sql("CREATE TEMPORARY TABLE D2A ("
@@ -76,10 +77,10 @@ void T9(int patient_id)
     auto insert2D2A = mysql.mysess->getSchema("Healthcare")
                           .getTable("D2A")
                           .insert("drug", "adverse_effect");
-    end_mysql = high_resolution_clock::now();
-    time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
+    auto end_mysql = high_resolution_clock::now();
+    auto time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
 
-    start_mongo = high_resolution_clock::now();
+    auto start_mongo = high_resolution_clock::now();
     mongodb_connector mongodb("Healthcare");
     auto drug = mongodb.db["drug"];
 
@@ -90,10 +91,10 @@ void T9(int patient_id)
         kvp("adverse_effect", "$adverse_effect_list.adverse_effect_name"),
         kvp("is_adverse_effect", make_document(kvp("$literal", 1)))));
     auto cursor = drug.aggregate(stages);
-    end_mongo = high_resolution_clock::now();
-    time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
+    auto end_mongo = high_resolution_clock::now();
+    auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
 
-    start_comm = high_resolution_clock::now();
+    auto start_comm = high_resolution_clock::now();
     auto time_loop = 0;
     int buffer = 0;
     for (auto row : cursor)
@@ -123,8 +124,8 @@ void T9(int patient_id)
         time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
         time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
     }
-    end_comm = high_resolution_clock::now();
-    time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    auto end_comm = high_resolution_clock::now();
+    auto time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
 
     start_mysql = high_resolution_clock::now();
     if (buffer > 0)
@@ -160,7 +161,7 @@ void T9(int patient_id)
     end_mysql = high_resolution_clock::now();
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
-    start_scidb = high_resolution_clock::now();
+    auto start_scidb = high_resolution_clock::now();
     unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_HEALTHCARE + string(":8080")));
 
     conn->exec("remove(temp)");
@@ -177,8 +178,8 @@ void T9(int patient_id)
     sschema.attrs.push_back(ScidbAttr("is_adverse_effect", DOUBLE));
 
     shared_ptr<ScidbArrFile> coo(new ScidbArrFile(sschema));
-    end_scidb = high_resolution_clock::now();
-    time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
+    auto end_scidb = high_resolution_clock::now();
+    auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
     start_comm = high_resolution_clock::now();
     time_loop = 0;

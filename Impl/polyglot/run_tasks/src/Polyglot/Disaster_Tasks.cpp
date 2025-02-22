@@ -16,6 +16,10 @@ using Json = nlohmann::json;
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+using std::chrono::milliseconds;
+
 #define SCIDB_HOST_DISASTER "127.0.0.1"
 #define BUFFER 1000
 
@@ -100,16 +104,13 @@ int ST_ClosestObject_Map_building_centroid(mongocxx::collection mapCentroidColle
  */
 void T14(int z1, int z2)
 {
-    auto time_mongo, time_scidb, time_comm;
-    auto start_mongo, end_mongo, start_scidb, end_scidb, start_comm, end_comm;
-
-    start_mongo = high_resolution_clock::now();
+    auto start_mongo = high_resolution_clock::now();
     mongodb_connector mongodb("Disaster");
     auto mapCentroidCollection = mongodb.db["Site_centroid"];
-    end_mongo = high_resolution_clock::now();
-    time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
+    auto end_mongo = high_resolution_clock::now();
+    auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
 
-    start_scidb = high_resolution_clock::now();
+    auto start_scidb = high_resolution_clock::now();
     unique_ptr<ScidbConnection> scidb(new ScidbConnection(SCIDB_HOST_DISASTER + string(":8080")));
 
     // Query A and B
@@ -129,16 +130,16 @@ void T14(int z1, int z2)
     maxSchema.attrs.push_back(ScidbAttr("latitude", INT64));
     maxSchema.attrs.push_back(ScidbAttr("longitude", INT64));
     maxSchema.attrs.push_back(ScidbAttr("timestamp", INT64));
-    end_scidb = high_resolution_clock::now();
-    time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
+    auto end_scidb = high_resolution_clock::now();
+    auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
-    start_comm = high_resolution_clock::now();
+    auto start_comm = high_resolution_clock::now();
     auto t2arr = scidb->download("sort(redimension(aggregate(t14t1, max(pm10_avg), date), "
                                  "<pm10_avg_max: double, date: int64>[i=0:*:0:1000]), date)",
                                  t2Schema);
     auto t2arrVal = t2arr->readcell();
-    end_comm = high_resolution_clock::now();
-    time_comm = duration_cast<milliseconds>(end_comm - start_comm);
+    auto end_comm = high_resolution_clock::now();
+    auto time_comm = duration_cast<milliseconds>(end_comm - start_comm);
 
     // std::ofstream csv_file("/tmp/t14.csv");
     // csv_file << "date,timestamp,site_id\n";
@@ -205,16 +206,13 @@ void T14(int z1, int z2)
  */
 void T15(int z1, int z2, double lon, double lat)
 {
-    auto time_mongo, time_scidb, time_comm;
-    auto start_mongo, end_mongo, start_scidb, end_scidb, start_comm, end_comm;
-
-    start_mongo = high_resolution_clock::now();
+    auto start_mongo = high_resolution_clock::now();
     mongodb_connector mongodb("Disaster");
     auto mapCentroidCollection = mongodb.db["Site_centroid"];
-    end_mongo = high_resolution_clock::now();
-    time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
+    auto end_mongo = high_resolution_clock::now();
+    auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
 
-    start_scidb = high_resolution_clock::now();
+    auto start_scidb = high_resolution_clock::now();
     unique_ptr<ScidbConnection> scidb(new ScidbConnection(SCIDB_HOST_DISASTER + string(":8080")));
 
     // Query A and B
@@ -223,10 +221,10 @@ void T15(int z1, int z2, double lon, double lat)
     hotspotSchema.attrs.push_back(ScidbAttr("pm10_avg", DOUBLE));
     hotspotSchema.attrs.push_back(ScidbAttr("latitude", INT64));
     hotspotSchema.attrs.push_back(ScidbAttr("longitude", INT64));
-    end_scidb = high_resolution_clock::now();
-    time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
+    auto end_scidb = high_resolution_clock::now();
+    auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
-    start_comm = high_resolution_clock::now();
+    auto start_comm = high_resolution_clock::now();
     auto hotspot = scidb->download("limit(sort(redimension(apply(window(aggregate(between(Finedust, " + to_string(z1) + ", 0, 0, " + to_string(z2) + ", 522, 522), sum(pm10), count(pm10), latitude, longitude), "
                                                                                                                                                      "2, 2, 2, 2, sum(pm10_sum), sum(pm10_count)), "
                                                                                                                                                      "pm10_avg, pm10_sum_sum / pm10_count_sum), "
@@ -234,8 +232,8 @@ void T15(int z1, int z2, double lon, double lat)
                                    hotspotSchema);
 
     auto hotspotCells = hotspot->readcell();
-    end_comm = high_resolution_clock::now();
-    time_comm = duration_cast<milliseconds>(end_comm - start_comm);
+    auto end_comm = high_resolution_clock::now();
+    auto time_comm = duration_cast<milliseconds>(end_comm - start_comm);
 
     start_scidb = high_resolution_clock::now();
     double targetLat = 34.011898718557454 + static_cast<double>(get<long long>(hotspotCells.at(2))) * 0.000172998;
@@ -282,14 +280,11 @@ void T15(int z1, int z2, double lon, double lat)
  */
 void T16(int z1, int z2)
 {
-    auto time_mongo, time_scidb, time_comm;
-    auto start_mongo, end_mongo, start_scidb, end_scidb, start_comm, end_comm;
-
-    start_mongo = high_resolution_clock::now();
+    auto start_mongo = high_resolution_clock::now();
     mongodb_connector mongodb("Disaster");
     auto map = mongodb.db["Site"];
-    end_mongo = high_resolution_clock::now();
-    time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
+    auto end_mongo = high_resolution_clock::now();
+    auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
 
     double arrayinfo_lat_offset = 34.01189870;
     double arrayinfo_lat_grid_interval = 0.000172998;
@@ -300,13 +295,13 @@ void T16(int z1, int z2)
     double lat_max = arrayinfo_lat_grid_interval * 522 + arrayinfo_lat_offset;
     double lon_max = arrayinfo_lon_grid_interval * 522 + arrayinfo_lon_offset;
 
-    start_scidb = high_resolution_clock::now();
+    auto start_scidb = high_resolution_clock::now();
     unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_DISASTER + string(":8080")));
 
     conn->exec("remove(finedust_temp)");
     conn->exec("store(aggregate(between(Finedust," + to_string(z1) + ",null,null," + to_string(z2) + ",null,null), avg(pm10), latitude, longitude), finedust_temp)");
-    end_scidb = high_resolution_clock::now();
-    time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
+    auto end_scidb = high_resolution_clock::now();
+    auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
     start_mongo = high_resolution_clock::now();
     mongocxx::pipeline stages;
@@ -335,7 +330,7 @@ void T16(int z1, int z2)
     // std::ofstream csv_file("/tmp/t16.csv");
     // csv_file << "site_id,pm10\n";
 
-    start_comm = high_resolution_clock::now();
+    auto start_comm = high_resolution_clock::now();
     auto time_loop = 0;
     int nrow = 0;
     for (auto school : cursor)
@@ -385,8 +380,8 @@ void T16(int z1, int z2)
             }
         }
     }
-    end_comm = high_resolution_clock::now();
-    time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    auto end_comm = high_resolution_clock::now();
+    auto time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
 
     /* save result matrix to csv */
     // csv_file.close();

@@ -3,9 +3,6 @@
  * Updated: February 2025
  */
 
-#include <tuple>
-#include <string>
-
 #include <nlohmann/json.hpp>
 #include <mongocxx/client.hpp>
 #include <bsoncxx/builder/stream/document.hpp>
@@ -19,6 +16,10 @@ using Json = nlohmann::json;
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::basic::make_document;
 
+using std::chrono::duration_cast;
+using std::chrono::high_resolution_clock;
+using std::chrono::milliseconds;
+
 #define SCIDB_HOST_ECOMMERCE "127.0.0.1"
 #define BUFFER 1000
 
@@ -28,11 +29,8 @@ using bsoncxx::builder::basic::make_document;
  */
 void T0(int brand_id)
 {
-    auto time_mysql, time_mongo, time_scidb, time_comm;
-    auto start_mysql, end_mysql, start_mongo, end_mongo, start_scidb, end_scidb, start_comm, end_comm;
-
     // A
-    start_mysql = high_resolution_clock::now();
+    auto start_mysql = high_resolution_clock::now();
     auto mysql = mysql_connector();
     mysql.mysess->sql("USE Ecommerce").execute();
     mysql.mysess->sql("DROP TABLE IF EXISTS TASK_NEW_B2_TEMPTABLE").execute();
@@ -42,16 +40,16 @@ void T0(int brand_id)
                       "JOIN Interested_in i ON p.person_id = i._from "
                       "JOIN Hashtag h ON i._to = h.tag_id")
         .execute();
-    end_mysql = high_resolution_clock::now();
-    time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
+    auto end_mysql = high_resolution_clock::now();
+    auto time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
 
     // B
-    start_mongo = high_resolution_clock::now();
+    auto start_mongo = high_resolution_clock::now();
     mongodb_connector mongodb("Ecommerce");
     bool mmjoin_optimized = false;
     int buffer_cnt = 0;
-    end_mongo = high_resolution_clock::now();
-    time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
+    auto end_mongo = high_resolution_clock::now();
+    auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
 
     if (mmjoin_optimized)
     {
@@ -92,7 +90,7 @@ void T0(int brand_id)
         end_mongo = high_resolution_clock::now();
         time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
 
-        start_comm = high_resolution_clock::now();
+        auto start_comm = high_resolution_clock::now();
         auto time_loop = 0;
         for (const auto &doc : cursor)
         {
@@ -120,8 +118,8 @@ void T0(int brand_id)
             time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
             time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
         }
-        end_comm = high_resolution_clock::now();
-        time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+        auto end_comm = high_resolution_clock::now();
+        auto time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
 
         start_mysql = high_resolution_clock::now();
         insert_temptbl_b.execute();
@@ -267,7 +265,7 @@ void T0(int brand_id)
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
     // D
-    start_scidb = high_resolution_clock::now();
+    auto start_scidb = high_resolution_clock::now();
     unique_ptr<ScidbConnection> scidb(new ScidbConnection(SCIDB_HOST_ECOMMERCE + string(":8080")));
     scidb->exec("remove(tnew_d)");
 
@@ -285,8 +283,8 @@ void T0(int brand_id)
     schema.attrs.push_back(ScidbAttr("tag_id", INT32));
 
     shared_ptr<ScidbArrFile> coo(new ScidbArrFile(schema));
-    end_scidb = high_resolution_clock::now();
-    time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
+    auto end_scidb = high_resolution_clock::now();
+    auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
     start_mysql = high_resolution_clock::now();
     auto res_d = mysql.mysess->getSchema("Ecommerce")
@@ -457,10 +455,7 @@ void T0(int brand_id)
  */
 void T2()
 {
-    auto time_mysql, time_mongo, time_scidb, time_comm;
-    auto start_mysql, end_mysql, start_mongo, end_mongo, start_scidb, end_scidb, start_comm, end_comm;
-
-    start_mysql = high_resolution_clock::now();
+    auto start_mysql = high_resolution_clock::now();
     auto mysql = mysql_connector();
     mysql.mysess->sql("USE Ecommerce").execute();
     mysql.mysess->sql("CREATE TEMPORARY TABLE Rating_history ("
@@ -472,10 +467,10 @@ void T2()
     auto Rating_history = mysql.mysess->getSchema("Ecommerce")
                               .getTable("Rating_history")
                               .insert("customer_id", "product_id", "rating");
-    end_mysql = high_resolution_clock::now();
-    time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
+    auto end_mysql = high_resolution_clock::now();
+    auto time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
 
-    start_mongo = high_resolution_clock::now();
+    auto start_mongo = high_resolution_clock::now();
     mongodb_connector mongodb("Ecommerce");
     auto orders = mongodb.db["Order"];
     auto reviews = mongodb.db["Review"];
@@ -492,10 +487,10 @@ void T2()
                        kvp("product_id", "$product_id"))),
         kvp("val", make_document(kvp("$avg", "$rating")))));
     auto cursor = reviews.aggregate(stages);
-    end_mongo = high_resolution_clock::now();
-    time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
+    auto end_mongo = high_resolution_clock::now();
+    auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
 
-    start_comm = high_resolution_clock::now();
+    auto start_comm = high_resolution_clock::now();
     auto time_loop = 0;
     int buffer = 0;
     for (auto history : cursor)
@@ -524,8 +519,8 @@ void T2()
         time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
         time_loop += duration_cast<milliseconds>(end_mysql - start_mysql);
     }
-    end_comm = high_resolution_clock::now();
-    time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    auto end_comm = high_resolution_clock::now();
+    auto time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
 
     start_mysql = high_resolution_clock::now();
     if (buffer > 0)
@@ -560,7 +555,7 @@ void T2()
     end_mysql = high_resolution_clock::now();
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
 
-    start_scidb = high_resolution_clock::now();
+    auto start_scidb = high_resolution_clock::now();
     unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_ECOMMERCE + string(":8080")));
 
     conn->exec("remove(temp)");
@@ -572,8 +567,8 @@ void T2()
     schema.attrs.push_back(ScidbAttr("y", INT32));
 
     shared_ptr<ScidbArrFile> coo(new ScidbArrFile(schema));
-    end_scidb = high_resolution_clock::now();
-    time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
+    auto end_scidb = high_resolution_clock::now();
+    auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
 
     start_comm = high_resolution_clock::now();
     time_loop = 0;
