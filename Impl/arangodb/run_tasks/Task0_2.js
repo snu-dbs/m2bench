@@ -59,6 +59,7 @@ res4 = db
             FILTER order.order_id == review.order_id AND review.rating == 5
         FOR product IN Product
             FILTER review.product_id == product.product_id
+	FILTER TO_NUMBER(customer.person_id) >= 0 AND TO_NUMBER(customer.person_id) <= 9948
         COLLECT person_id = customer.person_id, brand_id = product.brand_id
         AGGREGATE cnt = COUNT(review)
         RETURN { person_id: person_id, brand_id: brand_id, cnt: cnt }
@@ -76,6 +77,9 @@ res4 = db
         FILTER out_row.person_id == in_row.person_id AND out_row.cnt == in_row.max_cnt
     COLLECT person_id = out_row.person_id
     AGGREGATE brand_id = MIN(out_row.brand_id)
+
+    FILTER person_id >=0 AND person_id <= 9948
+
     UPDATE {
         _key: TO_STRING(person_id)
     } WITH { val: brand_id == 50 ? 1 : 0 } INTO TEMP_C
@@ -103,6 +107,7 @@ res6 = db
         FOR x IN TEMP_A
         FOR y IN LR_w
             FILTER x.tag_id == y.i
+	FILTER x.person_id >= 0 AND x.person_id <= 9948
         COLLECT person_id = x.person_id
         AGGREGATE val = SUM(x.val * y.val)
         RETURN { person_id: person_id, val: val }
@@ -120,7 +125,8 @@ res6 = db
         FOR x IN TEMP_A
         FOR y IN Diff
             FILTER x.person_id == y.person_id
-        COLLECT i = x.tag_id
+        FILTER x.tag_id >= 0 AND x.tag_id <= 299
+	COLLECT i = x.tag_id
         AGGREGATE val = SUM(x.val * y.diff)
         RETURN { i: i, val: 0.0001 * val }
     )
