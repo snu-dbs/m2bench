@@ -6,8 +6,8 @@
 res1 = db
   ._query(
     `
-    FOR person_id IN 0..19897
-    FOR tag_id IN 0..599
+    FOR person_id IN 0..9948
+    FOR tag_id IN 0..299
     INSERT {
         _key: CONCAT(TO_STRING(person_id), ",", TO_STRING(tag_id)),
         person_id: person_id,
@@ -24,10 +24,11 @@ res2 = db
     `
     FOR person IN Person
     FOR hashtag IN 1..1 OUTBOUND person Interested_in
-    COLLECT person_id_str = person._key, tag_id_str = hashtag._key
-    UPDATE {
-        _key: CONCAT(person_id_str, ",", tag_id_str)
-    } WITH { val: 1 } INTO TEMP_A
+    LET key_str = CONCAT(person._key, ",", hashtag._key)
+
+    FILTER LENGTH(FOR doc IN TEMP_A FILTER doc._key == key_str RETURN doc) > 0
+    
+    UPDATE { _key: key_str } WITH { val: 1 } INTO TEMP_A
 `
   )
   .getExtra();
@@ -36,7 +37,7 @@ res2 = db
 res3 = db
   ._query(
     `
-    FOR person_id IN 0..19897
+    FOR person_id IN 0..9948
     INSERT {
         _key: TO_STRING(person_id),
         person_id: person_id,
@@ -86,7 +87,7 @@ res4 = db
 res5 = db
   ._query(
     `
-    FOR i IN 0..599
+    FOR i IN 0..299
     INSERT { i: i, val: 1 } INTO LR_w
 `
   )
