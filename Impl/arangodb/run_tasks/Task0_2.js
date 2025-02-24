@@ -3,9 +3,8 @@
  */
 
 /* 1-1. Initialize TEMP_A (Step D in task) */
-res1 = db
-  ._profileQuery(
-    `
+res1 = db._profileQuery(
+  `
     FOR person_id IN 0..9948
     FOR tag_id IN 0..299
     INSERT {
@@ -15,15 +14,13 @@ res1 = db
         val: 0
     } INTO TEMP_A
 `,
-    {},
-    { colors: false }
-  )
-  .getExtra();
+  {},
+  { colors: false }
+);
 
 /* 1-2. Create TEMP_A (Step A and D in task) */
-res2 = db
-  ._profileQuery(
-    `
+res2 = db._profileQuery(
+  `
     FOR person IN Person
     FOR hashtag IN 1..1 OUTBOUND person Interested_in
     LET key_str = CONCAT(person._key, ",", hashtag._key)
@@ -32,15 +29,13 @@ res2 = db
     
     UPDATE { _key: key_str } WITH { val: 1 } INTO TEMP_A
 `,
-    {},
-    { colors: false }
-  )
-  .getExtra();
+  {},
+  { colors: false }
+);
 
 /* 1-3. Initialize TEMP_C (Step E in task) */
-res3 = db
-  ._profileQuery(
-    `
+res3 = db._profileQuery(
+  `
     FOR person_id IN 0..9948
     INSERT {
         _key: TO_STRING(person_id),
@@ -48,15 +43,13 @@ res3 = db
         val: 0
     } INTO TEMP_C
 `,
-    {},
-    { colors: false }
-  )
-  .getExtra();
+  {},
+  { colors: false }
+);
 
 /* 1-4. Create TEMP_C (Step B, C, and E in task) */
-res4 = db
-  ._profileQuery(
-    `
+res4 = db._profileQuery(
+  `
     LET B = (
         FOR customer IN Customer
         FOR order IN Order
@@ -90,29 +83,25 @@ res4 = db
         _key: TO_STRING(person_id)
     } WITH { val: brand_id == 50 ? 1 : 0 } INTO TEMP_C
 `,
-    {},
-    { colors: false }
-  )
-  .getExtra();
+  {},
+  { colors: false }
+);
 
 /* 1-5. Initialize LR_w */
-res5 = db
-  ._profileQuery(
-    `
+res5 = db._profileQuery(
+  `
     FOR i IN 0..299
     INSERT { i: i, val: 1 } INTO LR_w
 `,
-    {},
-    { colors: false }
-  )
-  .getExtra();
+  {},
+  { colors: false }
+);
 
 /**
  * 2. Logistic Regression
  */
-res6 = db
-  ._profileQuery(
-    `
+res6 = db._profileQuery(
+  `
     LET Xw = (
         FOR x IN TEMP_A
         FOR y IN LR_w
@@ -146,46 +135,43 @@ res6 = db
         FILTER x.i == w.i
     INSERT { i: x.i, val: w.val - x.val } INTO LR_w_new
 `,
-    {},
-    { colors: false }
-  )
-  .getExtra();
+  {},
+  { colors: false }
+);
 
-res7 = db
-  ._profileQuery(`FOR row IN LR_w REMOVE row IN LR_w`, {}, { colors: false })
-  .getExtra();
-res8 = db
-  ._profileQuery(
-    `FOR row IN LR_w_new INSERT row INTO LR_w`,
-    {},
-    { colors: false }
-  )
-  .getExtra();
-res9 = db
-  ._profileQuery(
-    `FOR row IN LR_w_new REMOVE row IN LR_w_new`,
-    {},
-    { colors: false }
-  )
-  .getExtra();
+res7 = db._profileQuery(
+  `FOR row IN LR_w REMOVE row IN LR_w`,
+  {},
+  { colors: false }
+);
+res8 = db._profileQuery(
+  `FOR row IN LR_w_new INSERT row INTO LR_w`,
+  {},
+  { colors: false }
+);
+res9 = db._profileQuery(
+  `FOR row IN LR_w_new REMOVE row IN LR_w_new`,
+  {},
+  { colors: false }
+);
 
 res10 = db._profileQuery(`RETURN COUNT(LR_w)`, {}, { colors: false });
 
 /* Print result and execution time */
-print(res10.next());
-print(
-  "Elapsed Time: ",
-  res1["stats"]["executionTime"] +
-    res2["stats"]["executionTime"] +
-    res3["stats"]["executionTime"] +
-    res4["stats"]["executionTime"] +
-    res5["stats"]["executionTime"] +
-    res6["stats"]["executionTime"] +
-    res7["stats"]["executionTime"] +
-    res8["stats"]["executionTime"] +
-    res9["stats"]["executionTime"] +
-    res10.getExtra()["stats"]["executionTime"]
-);
+// print(res10.next());
+// print(
+//   "Elapsed Time: ",
+//   res1["stats"]["executionTime"] +
+//     res2["stats"]["executionTime"] +
+//     res3["stats"]["executionTime"] +
+//     res4["stats"]["executionTime"] +
+//     res5["stats"]["executionTime"] +
+//     res6["stats"]["executionTime"] +
+//     res7["stats"]["executionTime"] +
+//     res8["stats"]["executionTime"] +
+//     res9["stats"]["executionTime"] +
+//     res10.getExtra()["stats"]["executionTime"]
+// );
 
 // Answer Validation
 // const fs = require("fs");
