@@ -4,7 +4,7 @@
 
 /* 1-1. Initialize TEMP_A (Step D in task) */
 res1 = db
-  ._query(
+  ._profileQuery(
     `
     FOR person_id IN 0..9948
     FOR tag_id IN 0..299
@@ -14,13 +14,15 @@ res1 = db
         tag_id: tag_id,
         val: 0
     } INTO TEMP_A
-`
+`,
+    {},
+    { colors: false }
   )
   .getExtra();
 
 /* 1-2. Create TEMP_A (Step A and D in task) */
 res2 = db
-  ._query(
+  ._profileQuery(
     `
     FOR person IN Person
     FOR hashtag IN 1..1 OUTBOUND person Interested_in
@@ -29,13 +31,15 @@ res2 = db
     FILTER LENGTH(FOR doc IN TEMP_A FILTER doc._key == key_str RETURN doc) > 0
     
     UPDATE { _key: key_str } WITH { val: 1 } INTO TEMP_A
-`
+`,
+    {},
+    { colors: false }
   )
   .getExtra();
 
 /* 1-3. Initialize TEMP_C (Step E in task) */
 res3 = db
-  ._query(
+  ._profileQuery(
     `
     FOR person_id IN 0..9948
     INSERT {
@@ -43,13 +47,15 @@ res3 = db
         person_id: person_id,
         val: 0
     } INTO TEMP_C
-`
+`,
+    {},
+    { colors: false }
   )
   .getExtra();
 
 /* 1-4. Create TEMP_C (Step B, C, and E in task) */
 res4 = db
-  ._query(
+  ._profileQuery(
     `
     LET B = (
         FOR customer IN Customer
@@ -79,17 +85,21 @@ res4 = db
     UPDATE {
         _key: TO_STRING(person_id)
     } WITH { val: brand_id == 50 ? 1 : 0 } INTO TEMP_C
-`
+`,
+    {},
+    { colors: false }
   )
   .getExtra();
 
 /* 1-5. Initialize LR_w */
 res5 = db
-  ._query(
+  ._profileQuery(
     `
     FOR i IN 0..299
     INSERT { i: i, val: 1 } INTO LR_w
-`
+`,
+    {},
+    { colors: false }
   )
   .getExtra();
 
@@ -97,7 +107,7 @@ res5 = db
  * 2. Logistic Regression
  */
 res6 = db
-  ._query(
+  ._profileQuery(
     `
     LET Xw = (
         FOR x IN TEMP_A
@@ -129,15 +139,31 @@ res6 = db
     FOR w IN LR_w
         FILTER x.i == w.i
     INSERT { i: x.i, val: w.val - x.val } INTO LR_w_new
-`
+`,
+    {},
+    { colors: false }
   )
   .getExtra();
 
-res7 = db._query(`FOR row IN LR_w REMOVE row IN LR_w`).getExtra();
-res8 = db._query(`FOR row IN LR_w_new INSERT row INTO LR_w`).getExtra();
-res9 = db._query(`FOR row IN LR_w_new REMOVE row IN LR_w_new`).getExtra();
+res7 = db
+  ._profileQuery(`FOR row IN LR_w REMOVE row IN LR_w`, {}, { colors: false })
+  .getExtra();
+res8 = db
+  ._profileQuery(
+    `FOR row IN LR_w_new INSERT row INTO LR_w`,
+    {},
+    { colors: false }
+  )
+  .getExtra();
+res9 = db
+  ._profileQuery(
+    `FOR row IN LR_w_new REMOVE row IN LR_w_new`,
+    {},
+    { colors: false }
+  )
+  .getExtra();
 
-res10 = db._query(`RETURN COUNT(LR_w)`);
+res10 = db._profileQuery(`RETURN COUNT(LR_w)`, {}, { colors: false });
 
 /* Print result and execution time */
 print(res10.next());
@@ -158,13 +184,17 @@ print(
 // Answer Validation
 // const fs = require("fs");
 
-// let cursor = db._query("FOR row IN LR_w RETURN row");
+// let cursor = db._profileQuery(
+//   "FOR row IN LR_w RETURN row",
+//   {},
+//   { colors: false }
+// );
 // let data = cursor.toArray();
 
 // let csvContent = "i,val\n";
 
-// data.forEach(row => {
-//     csvContent += `${row.i},${row.val}\n`;
+// data.forEach((row) => {
+//   csvContent += `${row.i},${row.val}\n`;
 // });
 
 // let filePath = "/tmp/t0.csv";
