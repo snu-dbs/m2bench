@@ -1,8 +1,7 @@
 db._useDatabase("Healthcare");
 
-res1 = db
-  ._query(
-    `
+res1 = db._profileQuery(
+  `
     LET A = (
         FOR d IN Drug
         FOR ae IN d.adverse_effect_list
@@ -14,60 +13,61 @@ res1 = db
     )
     FOR a IN A
     INSERT { drug: a.drug, adverse_effect: a.adverse_effect, is_adverse_effect: a.is_adverse_effect } INTO drug_matrix
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res2 = db
-  ._query(
-    `
+res2 = db._profileQuery(
+  `
     FOR a IN drug_matrix
     FOR b IN drug_matrix
         FILTER a.adverse_effect == b.adverse_effect
         COLLECT row = a.drug, col = b.drug
         AGGREGATE res = SUM(a.is_adverse_effect * b.is_adverse_effect)
     INSERT { drug1: row, drug2: col, val: res } INTO similarity1
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res3 = db
-  ._query(
-    `
+res3 = db._profileQuery(
+  `
     FOR s IN similarity1
         FILTER s.drug1 == s.drug2
     INSERT { drug1: s.drug1, drug2: s.drug2, val: 1 / SQRT(s.val) } INTO inv_norm
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res4 = db
-  ._query(
-    `
+res4 = db._profileQuery(
+  `
     FOR a IN similarity1
     FOR b IN inv_norm
         FILTER a.drug2 == b.drug1
         COLLECT row = a.drug1, col = b.drug2
         AGGREGATE res = SUM(a.val * b.val)
     INSERT { drug1: row, drug2: col, val: res } INTO similarity2
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res5 = db
-  ._query(
-    `
+res5 = db._profileQuery(
+  `
     FOR a IN similarity2
     FOR b IN inv_norm
         FILTER a.drug1 == b.drug1
         COLLECT row = a.drug2, col = b.drug2
         AGGREGATE res = SUM(a.val * b.val)
     INSERT { drug1: row, drug2: col, val: res } INTO drug_similarity
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res6 = db._query(`
+res6 = db._profileQuery(`
     LET A = (
         FOR p IN Prescription
             FILTER p.patient_id == 9
@@ -82,22 +82,23 @@ res6 = db._query(`
     RETURN LENGTH(R)
 `);
 
-res7 = res6.getExtra();
+// res7 = res6.getExtra();
 
-print(res6);
-print(
-  res1["stats"]["executionTime"] +
-    res2["stats"]["executionTime"] +
-    res3["stats"]["executionTime"] +
-    res4["stats"]["executionTime"] +
-    res5["stats"]["executionTime"] +
-    res7["stats"]["executionTime"]
-);
+// print(res6);
+// print(
+//   res1["stats"]["executionTime"] +
+//     res2["stats"]["executionTime"] +
+//     res3["stats"]["executionTime"] +
+//     res4["stats"]["executionTime"] +
+//     res5["stats"]["executionTime"] +
+//     res7["stats"]["executionTime"]
+// );
 
 // Answer Validation
 // const fs = require("fs");
 
-// let cursor = db._query(`
+// let cursor = db._profileQuery(
+//   `
 //     LET A = (
 //         FOR p IN Prescription
 //             FILTER p.patient_id == 9
@@ -108,13 +109,16 @@ print(
 //     FOR ds IN drug_similarity
 //         FILTER ds.drug1 == a.drug
 //     RETURN ds
-// `);
+// `,
+//   {},
+//   { colors: false }
+// );
 // let data = cursor.toArray();
 
 // let csvContent = "drug_1,drug_2,val\n";
 
-// data.forEach(row => {
-//     csvContent += `${row.drug1},${row.drug2},${row.val}\n`;
+// data.forEach((row) => {
+//   csvContent += `${row.drug1},${row.drug2},${row.val}\n`;
 // });
 
 // let filePath = "/tmp/t9.csv";

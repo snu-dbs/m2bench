@@ -1,4 +1,5 @@
-let res = db._query(`
+let res = db._profileQuery(
+  `
     LET Z1 = 5
     LET Z2 = 10
 
@@ -80,12 +81,15 @@ let res = db._query(`
 
     RETURN LENGTH(D)
     // RETURN D[*] // Answer Validation
-`);
+`,
+  {},
+  { colors: false }
+);
 
-let res2 = res.getExtra();
+// let res2 = res.getExtra();
 
-print(res);
-print(res2["stats"]["executionTime"]);
+// print(res);
+// print(res2["stats"]["executionTime"]);
 
 // Answer Validation
 // const fs = require("fs");

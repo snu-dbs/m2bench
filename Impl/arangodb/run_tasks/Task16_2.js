@@ -1,4 +1,5 @@
-res = db._query(`
+res = db._profileQuery(
+  `
     LET Z1 = 6
     LET Z2 = 8
     LET interval = 10800
@@ -53,12 +54,15 @@ res = db._query(`
 
     RETURN LENGTH(C)
     // RETURN C // Answer Validation
-`);
+`,
+  {},
+  { colors: false }
+);
 
-res2 = res.getExtra();
+// res2 = res.getExtra();
 
-print(res);
-print(res2["stats"]["executionTime"]);
+// print(res);
+// print(res2["stats"]["executionTime"]);
 
 // Answer Validation
 // const fs = require("fs");
@@ -67,8 +71,8 @@ print(res2["stats"]["executionTime"]);
 
 // let csvContent = "site_id,pm10\n";
 
-// data[0].forEach(row => {
-//     csvContent += `${row.site_id},${row.pm10}\n`;
+// data[0].forEach((row) => {
+//   csvContent += `${row.site_id},${row.pm10}\n`;
 // });
 
 // let filePath = "/tmp/t16.csv";

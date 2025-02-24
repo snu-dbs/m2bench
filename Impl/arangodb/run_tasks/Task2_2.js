@@ -1,6 +1,5 @@
-res1 = db
-  ._query(
-    `
+res1 = db._profileQuery(
+  `
     LET ratings = (
         FOR order IN Order
         FOR review IN Review
@@ -12,13 +11,13 @@ res1 = db
 
     FOR v IN ratings
     INSERT v INTO V
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res2 = db
-  ._query(
-    `
+res2 = db._profileQuery(
+  `
     LET D1 = (
         FOR v IN V
         COLLECT product_id = v.product_id
@@ -30,13 +29,13 @@ res2 = db
     FOR d IN D1
     FOR i IN 1..Feature_Size
     INSERT { product_id: d.product_id, feature_id: i, val: 1.0 } INTO H
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res3 = db
-  ._query(
-    `
+res3 = db._profileQuery(
+  `
     LET D1 = (
         FOR v IN V
         COLLECT customer_id = v.customer_id
@@ -48,26 +47,26 @@ res3 = db
     FOR d IN D1
     FOR i IN 1..Feature_Size
     INSERT { customer_id: d.customer_id, feature_id: i, val: 1.0 } INTO W
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res4 = db
-  ._query(
-    `
+res4 = db._profileQuery(
+  `
     FOR w IN W
     FOR v IN V
         FILTER v.customer_id == w.customer_id
         COLLECT product_id = v.product_id, feature_id = w.feature_id
         AGGREGATE val = SUM(v.val * w.val)
     INSERT { product_id, feature_id, val } INTO WtV
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res5 = db
-  ._query(
-    `
+res5 = db._profileQuery(
+  `
     LET WtW = (
         FOR w1 IN W
         FOR w2 IN W
@@ -83,13 +82,13 @@ res5 = db
         COLLECT feature_id = wtw.feature_id1, product_id = h.product_id
         AGGREGATE val = SUM(wtw.val * h.val)
     INSERT { product_id, feature_id, val } INTO WtWH
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res6 = db
-  ._query(
-    `
+res6 = db._profileQuery(
+  `
     FOR h IN H
     FOR wtwh IN WtWH
     FOR wtv IN WtV
@@ -97,26 +96,26 @@ res6 = db
         FILTER h.feature_id == wtwh.feature_id AND h.product_id == wtwh.product_id
         LET val = h.val * (wtv.val / wtwh.val)
     INSERT { product_id: h.product_id, feature_id: h.feature_id, val } INTO newH
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res7 = db
-  ._query(
-    `
+res7 = db._profileQuery(
+  `
     FOR h IN newH
     FOR v IN V
         FILTER v.product_id == h.product_id
         COLLECT customer_id = v.customer_id, feature_id = h.feature_id
         AGGREGATE val = SUM(v.val * h.val)
     INSERT { customer_id, feature_id, val } INTO VHt
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res8 = db
-  ._query(
-    `
+res8 = db._profileQuery(
+  `
     LET HHt = (
         FOR h1 IN newH
         FOR h2 IN newH
@@ -132,13 +131,13 @@ res8 = db
         COLLECT customer_id = w.customer_id, feature_id = hht.feature_id2
         AGGREGATE val = SUM(w.val * hht.val)
     INSERT { customer_id, feature_id, val } INTO WHHt
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res9 = db
-  ._query(
-    `
+res9 = db._profileQuery(
+  `
     FOR w IN W
     FOR vht IN VHt
     FOR whht IN WHHt
@@ -146,38 +145,43 @@ res9 = db
         FILTER vht.customer_id == whht.customer_id AND vht.feature_id == whht.feature_id
         LET val = vht.val * w.val / whht.val
     INSERT { customer_id: w.customer_id, feature_id: w.feature_id, val } INTO newW
-`
-  )
-  .getExtra();
+`,
+  {},
+  { colors: false }
+);
 
-res10 = db._query(`RETURN COUNT(newW)`);
+res10 = db._profileQuery(`RETURN COUNT(newW)`, {}, { colors: false });
 
 /* Print result and execution time */
-print(res10.next());
-print(
-  "Elapsed Time: ",
-  res1["stats"]["executionTime"] +
-    res2["stats"]["executionTime"] +
-    res3["stats"]["executionTime"] +
-    res4["stats"]["executionTime"] +
-    res5["stats"]["executionTime"] +
-    res6["stats"]["executionTime"] +
-    res7["stats"]["executionTime"] +
-    res8["stats"]["executionTime"] +
-    res9["stats"]["executionTime"] +
-    res10.getExtra()["stats"]["executionTime"]
-);
+// print(res10.next());
+// print(
+//   "Elapsed Time: ",
+//   res1["stats"]["executionTime"] +
+//     res2["stats"]["executionTime"] +
+//     res3["stats"]["executionTime"] +
+//     res4["stats"]["executionTime"] +
+//     res5["stats"]["executionTime"] +
+//     res6["stats"]["executionTime"] +
+//     res7["stats"]["executionTime"] +
+//     res8["stats"]["executionTime"] +
+//     res9["stats"]["executionTime"] +
+//     res10.getExtra()["stats"]["executionTime"]
+// );
 
 // Answer Validation
 // const fs = require("fs");
 
-// let cursor = db._query("FOR row IN newW RETURN row");
+// let cursor = db._profileQuery(
+//   "FOR row IN newW RETURN row",
+//   {},
+//   { colors: false }
+// );
 // let data = cursor.toArray();
 
 // let csvContent = "customer_id,feature_id,val\n";
 
-// data.forEach(row => {
-//     csvContent += `${row.customer_id},${row.feature_id},${row.val}\n`;
+// data.forEach((row) => {
+//   csvContent += `${row.customer_id},${row.feature_id},${row.val}\n`;
 // });
 
 // let filePath = "/tmp/t2.csv";
