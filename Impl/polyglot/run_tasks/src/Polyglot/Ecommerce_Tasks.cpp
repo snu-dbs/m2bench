@@ -354,7 +354,7 @@ void T0(int brand_id)
     time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
     cout << "Insert to tnew_d_temp (MySQL - Get Row): " << time_mysql.count() - before_mysql.count() << " ms" << endl;
     cout << "Append to tnew_d_temp (SciDB): " << time_scidb.count() - before_scidb.count() << " ms" << endl;
-    cout << "Communication Time: " << duration_cast<milliseconds>(end_comm - start_comm - time_loop) << " ms" << endl;
+    cout << "Communication Time: " << duration_cast<milliseconds>(end_comm - start_comm - time_loop).count() << " ms" << endl;
 
     // Densify
     start_scidb = high_resolution_clock::now();
@@ -419,7 +419,7 @@ void T0(int brand_id)
     time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
     cout << "Insert to tnew_e_temp (MySQL - Get Row): " << time_mysql.count() - before_mysql.count() << " ms" << endl;
     cout << "Append to tnew_e_temp (SciDB): " << time_scidb.count() - before_scidb.count() << " ms" << endl;
-    cout << "Communication Time: " << duration_cast<milliseconds>(end_comm - start_comm - time_loop) << " ms" << endl;
+    cout << "Communication Time: " << duration_cast<milliseconds>(end_comm - start_comm - time_loop).count() << " ms" << endl;
 
     // Densify
     start_scidb = high_resolution_clock::now();
@@ -472,7 +472,7 @@ void T0(int brand_id)
     }
     end_comm = high_resolution_clock::now();
     time_comm += duration_cast<milliseconds>(end_comm - start_comm);
-    cout << "Communication Time (Get result from SciDB): " << duration_cast<milliseconds>(end_comm - start_comm) << " ms" << endl
+    cout << "Communication Time (Get result from SciDB): " << duration_cast<milliseconds>(end_comm - start_comm).count() << " ms" << endl
          << endl;
 
     /* save result matrix to csv */
@@ -614,7 +614,7 @@ void T2()
     int dim2 = mysql.mysess->getSchema("Ecommerce").getTable("Rproduct").count();
     end_mysql = high_resolution_clock::now();
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
-    cout << "Create Index and Get A (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql) << " ms" << endl;
+    cout << "Create Index and Get A (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
     before_mysql = time_mysql;
 
     auto start_scidb = high_resolution_clock::now();
@@ -670,7 +670,7 @@ void T2()
     time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
     cout << "Insert to array A (MySQL - Get Row): " << time_mysql.count() - before_mysql.count() << " ms" << endl;
     cout << "Append to array A (SciDB): " << time_scidb.count() - before_scidb.count() << " ms" << endl;
-    cout << "Communication Time: " << duration_cast<milliseconds>(end_comm - start_comm - time_loop) << " ms" << endl;
+    cout << "Communication Time: " << duration_cast<milliseconds>(end_comm - start_comm - time_loop).count() << " ms" << endl;
     before_comm = time_comm;
 
     start_scidb = high_resolution_clock::now();
@@ -796,7 +796,7 @@ void T2()
     }
     end_scidb = high_resolution_clock::now();
     time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb - time_loop);
-    cout << "MatMul (SciDB): " << duration_cast<milliseconds>(end_scidb - start_scidb - time_loop) << " ms" << endl;
+    cout << "MatMul (SciDB): " << duration_cast<milliseconds>(end_scidb - start_scidb - time_loop).count() << " ms" << endl;
     cout << "Communication Time (Get result from SciDB): " << time_comm.count() - before_comm.count() << " ms" << endl
          << endl;
 
