@@ -43,10 +43,8 @@ void T0(int brand_id)
     mysql.mysess->sql("USE Ecommerce").execute();
     mysql.mysess->sql("DROP TABLE IF EXISTS TASK_NEW_B2_TEMPTABLE").execute();
     mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_A_TEMPTABLE AS "
-                      "SELECT p.person_id, h.tag_id "
-                      "FROM Person p "
-                      "JOIN Interested_in i ON p.person_id = i._from "
-                      "JOIN Hashtag h ON i._to = h.tag_id")
+                      "SELECT _from AS person_id, _to AS tag_id "
+                      "FROM Interested_in")
         .execute();
     auto end_mysql = high_resolution_clock::now();
     auto time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
