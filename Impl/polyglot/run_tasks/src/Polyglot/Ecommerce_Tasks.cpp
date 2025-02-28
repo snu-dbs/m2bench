@@ -33,6 +33,10 @@ void T0(int brand_id)
     auto start_comm = high_resolution_clock::now();
     auto end_comm = high_resolution_clock::now();
 
+    auto before_mysql = milliseconds(0);
+    auto before_mongo = milliseconds(0);
+    auto before_scidb = milliseconds(0);
+
     // A
     auto start_mysql = high_resolution_clock::now();
     auto mysql = mysql_connector();
@@ -46,6 +50,7 @@ void T0(int brand_id)
         .execute();
     auto end_mysql = high_resolution_clock::now();
     auto time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
+    cout << "A (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
 
     // B
     auto start_mongo = high_resolution_clock::now();
@@ -54,6 +59,7 @@ void T0(int brand_id)
     int buffer_cnt = 0;
     auto end_mongo = high_resolution_clock::now();
     auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
+    cout << "Connect (MongoDB): " << duration_cast<milliseconds>(end_mongo - start_mongo).count() << " ms" << endl;
 
     if (mmjoin_optimized)
     {
@@ -73,6 +79,7 @@ void T0(int brand_id)
             kvp("product_id", "$product_id")));
         end_mongo = high_resolution_clock::now();
         time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
+        cout << "Get pairs from Order (MongoDB): " << duration_cast<milliseconds>(end_mongo - start_mongo).count() << " ms" << endl;
 
         start_mysql = high_resolution_clock::now();
         mysql.mysess->sql("USE Ecommerce").execute();
@@ -88,11 +95,15 @@ void T0(int brand_id)
                                     .insert("customer_id", "product_id");
         end_mysql = high_resolution_clock::now();
         time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+        cout << "Create TASK_NEW_B1_TEMPTABLE (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
+        before_mysql = time_mysql;
 
         start_mongo = high_resolution_clock::now();
         auto cursor = mongodb.db["Review"].aggregate(stages);
         end_mongo = high_resolution_clock::now();
         time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
+        cout << "Aggregate Review (MongoDB): " << duration_cast<milliseconds>(end_mongo - start_mongo).count() << " ms" << endl;
+        before_mongo = time_mongo;
 
         start_comm = high_resolution_clock::now();
         milliseconds time_loop = milliseconds(0);
@@ -124,6 +135,9 @@ void T0(int brand_id)
         }
         end_comm = high_resolution_clock::now();
         time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+        cout << "Insert to TASK_NEW_B1_TEMPTABLE (MongoDB - Parse): " << time_mongo.count() - before_mongo.count() << " ms" << endl;
+        cout << "Insert to TASK_NEW_B1_TEMPTABLE (MySQL): " << time_mysql.count() - before_mysql.count() << " ms" << endl;
+        cout << "Communication Time: " << time_comm.count() << " ms" << endl;
 
         start_mysql = high_resolution_clock::now();
         insert_temptbl_b.execute();
@@ -145,6 +159,7 @@ void T0(int brand_id)
             .execute();
         end_mysql = high_resolution_clock::now();
         time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+        cout << "TASK_NEW_B2_TEMPTABLE (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
     }
     else
     {
@@ -164,6 +179,7 @@ void T0(int brand_id)
             kvp("product_id", "$product_id")));
         end_mongo = high_resolution_clock::now();
         time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
+        cout << "Get pairs from Order (MongoDB): " << duration_cast<milliseconds>(end_mongo - start_mongo).count() << " ms" << endl;
 
         start_mysql = high_resolution_clock::now();
         mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_B2_TEMPTABLE_2 ("
@@ -176,11 +192,15 @@ void T0(int brand_id)
                                     .insert("person_id", "brand_id");
         end_mysql = high_resolution_clock::now();
         time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+        cout << "Create TASK_NEW_B2_TEMPTABLE_2 (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
+        before_mysql = time_mysql;
 
         start_mongo = high_resolution_clock::now();
         auto cursor = mongodb.db["Review"].aggregate(stages);
         end_mongo = high_resolution_clock::now();
         time_mongo += duration_cast<milliseconds>(end_mongo - start_mongo);
+        cout << "Aggregate Review (MongoDB): " << duration_cast<milliseconds>(end_mongo - start_mongo).count() << " ms" << endl;
+        before_mongo = time_mongo;
 
         start_comm = high_resolution_clock::now();
         milliseconds time_loop = milliseconds(0);
@@ -226,6 +246,9 @@ void T0(int brand_id)
         }
         end_comm = high_resolution_clock::now();
         time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+        cout << "Insert to TASK_NEW_B2_TEMPTABLE_2 (MongoDB - Parse): " << time_mongo.count() - before_mongo.count() << " ms" << endl;
+        cout << "Insert to TASK_NEW_B2_TEMPTABLE_2 (MySQL): " << time_mysql.count() - before_mysql.count() << " ms" << endl;
+        cout << "Communication Time: " << time_comm.count() << " ms" << endl;
 
         start_mysql = high_resolution_clock::now();
         insert_temptbl_b.execute();
@@ -245,6 +268,7 @@ void T0(int brand_id)
             .execute();
         end_mysql = high_resolution_clock::now();
         time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+        cout << "TASK_NEW_B2_TEMPTABLE (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
     }
 
     // C: Find favorite brand per customer
@@ -267,6 +291,7 @@ void T0(int brand_id)
         .execute();
     end_mysql = high_resolution_clock::now();
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+    cout << "C (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
 
     // D
     auto start_scidb = high_resolution_clock::now();
@@ -289,6 +314,8 @@ void T0(int brand_id)
     shared_ptr<ScidbArrFile> coo(new ScidbArrFile(schema));
     auto end_scidb = high_resolution_clock::now();
     auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
+    cout << "D (SciDB): " << duration_cast<milliseconds>(end_scidb - start_scidb).count() << " ms" << endl;
+    before_scidb = time_scidb;
 
     start_mysql = high_resolution_clock::now();
     auto res_d = mysql.mysess->getSchema("Ecommerce")
@@ -297,6 +324,8 @@ void T0(int brand_id)
                      .execute();
     end_mysql = high_resolution_clock::now();
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+    cout << "Get A (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
+    before_mysql = time_mysql;
 
     start_comm = high_resolution_clock::now();
     milliseconds time_loop = milliseconds(0);
@@ -323,6 +352,9 @@ void T0(int brand_id)
     scidb->upload("tnew_d_temp", coo);
     end_comm = high_resolution_clock::now();
     time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    cout << "Insert to tnew_d_temp (MySQL - Get Row): " << time_mysql.count() - before_mysql.count() << " ms" << endl;
+    cout << "Append to tnew_d_temp (SciDB): " << time_scidb.count() - before_scidb.count() << " ms" << endl;
+    cout << "Communication Time: " << duration_cast<milliseconds>(end_comm - start_comm - time_loop) << " ms" << endl;
 
     // Densify
     start_scidb = high_resolution_clock::now();
@@ -347,6 +379,8 @@ void T0(int brand_id)
     shared_ptr<ScidbArrFile> coo2(new ScidbArrFile(schema2));
     end_scidb = high_resolution_clock::now();
     time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
+    cout << "E (SciDB): " << duration_cast<milliseconds>(end_scidb - start_scidb).count() << " ms" << endl;
+    before_scidb = time_scidb;
 
     start_mysql = high_resolution_clock::now();
     auto res_e = mysql.mysess->getSchema("Ecommerce")
@@ -355,6 +389,8 @@ void T0(int brand_id)
                      .execute();
     end_mysql = high_resolution_clock::now();
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+    cout << "Get C (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
+    before_mysql = time_mysql;
 
     start_comm = high_resolution_clock::now();
     time_loop = milliseconds(0);
@@ -381,6 +417,9 @@ void T0(int brand_id)
     scidb->upload("tnew_e_temp", coo2);
     end_comm = high_resolution_clock::now();
     time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    cout << "Insert to tnew_e_temp (MySQL - Get Row): " << time_mysql.count() - before_mysql.count() << " ms" << endl;
+    cout << "Append to tnew_e_temp (SciDB): " << time_scidb.count() - before_scidb.count() << " ms" << endl;
+    cout << "Communication Time: " << duration_cast<milliseconds>(end_comm - start_comm - time_loop) << " ms" << endl;
 
     // Densify
     start_scidb = high_resolution_clock::now();
@@ -415,11 +454,13 @@ void T0(int brand_id)
     }
     end_scidb = high_resolution_clock::now();
     time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
+    cout << "Logistic Regression (SciDB): " << duration_cast<milliseconds>(end_scidb - start_scidb).count() << " ms" << endl;
 
     start_mysql = high_resolution_clock::now();
     mysql.mysess->sql("DROP TABLE TASK_NEW_B2_TEMPTABLE").execute();
     end_mysql = high_resolution_clock::now();
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+    cout << "Drop TASK_NEW_B2_TEMPTABLE (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql).count() << " ms" << endl;
 
     start_comm = high_resolution_clock::now();
     auto result = scidb->download("tnew_w");
@@ -431,6 +472,8 @@ void T0(int brand_id)
     }
     end_comm = high_resolution_clock::now();
     time_comm += duration_cast<milliseconds>(end_comm - start_comm);
+    cout << "Communication Time (Get result from SciDB): " << duration_cast<milliseconds>(end_comm - start_comm) << " ms" << endl
+         << endl;
 
     /* save result matrix to csv */
     // scidb->exec("save(tnew_w, '/tmp/t0.csv', -2, 'csv')");
@@ -460,6 +503,11 @@ void T0(int brand_id)
  */
 void T2()
 {
+    auto before_mysql = milliseconds(0);
+    auto before_mongo = milliseconds(0);
+    auto before_scidb = milliseconds(0);
+    auto before_comm = milliseconds(0);
+
     auto start_mysql = high_resolution_clock::now();
     auto mysql = mysql_connector();
     mysql.mysess->sql("USE Ecommerce").execute();
@@ -474,6 +522,8 @@ void T2()
                               .insert("customer_id", "product_id", "rating");
     auto end_mysql = high_resolution_clock::now();
     auto time_mysql = duration_cast<milliseconds>(end_mysql - start_mysql);
+    cout << "Create Rating_history (MySQL): " << time_mysql.count() << " ms" << endl;
+    before_mysql = time_mysql;
 
     auto start_mongo = high_resolution_clock::now();
     mongodb_connector mongodb("Ecommerce");
@@ -494,6 +544,8 @@ void T2()
     auto cursor = reviews.aggregate(stages);
     auto end_mongo = high_resolution_clock::now();
     auto time_mongo = duration_cast<milliseconds>(end_mongo - start_mongo);
+    cout << "Aggregate Review (MongoDB): " << time_mongo.count() << " ms" << endl;
+    before_mongo = time_mongo;
 
     auto start_comm = high_resolution_clock::now();
     milliseconds time_loop = milliseconds(0);
@@ -526,6 +578,9 @@ void T2()
     }
     auto end_comm = high_resolution_clock::now();
     auto time_comm = duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    cout << "Insert to Rating_history (MongoDB - Parse): " << time_mongo.count() - before_mongo.count() << " ms" << endl;
+    cout << "Insert to Rating_history (MySQL): " << time_mysql.count() - before_mysql.count() << " ms" << endl;
+    cout << "Communication Time: " << time_comm.count() << " ms" << endl;
 
     start_mysql = high_resolution_clock::now();
     if (buffer > 0)
@@ -559,6 +614,8 @@ void T2()
     int dim2 = mysql.mysess->getSchema("Ecommerce").getTable("Rproduct").count();
     end_mysql = high_resolution_clock::now();
     time_mysql += duration_cast<milliseconds>(end_mysql - start_mysql);
+    cout << "Create Index and Get A (MySQL): " << duration_cast<milliseconds>(end_mysql - start_mysql) << " ms" << endl;
+    before_mysql = time_mysql;
 
     auto start_scidb = high_resolution_clock::now();
     unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_ECOMMERCE + string(":8080")));
@@ -574,6 +631,8 @@ void T2()
     shared_ptr<ScidbArrFile> coo(new ScidbArrFile(schema));
     auto end_scidb = high_resolution_clock::now();
     auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
+    cout << "A to array (SciDB): " << time_scidb.count() << " ms" << endl;
+    before_scidb = time_scidb;
 
     start_comm = high_resolution_clock::now();
     time_loop = milliseconds(0);
@@ -609,6 +668,10 @@ void T2()
     conn->upload("temp", coo);
     end_comm = high_resolution_clock::now();
     time_comm += duration_cast<milliseconds>(end_comm - start_comm - time_loop);
+    cout << "Insert to array A (MySQL - Get Row): " << time_mysql.count() - before_mysql.count() << " ms" << endl;
+    cout << "Append to array A (SciDB): " << time_scidb.count() - before_scidb.count() << " ms" << endl;
+    cout << "Communication Time: " << duration_cast<milliseconds>(end_comm - start_comm - time_loop) << " ms" << endl;
+    before_comm = time_comm;
 
     start_scidb = high_resolution_clock::now();
     conn->exec("remove(V)");
@@ -733,6 +796,9 @@ void T2()
     }
     end_scidb = high_resolution_clock::now();
     time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb - time_loop);
+    cout << "MatMul (SciDB): " << duration_cast<milliseconds>(end_scidb - start_scidb - time_loop) << " ms" << endl;
+    cout << "Communication Time (Get result from SciDB): " << time_comm.count() - before_comm.count() << " ms" << endl
+         << endl;
 
     /* save result matrix to csv */
     // conn->exec("save(W, '/tmp/t2.csv', -2, 'csv')");
