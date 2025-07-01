@@ -170,7 +170,7 @@ void T9(int patient_id)
     conn->exec("remove(similarity2)");
     conn->exec("remove(inv_norm)");
     conn->exec("remove(drug_similarity)");
-    conn->exec("create array temp<drug:int64 NOT NULL, adverse_effect:int64 NOT NULL, is_adverse_effect:double NOT NULL> [i=0:" + to_string(dim1 * dim2 - 1) + ":0:1000000]");
+    conn->exec("create array temp<drug:int64 NOT NULL, adverse_effect:int64 NOT NULL, is_adverse_effect:double NOT NULL> [i=0:" + to_string(dim1 * dim2 - 1) + ":0:640000]");
 
     ScidbSchema sschema;
     sschema.attrs.push_back(ScidbAttr("drug", INT64));
@@ -215,7 +215,7 @@ void T9(int patient_id)
 
     start_scidb = high_resolution_clock::now();
     conn->exec("store(redimension(temp, <is_adverse_effect:double NOT NULL>[drug=0:" + to_string(dim1 - 1) +
-               ":0:1000; adverse_effect=0:" + to_string(dim2 - 1) + ":0:1000], false),  drug_matrix)");
+               ":0:1600; adverse_effect=0:" + to_string(dim2 - 1) + ":0:400], false), drug_matrix)");
     conn->exec("store(spgemm(drug_matrix,transpose(drug_matrix)),similarity1)");
     conn->exec("store(project(apply(filter(similarity1,drug=drug2),result,1/sqrt(multiply)),result),inv_norm)");
     conn->exec("store(spgemm(similarity1,inv_norm),similarity2)");
@@ -236,7 +236,7 @@ void T9(int patient_id)
 
     start_scidb = high_resolution_clock::now();
     ScidbSchema schema;
-    schema.dims.push_back(ScidbDim("result", 0, INT32_MAX, 0, 1000000));
+    schema.dims.push_back(ScidbDim("result", 0, INT32_MAX, 0, 1600));
     schema.attrs.push_back(ScidbAttr("similarity", DOUBLE));
     end_scidb = high_resolution_clock::now();
     time_scidb += duration_cast<milliseconds>(end_scidb - start_scidb);
