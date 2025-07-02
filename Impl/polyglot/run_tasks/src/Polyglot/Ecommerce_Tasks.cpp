@@ -298,12 +298,12 @@ void T0(int brand_id)
 
     // 2984700 = 9949 * 300
     scidb->exec("store(redimension( "
-                "apply(apply(build(<val: double> [i=0:2984699:0:600000], 0), person_id, i / 300), tag_id, i % 300), "
-                "<val:double>[person_id=0:9948:0:2000;tag_id=0:299:0:300], false), tnew_d)");
+                "apply(apply(build(<val: double> [i=0:2984699:0:300000], 0), person_id, i / 300), tag_id, i % 300), "
+                "<val:double>[person_id=0:9948:0:1000;tag_id=0:299:0:300], false), tnew_d)");
 
     // Array for uploading
     scidb->exec("remove(tnew_d_temp)");
-    scidb->exec("create array tnew_d_temp <person_id:int32, tag_id:int32> [i=0:2984699:0:600000]");
+    scidb->exec("create array tnew_d_temp <person_id:int32, tag_id:int32> [i=0:2984699:0:300000]");
 
     ScidbSchema schema;
     schema.attrs.push_back(ScidbAttr("person_id", INT32));
@@ -358,17 +358,17 @@ void T0(int brand_id)
     start_scidb = high_resolution_clock::now();
     scidb->exec("insert(redimension( "
                 "apply(tnew_d_temp, val, 1.0), "
-                "<val:double>[person_id=0:9948:0:2000;tag_id=0:299:0:300], false), tnew_d)");
+                "<val:double>[person_id=0:9948:0:1000;tag_id=0:299:0:300], false), tnew_d)");
 
     // E
     scidb->exec("remove(tnew_e)");
     scidb->exec("store(redimension( "
-                "apply(build(<favorite: double> [person_id=0:9948:0:2000], 0), j, 0), "
-                "<favorite: double> [person_id=0:9948:0:2000, j=0:0:0:1]), tnew_e)");
+                "apply(build(<favorite: double> [person_id=0:9948:0:1000], 0), j, 0), "
+                "<favorite: double> [person_id=0:9948:0:1000, j=0:0:0:1]), tnew_e)");
 
     // Array for uploading
     scidb->exec("remove(tnew_e_temp)");
-    scidb->exec("create array tnew_e_temp <person_id:int32, favorite:double> [i=0:9948:0:2000]");
+    scidb->exec("create array tnew_e_temp <person_id:int32, favorite:double> [i=0:9948:0:1000]");
 
     ScidbSchema schema2;
     schema2.attrs.push_back(ScidbAttr("person_id", INT32));
@@ -422,11 +422,11 @@ void T0(int brand_id)
     // Densify
     start_scidb = high_resolution_clock::now();
     scidb->exec("insert(redimension(tnew_e_temp, "
-                "<favorite: double> [person_id=0:9948:0:2000, j=0:0:0:1], 0), tnew_e)");
+                "<favorite: double> [person_id=0:9948:0:1000, j=0:0:0:1], 0), tnew_e)");
 
     // Logistic Regression of F
     scidb->exec("remove(empty_c)");
-    scidb->exec("create array empty_c <val:double> [i=0:9948:0:2000, j=0:0:0:1]");
+    scidb->exec("create array empty_c <val:double> [i=0:9948:0:1000, j=0:0:0:1]");
 
     // For the third argument of the outer gemm
     scidb->exec("remove(empty_c2)");
@@ -619,7 +619,7 @@ void T2()
     unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_ECOMMERCE + string(":8080")));
 
     conn->exec("remove(temp)");
-    conn->exec("create array temp<val:double, x:int32, y:int32> [i=0:" + to_string(dim1 * dim2 - 1) + ":0:600000]");
+    conn->exec("create array temp<val:double, x:int32, y:int32> [i=0:" + to_string(dim1 * dim2 - 1) + ":0:300000]");
 
     ScidbSchema schema;
     schema.attrs.push_back(ScidbAttr("val", DOUBLE));
@@ -674,7 +674,7 @@ void T2()
     start_scidb = high_resolution_clock::now();
     conn->exec("remove(V)");
     conn->exec("store(redimension(temp, <val:double>[x=0:" + to_string(dim1 - 1) +
-               ":0:2000; y=0:" + to_string(dim2 - 1) + ":0:300], false),  V)");
+               ":0:1000; y=0:" + to_string(dim2 - 1) + ":0:300], false),  V)");
 
     /**
      *  INIT W H
@@ -685,7 +685,7 @@ void T2()
     conn->exec("remove(W)");
 
     int feature_size = 50;
-    string create_W = "store(build(<val:double>[i=0:" + to_string(dim1 - 1) + ":0:2000; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "], 1.0), initW)";
+    string create_W = "store(build(<val:double>[i=0:" + to_string(dim1 - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "], 1.0), initW)";
     conn->exec(create_W);
 
     conn->exec("remove(initH)");
@@ -714,7 +714,7 @@ void T2()
     conn->exec(zeroFH);
 
     conn->exec("remove(zeroVHt)");
-    string zeroVHt = "create array zeroVHt<val:double> [i=0:" + to_string(dim1 - 1) + ":0:2000; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "]";
+    string zeroVHt = "create array zeroVHt<val:double> [i=0:" + to_string(dim1 - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "]";
     conn->exec(zeroVHt);
 
     conn->exec("remove(zeroHHt)");
@@ -722,7 +722,7 @@ void T2()
     conn->exec(zeroHHt);
 
     conn->exec("remove(zeroWF)");
-    string zeroWF = "create array zeroWF<val:double> [i=0:" + to_string(dim1 - 1) + ":0:2000; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "]";
+    string zeroWF = "create array zeroWF<val:double> [i=0:" + to_string(dim1 - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "]";
     conn->exec(zeroWF);
 
     conn->exec("remove(WtV)");
