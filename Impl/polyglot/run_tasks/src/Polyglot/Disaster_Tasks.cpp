@@ -212,7 +212,7 @@ void T15(int z1, int z2, double lon, double lat)
 
     // Query A and B
     ScidbSchema hotspotSchema;
-    hotspotSchema.dims.push_back(ScidbDim("i", 0, INT32_MAX, 0, 1000));
+    hotspotSchema.dims.push_back(ScidbDim("i", 0, INT32_MAX, 0, 1000000));
     hotspotSchema.attrs.push_back(ScidbAttr("pm10_avg", DOUBLE));
     hotspotSchema.attrs.push_back(ScidbAttr("latitude", INT64));
     hotspotSchema.attrs.push_back(ScidbAttr("longitude", INT64));
@@ -220,7 +220,7 @@ void T15(int z1, int z2, double lon, double lat)
     auto hotspot = scidb->download("limit(sort(redimension(apply(window(aggregate(between(Finedust, " + to_string(z1) + ", 0, 0, " + to_string(z2) + ", 522, 522), sum(pm10), count(pm10), latitude, longitude), "
                                                                                                                                                      "2, 2, 2, 2, sum(pm10_sum), sum(pm10_count)), "
                                                                                                                                                      "pm10_avg, pm10_sum_sum / pm10_count_sum), "
-                                                                                                                                                     "<pm10_avg:double, latitude:int64, longitude:int64>[i=0:*:0:1000]), pm10_avg desc), 1)",
+                                                                                                                                                     "<pm10_avg:double, latitude:int64, longitude:int64>[i=0:*:0:100000000]), pm10_avg desc), 1)",
                                    hotspotSchema);
     auto end_scidb = high_resolution_clock::now();
     auto time_scidb = duration_cast<milliseconds>(end_scidb - start_scidb);
