@@ -364,7 +364,7 @@ void T0(int brand_id)
     scidb->exec("remove(tnew_e)");
     scidb->exec("store(redimension( "
                 "apply(build(<favorite: double> [person_id=0:9948:0:1000], 0), j, 0), "
-                "<favorite: double> [person_id=0:9948:0:1000, j=0:0:0:1]), tnew_e)");
+                "<favorite: double> [person_id=0:9948:0:1000, j=0:0:0:1000]), tnew_e)");
 
     // Array for uploading
     scidb->exec("remove(tnew_e_temp)");
@@ -422,19 +422,19 @@ void T0(int brand_id)
     // Densify
     start_scidb = high_resolution_clock::now();
     scidb->exec("insert(redimension(tnew_e_temp, "
-                "<favorite: double> [person_id=0:9948:0:1000, j=0:0:0:1], 0), tnew_e)");
+                "<favorite: double> [person_id=0:9948:0:1000, j=0:0:0:1000], 0), tnew_e)");
 
     // Logistic Regression of F
     scidb->exec("remove(empty_c)");
-    scidb->exec("create array empty_c <val:double> [i=0:9948:0:1000, j=0:0:0:1]");
+    scidb->exec("create array empty_c <val:double> [i=0:9948:0:1000, j=0:0:0:1000]");
 
     // For the third argument of the outer gemm
     scidb->exec("remove(empty_c2)");
-    scidb->exec("create array empty_c2 <val:double> [i=0:299:0:300, j=0:0:0:1]");
+    scidb->exec("create array empty_c2 <val:double> [i=0:299:0:300, j=0:0:0:1000]");
 
     // Initialize w
     scidb->exec("remove(tnew_w)");
-    scidb->exec("store(build(<val:double> [i=0:299:0:300, j=0:0:0:1], 1.0), tnew_w)");
+    scidb->exec("store(build(<val:double> [i=0:299:0:300, j=0:0:0:1000], 1.0), tnew_w)");
 
     // Update
     int nrow = 0, max_iter = 1;
