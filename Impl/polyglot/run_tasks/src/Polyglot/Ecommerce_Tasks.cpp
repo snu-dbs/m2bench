@@ -298,12 +298,12 @@
  
      // 2984700 = 9949 * 300
      scidb->exec("store(redimension( "
-                 "apply(apply(build(<val: double> [i=0:2984699:0:300000], 0), person_id, i / 300), tag_id, i % 300), "
+                 "apply(apply(build(<val: double> [i=0:2984699:0:1000000], 0), person_id, i / 300), tag_id, i % 300), "
                  "<val:double>[person_id=0:9948:0:1000;tag_id=0:299:0:1000], false), tnew_d)");
  
      // Array for uploading
      scidb->exec("remove(tnew_d_temp)");
-     scidb->exec("create array tnew_d_temp <person_id:int32, tag_id:int32> [i=0:2984699:0:300000]");
+     scidb->exec("create array tnew_d_temp <person_id:int32, tag_id:int32> [i=0:2984699:0:1000000]");
  
      ScidbSchema schema;
      schema.attrs.push_back(ScidbAttr("person_id", INT32));
@@ -619,7 +619,7 @@ void T2()
     unique_ptr<ScidbConnection> conn(new ScidbConnection(SCIDB_HOST_ECOMMERCE + string(":8080")));
 
     conn->exec("remove(temp)");
-    conn->exec("create array temp<val:double, x:int32, y:int32> [i=0:" + to_string(dim1 * dim2 - 1) + ":0:300000]");
+    conn->exec("create array temp<val:double, x:int32, y:int32> [i=0:" + to_string(dim1 * dim2 - 1) + ":0:1000000]");
 
     ScidbSchema schema;
     schema.attrs.push_back(ScidbAttr("val", DOUBLE));
@@ -674,7 +674,7 @@ void T2()
     start_scidb = high_resolution_clock::now();
     conn->exec("remove(V)");
     conn->exec("store(redimension(temp, <val:double>[x=0:" + to_string(dim1 - 1) +
-               ":0:1000; y=0:" + to_string(dim2 - 1) + ":0:300], false),  V)");
+               ":0:1000; y=0:" + to_string(dim2 - 1) + ":0:1000], false),  V)");
 
     /**
      *  INIT W H
@@ -685,12 +685,12 @@ void T2()
     conn->exec("remove(W)");
 
     int feature_size = 50;
-    string create_W = "store(build(<val:double>[i=0:" + to_string(dim1 - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "], 1.0), initW)";
+    string create_W = "store(build(<val:double>[i=0:" + to_string(dim1 - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:1000], 1.0), initW)";
     conn->exec(create_W);
 
     conn->exec("remove(initH)");
     conn->exec("remove(H)");
-    string create_H = "store(build(<val:double>[i=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "; j=0:" + to_string(dim2 - 1) + ":0:300], 1.0), initH)";
+    string create_H = "store(build(<val:double>[i=0:" + to_string(feature_size - 1) + ":0:1000; j=0:" + to_string(dim2 - 1) + ":0:1000], 1.0), initH)";
     conn->exec(create_H);
 
     string newH = "store(initH, H)";
@@ -702,27 +702,27 @@ void T2()
      *  ZERO MATRRIX
      */
     conn->exec("remove(zeroWtV)");
-    string zeroWtV = "create array zeroWtV<val:double> [i=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "; j=0:" + to_string(dim2 - 1) + ":0:300]";
+    string zeroWtV = "create array zeroWtV<val:double> [i=0:" + to_string(feature_size - 1) + ":0:1000; j=0:" + to_string(dim2 - 1) + ":0:1000]";
     conn->exec(zeroWtV);
 
     conn->exec("remove(zeroWtW)");
-    string zeroWtW = "create array zeroWtW<val:double> [i=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "]";
+    string zeroWtW = "create array zeroWtW<val:double> [i=0:" + to_string(feature_size - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:1000]";
     conn->exec(zeroWtW);
 
     conn->exec("remove(zeroFH)");
-    string zeroFH = "create array zeroFH<val:double> [i=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "; j=0:" + to_string(dim2 - 1) + ":0:300]";
+    string zeroFH = "create array zeroFH<val:double> [i=0:" + to_string(feature_size - 1) + ":0:1000; j=0:" + to_string(dim2 - 1) + ":0:1000]";
     conn->exec(zeroFH);
 
     conn->exec("remove(zeroVHt)");
-    string zeroVHt = "create array zeroVHt<val:double> [i=0:" + to_string(dim1 - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "]";
+    string zeroVHt = "create array zeroVHt<val:double> [i=0:" + to_string(dim1 - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:1000]";
     conn->exec(zeroVHt);
 
     conn->exec("remove(zeroHHt)");
-    string zeroHHt = "create array zeroHHt<val:double> [i=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "]";
+    string zeroHHt = "create array zeroHHt<val:double> [i=0:" + to_string(feature_size - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:1000]";
     conn->exec(zeroHHt);
 
     conn->exec("remove(zeroWF)");
-    string zeroWF = "create array zeroWF<val:double> [i=0:" + to_string(dim1 - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:" + to_string(feature_size) + "]";
+    string zeroWF = "create array zeroWF<val:double> [i=0:" + to_string(dim1 - 1) + ":0:1000; j=0:" + to_string(feature_size - 1) + ":0:1000]";
     conn->exec(zeroWF);
 
     conn->exec("remove(WtV)");
