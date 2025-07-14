@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS Follows (
 
 CREATE TABLE IF NOT EXISTS Hashtag (
     tag_id  INT,
-    content VARCHAR(30)
+    content VARCHAR(31)
 );
 
 CREATE TABLE IF NOT EXISTS Interested_in (

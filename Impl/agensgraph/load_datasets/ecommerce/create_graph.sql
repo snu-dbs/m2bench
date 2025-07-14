@@ -41,7 +41,7 @@ OPTIONS (
 
 CREATE FOREIGN TABLE IF NOT EXISTS hashtag (
     tag_id  INT,
-    content VARCHAR(30)
+    content VARCHAR(31)
 )
 SERVER import_server
 OPTIONS (
