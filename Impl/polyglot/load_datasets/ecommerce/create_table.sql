@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS Brand (
 );
 
 CREATE TABLE IF NOT EXISTS Product (
-    product_id CHAR(11) PRIMARY KEY,
+    product_id CHAR(12) PRIMARY KEY,
     title      VARCHAR(1000),
     price      FLOAT,
     brand_id   INT
