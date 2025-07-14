@@ -12,7 +12,7 @@ CREATE TABLE brand (
 );
 
 CREATE TABLE product (
-    product_id  CHAR(11) PRIMARY KEY,
+    product_id  CHAR(12) PRIMARY KEY,
     title       VARCHAR(1000),
     price       REAL,
     brand_id    INT
