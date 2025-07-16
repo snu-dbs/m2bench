@@ -83,7 +83,7 @@
          mysql.mysess->sql("USE Ecommerce").execute();
          mysql.mysess->sql("CREATE TEMPORARY TABLE TASK_NEW_B1_TEMPTABLE ("
                            "customer_id CHAR(20), "
-                           "product_id CHAR(10))")
+                           "product_id CHAR(12))")
              .execute();
  
          // Transfer MongoDB result to MySQL
@@ -511,7 +511,7 @@ void T2()
     mysql.mysess->sql("USE Ecommerce").execute();
     mysql.mysess->sql("CREATE TEMPORARY TABLE Rating_history ("
                       "customer_id VARCHAR(20),"
-                      "product_id CHAR(11),"
+                      "product_id CHAR(12),"
                       "rating INT)")
         .execute();
 
