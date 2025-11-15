@@ -15,7 +15,8 @@ CREATE TEMPORARY TABLE T14C (
     coordinates GEOMETRY
 );
 
-EXPLAIN ANALYZE INSERT INTO T14A
+-- EXPLAIN ANALYZE 
+INSERT INTO T14A
 SELECT 
     t1.timestamp / 8 AS date, 
     t1.timestamp, 
@@ -32,7 +33,8 @@ WHERE (:Z1 <= t1.timestamp)
   AND (t2.longitude <= (t1.longitude + 2))
 GROUP BY t1.timestamp / 8, t1.timestamp, t1.latitude, t1.longitude;
 
-EXPLAIN ANALYZE INSERT INTO T14C
+-- EXPLAIN ANALYZE 
+INSERT INTO T14C
 SELECT date, timestamp, coordinates
 FROM (
     SELECT 
@@ -51,7 +53,8 @@ FROM (
 WHERE rn = 1;
 
 
-EXPLAIN ANALYZE SELECT COUNT(site_id)
+-- EXPLAIN ANALYZE 
+SELECT COUNT(site_id)
 FROM (
     SELECT 
         T14C.date, 

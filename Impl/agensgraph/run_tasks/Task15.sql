@@ -13,7 +13,8 @@ CREATE TEMPORARY TABLE T15B (
     pm10_avg	DOUBLE PRECISION
 );
 
-EXPLAIN ANALYZE INSERT INTO T15A
+-- EXPLAIN ANALYZE 
+INSERT INTO T15A
 SELECT 
     longitude, 
     latitude, 
@@ -26,7 +27,8 @@ GROUP BY longitude, latitude;
 
 CREATE INDEX t15a_latlon ON T15A (latitude, longitude);
 
-EXPLAIN ANALYZE INSERT INTO T15B
+-- EXPLAIN ANALYZE 
+INSERT INTO T15B
 SELECT 
     ST_Point(
         -118.34501002237936 + (t1.longitude * 0.000216636), 
@@ -40,13 +42,15 @@ WHERE ((t1.latitude - 2) <= t2.latitude)
   AND (t2.longitude <= (t1.longitude + 2))
 GROUP BY coordinates;
 
-EXPLAIN ANALYZE SELECT CAST(Site_centroid.data->>'site_id' AS INT)
+-- EXPLAIN ANALYZE 
+SELECT CAST(Site_centroid.data->>'site_id' AS INT)
 FROM Site_centroid
 WHERE Site_centroid.data->'properties'->>'type' = 'roadnode'
 ORDER BY ST_GeomFromGeoJSON(Site_centroid.data->>'centroid') <-> ST_Point(:CLON, :CLAT)::geography ASC
 LIMIT 1;
 
-EXPLAIN ANALYZE SELECT CAST(Site_centroid.data->>'site_id' AS INT)
+-- EXPLAIN ANALYZE 
+SELECT CAST(Site_centroid.data->>'site_id' AS INT)
 FROM Site_centroid
 WHERE Site_centroid.data->'properties'->>'type' = 'roadnode'
 ORDER BY ST_GeomFromGeoJSON(Site_centroid.data->>'centroid') <-> ((

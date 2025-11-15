@@ -1,7 +1,8 @@
 \timing
 \pset pager off
 
-EXPLAIN ANALYZE CREATE TEMPORARY TABLE A AS (
+-- EXPLAIN ANALYZE 
+CREATE TEMPORARY TABLE A AS (
     SELECT latitude, 
            longitude, 
            AVG(pm10) AS pm10
@@ -11,7 +12,8 @@ EXPLAIN ANALYZE CREATE TEMPORARY TABLE A AS (
     GROUP BY latitude, longitude
 );
 
-EXPLAIN ANALYZE CREATE TEMPORARY TABLE B AS (
+-- EXPLAIN ANALYZE 
+CREATE TEMPORARY TABLE B AS (
     SELECT site_id, 
            SUM((coo->>0)::FLOAT) / COUNT(site_id) AS longitude, 
            SUM((coo->>1)::FLOAT) / COUNT(site_id) AS latitude
@@ -25,7 +27,8 @@ EXPLAIN ANALYZE CREATE TEMPORARY TABLE B AS (
     GROUP BY site_id
 );
 
-EXPLAIN ANALYZE SELECT COUNT(*) 
+-- EXPLAIN ANALYZE 
+SELECT COUNT(*) 
 FROM (
     SELECT site_id, pm10
     FROM A, B
