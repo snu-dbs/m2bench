@@ -1,7 +1,7 @@
 \timing
 \pset pager off
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE V AS (
     WITH temp AS (
         SELECT "order".data->>'customer_id' AS customer_id, 
@@ -17,11 +17,11 @@ CREATE TEMPORARY TABLE V AS (
     GROUP BY customer_id, product_id
 );
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE feature_size AS 
 SELECT generate_series(1, 50) AS feature_id;
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE W AS (
     -- SELECT customer_id, feature_id, random()::FLOAT AS val
     SELECT customer_id, feature_id, 1.0 AS val
@@ -29,7 +29,7 @@ CREATE TEMPORARY TABLE W AS (
          feature_size
 );
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE H AS (
     -- SELECT product_id, feature_id, random()::FLOAT AS val
     SELECT product_id, feature_id, 1.0 AS val
@@ -48,7 +48,7 @@ CREATE INDEX ON H (feature_id);
 CREATE INDEX ON H (product_id);
 CREATE INDEX ON H (product_id, feature_id);
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE WtV AS (
     SELECT product_id, feature_id, SUM(W.val * V.val) AS val 
     FROM W, V
@@ -60,7 +60,7 @@ CREATE INDEX ON WtV (product_id);
 CREATE INDEX ON WtV (feature_id);
 CREATE INDEX ON WtV (feature_id, product_id);
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE WtW AS (
     SELECT W1.feature_id AS feature_id1, 
            W2.feature_id AS feature_id2, 
@@ -70,7 +70,7 @@ CREATE TEMPORARY TABLE WtW AS (
     GROUP BY feature_id1, feature_id2
 );
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE WtWH AS (
     SELECT product_id, 
            WtW.feature_id1 AS feature_id, 
@@ -84,7 +84,7 @@ CREATE INDEX ON WtWH (product_id);
 CREATE INDEX ON WtWH (feature_id);
 CREATE INDEX ON WtWH (feature_id, product_id);
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE newH AS (
     SELECT H.product_id, 
            H.feature_id, 
@@ -100,7 +100,7 @@ CREATE INDEX ON newH (feature_id);
 CREATE INDEX ON newH (product_id);
 CREATE INDEX ON newH (product_id, feature_id);
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE VHt AS (
     SELECT customer_id, 
            feature_id, 
@@ -114,7 +114,7 @@ CREATE INDEX ON VHt (customer_id);
 CREATE INDEX ON VHt (feature_id);
 CREATE INDEX ON VHt (feature_id, customer_id);
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE HHt AS (
     SELECT H1.feature_id AS feature_id1, 
            H2.feature_id AS feature_id2, 
@@ -124,7 +124,7 @@ CREATE TEMPORARY TABLE HHt AS (
     GROUP BY feature_id1, feature_id2
 );
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE WHHt AS (
     SELECT customer_id,  
            HHt.feature_id1 AS feature_id, 
@@ -138,7 +138,7 @@ CREATE INDEX ON WHHt (customer_id);
 CREATE INDEX ON WHHt (feature_id);
 CREATE INDEX ON WHHt (feature_id, customer_id);
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 CREATE TEMPORARY TABLE newW AS (
     SELECT W.customer_id, 
            W.feature_id, 
@@ -150,7 +150,7 @@ CREATE TEMPORARY TABLE newW AS (
       AND VHt.customer_id = W.customer_id
 );
 
--- EXPLAIN ANALYZE 
+EXPLAIN (ANALYZE, BUFFERS)
 SELECT COUNT(*) FROM newW;
 
 -- Answer Validation
